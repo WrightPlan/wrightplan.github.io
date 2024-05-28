@@ -1,0 +1,11 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.wrightplan.fieldsolutions",
+      "sha256_cert_fingerprints":
+        ["36:60:85:66:63:6F:44:6F:AB:F0:40:71:CE:50:94:9B:77:CA:96:B9:27:7F:03:EE:E7:4D:81:93:40:EF:4E:41"]
+    }
+  }
+]

@@ -21,6 +21,29 @@
         <h1>Field Solutions</h1>
       </header>
 
+      <aside class="alert alert-danger" role="alert" style="display: none">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          fill="currentColor"
+          class="bi bi-exclamation-triangle"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.15.15 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.2.2 0 0 1-.054.06.1.1 0 0 1-.066.017H1.146a.1.1 0 0 1-.066-.017.2.2 0 0 1-.054-.06.18.18 0 0 1 .002-.183L7.884 2.073a.15.15 0 0 1 .054-.057m1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767z"
+          />
+          <path
+            d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"
+          />
+        </svg>
+
+        The URL is missing <em>deployment</em> and/or
+        <em>invitation token</em> information. Please contact your WrightPlan
+        administrator and have them resend the Field Solution workspace
+        registration link.
+      </aside>
+
       <article>
         <h2>Register Workspace</h2>
         <p>
@@ -203,7 +226,21 @@
     ></script>
     <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
     <script type="text/javascript">
-      function generateClassicWebLoginUrl(workspace, token) {
+      const alertPlaceholder = document.getElementById("liveAlertPlaceholder");
+
+      const appendAlert = (message, type) => {
+        const wrapper = document.createElement("div");
+        wrapper.innerHTML = [
+          `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+          `   <div>${message}</div>`,
+          '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+          "</div>",
+        ].join("");
+
+        alertPlaceholder.append(wrapper);
+      };
+
+      const generateClassicWebLoginUrl = (workspace, token) => {
         const baseUrl = new URL(`https://${workspace}`);
 
         let basePath = baseUrl.pathname;
@@ -219,13 +256,13 @@
         fsLoginUrl.hash = `#redemptionLink=${redeemUrl.pathname}`;
 
         return fsLoginUrl.href;
-      }
+      };
 
-      function generateQRCode() {
+      const generateQRCode = () => {
         new QRCode(document.getElementById("qr_code"), window.location.href);
-      }
+      };
 
-      function showRegistrationInfo(workspace, token) {
+      const showRegistrationInfo = (workspace, token) => {
         document.getElementsByName("workspace").forEach((element) => {
           element.innerText = workspace;
         });
@@ -238,9 +275,9 @@
         classicAnchor.href = classicWebLoginUrl;
 
         generateQRCode();
-      }
+      };
 
-      function onLoaded() {
+      addEventListener("load", () => {
         const params = new URL(document.location).searchParams;
         const workspace = params.get("workspace");
         const token = params.get("token");
@@ -248,17 +285,11 @@
         if (workspace && token) {
           showRegistrationInfo(workspace, token);
         } else {
-          window.alert(
-            "Invalid registration link. Please contact your WrightPlan administrator."
-          );
-
-          window.setTimeout(() => {
-            window.location.replace("/");
-          }, 5000);
+          document.getElementsByClassName("alert-danger")[0].style.display =
+            "block";
+          document.getElementsByTagName("article")[0].style.display = "none";
         }
-      }
-
-      addEventListener("load", onLoaded);
+      });
     </script>
   </body>
 </html>

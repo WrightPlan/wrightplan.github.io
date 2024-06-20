@@ -1,0 +1,18 @@
+{
+    "applinks": {
+        "details": [
+             {
+               "appIDs": [ "A9L39JSPLA.com.wrightplan.fieldsolutions"]
+            }
+        ]
+    },
+    "activitycontinuation": {
+        "apps": [ "A9L39JSPLA.com.wrightplan.fieldsolutions" ]
+    },
+    "webcredentials": {
+        "apps": [ "A9L39JSPLA.com.wrightplan.fieldsolutions" ]
+    },
+    "appclips": {
+        "apps": ["A9L39JSPLA.com.wrightplan.fieldsolutions"]
+    }
+}   

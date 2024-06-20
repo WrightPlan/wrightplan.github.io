@@ -263,7 +263,13 @@
       };
 
       const generateQRCode = () => {
-        new QRCode(document.getElementById("qr_code"), window.location.href);
+        const options = {
+          text: window.location.href,
+          correctLevel: QRCode.CorrectLevel.M,
+          width: 256,
+          height: 256,
+        };
+        new QRCode(document.getElementById("qr_code"), options);
       };
 
       const showRegistrationInfo = (workspace, token) => {

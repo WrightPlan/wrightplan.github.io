@@ -24,17 +24,17 @@
     <main class="container">
       <header>
         <img class="img-fluid" src="/logo.png" alt="WrightPlan Logo" />
-        <h1>
-          Field Solutions
-          <div class="small">Register Workspace</div>
-        </h1>
+        <h1>Field Solutions</h1>
       </header>
+
       <article>
+        <h2>Register Workspace</h2>
         <p>
           You have been invited to register a Field Solutions workspace for
-          <strong name="workspace">WORKSPACE</strong>. Before continuing, you
-          will need to ensure that you have installed WrightPlan's
-          <em>Field Solutions</em> application on your mobile device.
+          <strong class="font-monospace" name="workspace">WORKSPACE</strong>.
+          Before continuing, you will need to ensure that you have installed
+          WrightPlan's <em>Field Solutions</em> application on your mobile
+          device.
         </p>
 
         <section>
@@ -61,25 +61,29 @@
           </dl>
         </section>
 
-        <details>
-          <summary>Classic Web Version</summary>
-          <p>
-            You can still use the classic web-based version of Field Solutions
-            by clicking the following button on your mobile device.
-          </p>
-          <p>
-            Note, the web-based version of Field Solutions is approaching
-            end-of-life.
-          </p>
-          <div class="d-grid gap-2 d-md-block">
-            <a
-              class="btn btn-primary btn-block"
-              id="webBasedAnchor"
-              href="#Classic"
-              >Web-based</a
-            >
-          </div>
-        </details>
+        <section>
+          <details>
+            <summary>Classic Web Version</summary>
+            <p>
+              You can still use the classic web-based version of Field Solutions
+              by clicking the following button on your mobile device.
+            </p>
+            <p>
+              Note, the web-based version of Field Solutions is approaching
+              end-of-life.
+            </p>
+            <div class="d-grid gap-2 d-md-block">
+              <a
+                class="btn btn-primary btn-block"
+                id="webBasedAnchor"
+                href="#Classic"
+                target="_blank"
+              >
+                Web-based
+              </a>
+            </div>
+          </details>
+        </section>
       </article>
 
       <footer
@@ -245,10 +249,12 @@
           showRegistrationInfo(workspace, token);
         } else {
           window.alert(
-            "Invalid registration link. Please contact your administrator."
+            "Invalid registration link. Please contact your WrightPlan administrator."
           );
 
-          // window.location.replace("/");
+          window.setTimeout(() => {
+            window.location.replace("/");
+          }, 5000);
         }
       }
 

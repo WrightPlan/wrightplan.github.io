@@ -42,9 +42,8 @@
         <p>
           You have been invited to register a WrightPlan
           <strong>Field Solutions</strong> Workspace for
-          <strong name="deployment-name">DEPLOYMENT NAME</strong>. Before
-          continuing, ensure that you have installed the app on your mobile
-          device.
+          <strong name="deployment-name">your company</strong>. Before continuing,
+          ensure that you have installed the app on your mobile device.
         </p>
 
         <section>
@@ -183,8 +182,9 @@
       integrity="sha256-xUHvBjJ4hahBW8qN9gceFBibSFUzbe9PNttUvehITzY="
       crossorigin="anonymous"
     ></script>
+
     <script type="text/javascript">
-      const generateClassicWebLoginUrl = (workspace, token) => {
+      const generateUrl = (workspace, relativePath) => {
         const baseUrl = new URL(`https://${workspace}`);
 
         let basePath = baseUrl.pathname;
@@ -192,14 +192,42 @@
           basePath = basePath.slice(0, -1);
         }
 
-        const redeemUrl = new URL(
-          `${basePath}/Api/resources/employees/redeem-login/${token}`,
-          baseUrl
+        const path = `${basePath}${relativePath}`;
+        const url = new URL(path, baseUrl);
+
+        if (url.hostname == "localhost" || "127.0.0.1") {
+          url.protocol = "http";
+        }
+
+        return url;
+      };
+
+      const generateClassicWebLoginUrl = (workspace, token) => {
+        const redeemUrl = generateUrl(
+          workspace,
+          `/Api/resources/employees/redeem-login/${encodeURIComponent(token)}`
         );
-        const fsLoginUrl = new URL(`${basePath}/FS/login.html`, baseUrl);
+        const fsLoginUrl = generateUrl(workspace, "/FS/login.html");
         fsLoginUrl.hash = `#redemptionLink=${redeemUrl.pathname}`;
 
         return fsLoginUrl.href;
+      };
+
+      const fetchDeploymentName = async (workspace) => {
+        const brandingUrl = generateUrl(workspace, "/Api/branding");
+
+        const response = await fetch(brandingUrl.href, {
+          method: "GET",
+          credentials: "omit",
+          mode: "cors",
+          headers: {
+            Accept: "application/json",
+          },
+        });
+        const brandingDto = await response.json();
+        const branding = brandingDto?.data;
+
+        return branding?.deploymentName || workspace;
       };
 
       const generateQRCode = () => {
@@ -210,6 +238,12 @@
           height: 256,
         };
         new QRCode(document.getElementById("qr_code"), options);
+      };
+
+      const showDeploymentName = (name) => {
+        document.getElementsByName("deployment-name").forEach((element) => {
+          element.innerText = name;
+        });
       };
 
       const showRegistrationInfo = (workspace, token) => {
@@ -225,6 +259,10 @@
         classicAnchor.href = classicWebLoginUrl;
 
         generateQRCode();
+
+        fetchDeploymentName(workspace)
+          .then(showDeploymentName)
+          .catch(() => showDeploymentName(workspace));
       };
 
       addEventListener("load", () => {

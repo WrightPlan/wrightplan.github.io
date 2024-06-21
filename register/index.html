@@ -42,8 +42,9 @@
         <p>
           You have been invited to register a WrightPlan
           <strong>Field Solutions</strong> Workspace for
-          <strong name="deployment-name">your company</strong>. Before continuing,
-          ensure that you have installed the app on your mobile device.
+          <strong name="deployment-name">your company</strong>. Before
+          continuing, ensure that you have installed the app on your mobile
+          device.
         </p>
 
         <section>
@@ -184,6 +185,7 @@
     ></script>
 
     <script type="text/javascript">
+      const localHosts = new Set(["localhost", "127.0.0.1"]);
       const generateUrl = (workspace, relativePath) => {
         const baseUrl = new URL(`https://${workspace}`);
 
@@ -195,7 +197,7 @@
         const path = `${basePath}${relativePath}`;
         const url = new URL(path, baseUrl);
 
-        if (url.hostname == "localhost" || "127.0.0.1") {
+        if (localHosts.has(url.hostname)) {
           url.protocol = "http";
         }
 

@@ -1,11 +1,15 @@
 [
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
     "target": {
       "namespace": "android_app",
       "package_name": "com.wrightplan.fieldsolutions",
-      "sha256_cert_fingerprints":
-        ["36:60:85:66:63:6F:44:6F:AB:F0:40:71:CE:50:94:9B:77:CA:96:B9:27:7F:03:EE:E7:4D:81:93:40:EF:4E:41"]
+      "sha256_cert_fingerprints": [
+        "36:60:85:66:63:6F:44:6F:AB:F0:40:71:CE:50:94:9B:77:CA:96:B9:27:7F:03:EE:E7:4D:81:93:40:EF:4E:41",
+        "F2:81:59:AD:31:A3:A7:13:1D:C5:6B:75:7B:63:77:AB:A7:97:E7:62:95:D2:CF:8F:9D:DF:DC:82:B2:2E:DF:BD"
+      ]
     }
   }
 ]

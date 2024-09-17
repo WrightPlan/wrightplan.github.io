@@ -2,7 +2,17 @@
   "applinks": {
     "details": [
       {
-        "appIDs": ["A9L39JSPLA.com.wrightplan.fieldsolutions"]
+        "appIDs": ["A9L39JSPLA.com.wrightplan.fieldsolutions"],
+        "components": [
+          {
+            "/": "/register/*",
+            "comment": "Matches any URL whose path starts with /register/ and opens it as a universal link"
+          },
+          {
+            "/": "/register",
+            "comment": "Matches any URL whose path starts with /register and opens it as a universal link"
+          }
+        ]
       }
     ]
   },

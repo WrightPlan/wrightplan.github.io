@@ -6,11 +6,12 @@
         "components": [
           {
             "/": "/register/*",
-            "comment": "Matches any URL whose path starts with /register/ and opens it as a universal link"
+            "comment": "Matches any URL whose path starts with /register/ and opens it as a Universal Link"
           },
           {
-            "/": "/register",
-            "comment": "Matches any URL whose path starts with /register and opens it as a universal link"
+            "/": "*",
+            "exclude": true,
+            "comment": "Matches any other URL and prevents from being opened as a Universal Link"
           }
         ]
       }

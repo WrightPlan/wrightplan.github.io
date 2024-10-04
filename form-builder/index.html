@@ -228,6 +228,13 @@
                                                 <option value="choice">Choice</option>
                                             </select>
                                         </div>
+
+                                        <div class="form-group">
+                                            <label>
+                                                <input type="checkbox" data-bind="checked: required"> Required
+                                            </label>
+                                        </div>
+
                                         <div class="form-group" data-bind="if: type() === 'text'">
                                             <label>
                                                 <input type="checkbox" data-bind="checked: multiLineText"> Multi-Line
@@ -338,6 +345,7 @@
                 this.exclusiveMaximum = ko.observable(false);
                 this.multiChoice = ko.observable(false);
                 this.multiLineText = ko.observable(false);
+                this.required = ko.observable(false);
 
                 this.type.subscribe(newValue => {
                     this.removeUnnecessaryFields();

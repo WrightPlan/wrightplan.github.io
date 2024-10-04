@@ -168,6 +168,36 @@
             margin: auto;
             max-width: 70%;
         }
+
+        .file-uploader-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        #jsonFileInput {
+            display: none;
+            /* Hide the default file input */
+        }
+
+        .file-uploader-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .file-uploader-label:hover {
+            background-color: #0056b3;
+        }
+
+        .file-uploader-label i {
+            margin-right: 10px;
+        }
     </style>
 </head>
 
@@ -183,8 +213,12 @@
                 <p>You can create a new form using the tool, or edit an existing one by uploading a json file into the
                     uploader below.</p>
             </div>
-            <input type="file" id="jsonFileInput" accept=".json" />
-
+            <div class="file-uploader-container">
+                <input type="file" id="jsonFileInput" accept=".json" />
+                <label for="jsonFileInput" class="file-uploader-label">
+                    <i class="fa fa-upload"></i> Choose a JSON file
+                </label>
+            </div>
             <form id="formDefinition" data-bind="submit: downloadJSON.bind(formViewModel)">
                 <h3>Form Information</h3>
                 <div class="form-group">

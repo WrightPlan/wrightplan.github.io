@@ -144,6 +144,7 @@
             box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: center;
+            z-index: 2;
         }
 
         .form-container {
@@ -178,10 +179,14 @@
         <h1 class="text-center mb-4">Form Builder</h1>
         <div class="form-container">
 
+            <div>Welcome to the Form Builder
+                <p>You can create a new form using the tool, or edit an existing one by uploading a json file into the
+                    uploader below.</p>
+            </div>
             <input type="file" id="jsonFileInput" accept=".json" />
 
             <form id="formDefinition" data-bind="submit: downloadJSON.bind(formViewModel)">
-                <h2>General Information</h2>
+                <h3>Form Information</h3>
                 <div class="form-group">
                     <label for="formId">Form ID</label>
                     <input type="text" class="form-control" id="formId" data-bind="value: formId" required>
@@ -479,7 +484,7 @@
 
             duplicateQuestion(question) {
                 //duplicate the question and add it to the section
-                const newQuestion = new QuestionViewModel(this.sectionId(), this.questions().length + 1);
+                const newQuestion = new QuestionViewModel(this.sectionId(), question.questionId());
                 newQuestion.title(question.title());
                 newQuestion.subtitle(question.subtitle());
                 newQuestion.type(question.type());

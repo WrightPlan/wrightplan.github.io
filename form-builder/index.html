@@ -522,7 +522,7 @@
                 newQuestion.title(question.title());
                 newQuestion.subtitle(question.subtitle());
                 newQuestion.type(question.type());
-                newQuestion.choices(question.choices().map(choice => ko.observable(choice())));
+                newQuestion.choices(question.choices()?.map(choice => ko.observable(choice())));
                 newQuestion.minimum(question.minimum());
                 newQuestion.maximum(question.maximum());
                 newQuestion.exclusiveMinimum(question.exclusiveMinimum());
@@ -643,6 +643,7 @@
             validateForm() {
                 let isValid = true;
                 let errorMessages = [];
+                let questionIds = new Set();
 
                 // Validate form title
                 if (!this.title().trim()) {
@@ -654,21 +655,29 @@
                     // Validate section title
                     if (!section.title().trim()) {
                         isValid = false;
-                        errorMessages.push(`Section ${section.sectionId()} title is required.`);
+                        errorMessages.push(`Section "${section.sectionId()}" title is required.`);
                     }
 
                     section.questions().forEach(question => {
                         // Validate question title
                         if (!question.title().trim()) {
                             isValid = false;
-                            errorMessages.push(`Question ${question.questionId()} in section ${section.sectionId()} must have a title.`);
+                            errorMessages.push(`Question "${question.questionId()}" in section "${section.sectionId()}" must have a title.`);
+                        }
+
+                        // Check for duplicate questionId
+                        if (questionIds.has(question.questionId())) {
+                            isValid = false;
+                            errorMessages.push(`Duplicate questionId found: "${question.questionId()}" in section "${section.sectionId()}". Each question must have a unique questionId.`);
+                        } else {
+                            questionIds.add(question.questionId());
                         }
 
                         // Validate choices for 'choice' type questions
                         if (question.type() === 'choice') {
                             if (question.choices().length === 0) {
                                 isValid = false;
-                                errorMessages.push(`Question ${question.questionId()} in section ${section.sectionId()} must have at least one choice.`);
+                                errorMessages.push(`Question "${question.questionId()}" in section "${section.sectionId()}" must have at least one choice.`);
                             }
 
                             // Validate unique choices
@@ -676,30 +685,30 @@
                             const uniqueChoices = new Set(choiceValues);
                             if (uniqueChoices.size !== choiceValues.length) {
                                 isValid = false;
-                                errorMessages.push(`Question ${question.questionId()} in section ${section.sectionId()} has duplicate choices.`);
+                                errorMessages.push(`Question "${question.questionId()}" in section "${section.sectionId()}" has duplicate choices.`);
                             }
 
                             // Validate multi-choice
                             if (question.multiChoice() && question.choices().length < 2) {
                                 isValid = false;
-                                errorMessages.push(`Question ${question.questionId()} in section ${section.sectionId()} must have at least two choices for multi-choice.`);
+                                errorMessages.push(`Question "${question.questionId()}" in section "${section.sectionId()}" must have at least two choices for multi-choice.`);
                             }
                         }
 
                         // Validate numeric range
                         if (question.minimum() !== null && question.maximum() !== null && question.minimum() >= question.maximum()) {
                             isValid = false;
-                            errorMessages.push(`Question ${question.questionId()} in section ${section.sectionId()} has an invalid numeric range. Minimum should be less than maximum.`);
+                            errorMessages.push(`Question "${question.questionId()}" in section "${section.sectionId()}" has an invalid numeric range. Minimum should be less than maximum.`);
                         }
 
                         // Validate exclusive minimum/maximum
                         if (question.exclusiveMinimum() && question.minimum() === null) {
                             isValid = false;
-                            errorMessages.push(`Question ${question.questionId()} in section ${section.sectionId()} has exclusive minimum set but no minimum value.`);
+                            errorMessages.push(`Question "${question.questionId()}" in section "${section.sectionId()}" has exclusive minimum set but no minimum value.`);
                         }
                         if (question.exclusiveMaximum() && question.maximum() === null) {
                             isValid = false;
-                            errorMessages.push(`Question ${question.questionId()} in section ${section.sectionId()} has exclusive maximum set but no maximum value.`);
+                            errorMessages.push(`Question "${question.questionId()}" in section "${section.sectionId()}" has exclusive maximum set but no maximum value.`);
                         }
                     });
                 });

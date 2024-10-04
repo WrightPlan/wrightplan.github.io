@@ -412,7 +412,23 @@
                     });
                 });
                 const cleanedJson = this.removeNullsAndFalse(json);
-                console.log(JSON.stringify(cleanedJson, null, 2));
+
+                // Extract form title to use as filename
+                const formTitle = this.formTitle || 'form'; // Replace with actual form title property
+                const filename = `${formTitle}.json`;
+
+                // Create a Blob from the JSON data
+                const blob = new Blob([JSON.stringify(cleanedJson, null, 2)], { type: 'application/json' });
+
+                // Create a link element
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+
+                // Programmatically click the link to trigger the download
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             }
 
             validateForm() {

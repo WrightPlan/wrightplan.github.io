@@ -7,6 +7,7 @@
     <title>Form Builder</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
         body {
             background-color: #f7f9fc;
@@ -71,7 +72,7 @@
             background-color: transparent;
             color: #dc3545;
             border: none;
-            font-size: 1.5rem;
+            font-size: 2rem;
             line-height: 1;
             padding: 0;
             cursor: pointer;
@@ -80,6 +81,20 @@
         .remove-button:hover {
             color: #c82333;
         }
+
+        .duplicate-button {
+            cursor: pointer;
+            color: #25384b;
+            /* Add color to the icon */
+            margin-right: 10px;
+            /* Add some spacing between the icons */
+        }
+
+        .duplicate-button:hover {
+            color: #0056b3;
+            /* Darker color on hover */
+        }
+
 
         .form-check-input {
             margin-left: 0.75rem;
@@ -156,8 +171,14 @@
                         data-bind="attr: { id: 'section_' + sectionId() }, css: { 'section-odd': $index() % 2 === 0, 'section-even': $index() % 2 !== 0 }">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h3 data-bind="text: 'Section ' + sectionId()"></h3>
-                            <button type="button" class="remove-button"
-                                data-bind="click: $parent.removeSection.bind($parent)">&times;</button>
+                            <div>
+                                <span type="button" class="duplicate-button"
+                                    data-bind="click: $parent.duplicateSection.bind($parent)">
+                                    <i class="fa-solid fa-copy fa-2x"></i>
+                                </span>
+                                <button type="button" class="remove-button"
+                                    data-bind="click: $parent.removeSection.bind($parent)">&times;</button>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="form-group">
@@ -184,8 +205,14 @@
                                     <div class="card-header d-flex justify-content-between align-items-center">
                                         <span class="drag-handle">&#x2630;</span>
                                         <h4 data-bind="text: 'Question: ' + questionId()"></h4>
-                                        <button type="button" class="remove-button"
-                                            data-bind="click: $parent.removeQuestion.bind($parent)">&times;</button>
+                                        <div>
+                                            <span type="button" class="duplicate-button"
+                                                data-bind="click: $parent.duplicateQuestion.bind($parent)">
+                                                <i class="fa-solid fa-copy fa-2x"></i>
+                                            </span>
+                                            <button type="button" class="remove-button"
+                                                data-bind="click: $parent.removeQuestion.bind($parent)">&times;</button>
+                                        </div>
                                     </div>
                                     <div class="card-body">
                                         <div class="form-group">
@@ -394,12 +421,31 @@
             }
 
             addQuestion() {
-
                 this.questions.push(new QuestionViewModel(this.sectionId(), ' '));
             }
 
             removeQuestion(question) {
-                this.questions.remove(question);
+                if (confirm('Are you sure you want to remove this question?')) {
+                    const section = viewModel.sections().find(section => section.sectionId() === this.sectionId);
+                    section.questions.remove(question);
+                }
+            }
+
+            duplicateQuestion(question) {
+                //duplicate the question and add it to the section
+                const newQuestion = new QuestionViewModel(this.sectionId(), this.questions().length + 1);
+                newQuestion.title(question.title());
+                newQuestion.subtitle(question.subtitle());
+                newQuestion.type(question.type());
+                newQuestion.choices(question.choices().map(choice => ko.observable(choice())));
+                newQuestion.minimum(question.minimum());
+                newQuestion.maximum(question.maximum());
+                newQuestion.exclusiveMinimum(question.exclusiveMinimum());
+                newQuestion.exclusiveMaximum(question.exclusiveMaximum());
+                newQuestion.multiChoice(question.multiChoice());
+                newQuestion.multiLineText(question.multiLineText());
+                newQuestion.required(question.required());
+                this.questions.push(newQuestion);
             }
 
         }
@@ -420,7 +466,33 @@
             }
 
             removeSection(section) {
-                this.sections.remove(section);
+                if (confirm('Are you sure you want to remove this section?')) {
+                    this.sections.remove(section);
+                } this.renumberSections();
+            }
+
+            duplicateSection(section) {
+                //duplicate the section and add it to the form
+                const newSection = new SectionViewModel(this.sections().length + 1);
+                newSection.title(section.title());
+                newSection.subtitle(section.subtitle());
+                newSection.repeatable(section.repeatable());
+                section.questions().forEach(question => {
+                    const newQuestion = new QuestionViewModel(newSection.sectionId(), question.questionId());
+                    newQuestion.title(question.title());
+                    newQuestion.subtitle(question.subtitle());
+                    newQuestion.type(question.type());
+                    newQuestion.choices(question.choices().map(choice => ko.observable(choice())));
+                    newQuestion.minimum(question.minimum());
+                    newQuestion.maximum(question.maximum());
+                    newQuestion.exclusiveMinimum(question.exclusiveMinimum());
+                    newQuestion.exclusiveMaximum(question.exclusiveMaximum());
+                    newQuestion.multiChoice(question.multiChoice());
+                    newQuestion.multiLineText(question.multiLineText());
+                    newQuestion.required(question.required());
+                    newSection.questions.push(newQuestion);
+                });
+                this.sections.push(newSection);
                 this.renumberSections();
             }
 

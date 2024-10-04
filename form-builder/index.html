@@ -225,13 +225,20 @@
                                                 <option value="dispatch-job">Dispatch Job (ID)</option>
                                                 <option value="geolocation">Geolocation</option>
                                                 <option value="text">Text</option>
-                                                <option value="multiLineText">Multi-Line Text</option>
                                                 <option value="integer">Integer</option>
                                                 <option value="decimal">Decimal</option>
+                                                <option value="boolean">Boolean</option>
+                                                <option value="signature">Signature</option>
+                                                <option value="acknowledgement">Acknowledgement</option>
                                                 <option value="date">Date</option>
-                                                <option value="time">Time</option>
                                                 <option value="choice">Choice</option>
                                             </select>
+                                        </div>
+                                        <div class="form-group" data-bind="if: questionType() === 'text'">
+                                            <label>
+                                                <input type="checkbox" data-bind="checked: multiLineText"> Multi-Line
+                                                Text
+                                            </label>
                                         </div>
                                         <div class="form-group choices-field"
                                             data-bind="if: questionType() === 'choice'">
@@ -314,17 +321,24 @@
                 this.exclusiveMinimum = ko.observable(false);
                 this.exclusiveMaximum = ko.observable(false);
                 this.multiChoice = ko.observable(false);
+                this.multiLineText = ko.observable(false);
+
                 this.questionType.subscribe(newValue => {
                     this.removeUnnecessaryFields();
                 });
             }
 
             removeUnnecessaryFields() {
+
                 if (this.questionType() !== 'choice') {
                     this.choices.removeAll();
                     this.multiChoice(false);
                 } else {
                     this.addChoice();
+                }
+
+                if (this.questionType() !== 'text') {
+                    this.multiLineText(false);
                 }
 
 

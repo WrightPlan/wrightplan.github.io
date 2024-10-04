@@ -136,6 +136,10 @@
 </head>
 
 <body>
+
+    <input type="file" id="jsonFileInput" accept=".json" />
+
+
     <div class="container mt-5" data-bind="with: formViewModel">
         <h1 class="text-center mb-4">Form Builder</h1>
         <div class="container">
@@ -250,6 +254,7 @@
                                                 <option value="decimal">Decimal</option>
                                                 <option value="boolean">Boolean</option>
                                                 <option value="signature">Signature</option>
+                                                <option value="initials">Initials</option>
                                                 <option value="acknowledgement">Acknowledgement</option>
                                                 <option value="date">Date</option>
                                                 <option value="choice">Choice</option>
@@ -381,8 +386,8 @@
 
             removeUnnecessaryFields() {
 
-                if (this.type() !== 'choice') {
-                    this.choices.removeAll();
+                if (this.type() !== 'choice' && this.choices()) {
+                    this.choices?.removeAll();
                     this.multiChoice(false);
                 } else {
                     this.addChoice();
@@ -425,8 +430,9 @@
             }
 
             removeQuestion(question) {
+                console.log(formViewModel.sections())
                 if (confirm('Are you sure you want to remove this question?')) {
-                    const section = viewModel.sections().find(section => section.sectionId() === this.sectionId);
+                    const section = formViewModel.sections().find(section => section.sectionId() === this.sectionId());
                     section.questions.remove(question);
                 }
             }
@@ -626,6 +632,44 @@
                 return isValid;
             }
 
+            readJSON(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const json = JSON.parse(e.target.result);
+                        this.sections.removeAll();
+                        this.formId(json.formId);
+                        this.title(json.title);
+                        this.description(json.description);
+                        this.associatedEntity(json.associatedEntity);
+                        json.sections.forEach((sectionData, index) => {
+                            const section = new SectionViewModel(index + 1);
+                            section.title(sectionData.title);
+                            section.subtitle(sectionData.subtitle);
+                            section.repeatable(sectionData.repeatable);
+                            sectionData.questions.forEach(questionData => {
+                                const question = new QuestionViewModel(index + 1, questionData.questionId);
+                                question.title(questionData.title);
+                                question.subtitle(questionData.subtitle);
+                                question.type(questionData.type);
+                                question.choices(questionData.choices?.map(choice => ko.observable(choice)));
+                                question.minimum(questionData.minimum);
+                                question.maximum(questionData.maximum);
+                                question.exclusiveMinimum(questionData.exclusiveMinimum);
+                                question.exclusiveMaximum(questionData.exclusiveMaximum);
+                                question.multiChoice(questionData.multiChoice);
+                                question.multiLineText(questionData.multiLineText);
+                                question.required(questionData.required);
+                                section.questions.push(question);
+                            });
+                            this.sections.push(section);
+                        });
+                    };
+                    reader.readAsText(file);
+                }
+            };
+
 
             removeNullsAndFalse(obj) {
                 if (Array.isArray(obj)) {
@@ -664,6 +708,10 @@
                     section.questions(sortedQuestions);
                 }
             });
+        });
+
+        document.getElementById('jsonFileInput').addEventListener('change', function (event) {
+            formViewModel.readJSON(event);
         });
 
     </script>

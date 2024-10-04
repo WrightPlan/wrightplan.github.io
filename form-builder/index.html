@@ -132,17 +132,54 @@
         .question:hover {
             box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
         }
+
+        .sticky-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #f8f9fa;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+        }
+
+        .form-container {
+            max-width: 100%;
+            /* Ensure the form container does not exceed the viewport width */
+            margin: 0 auto;
+            /* Center the form container */
+            padding-bottom: 60px;
+            /* Add padding to prevent overlap with the sticky footer */
+            position: relative;
+            /* Ensure the form container is positioned relative to the sticky footer */
+        }
+
+        .sticky-footer .btn {
+            margin: 0 10px;
+            /* Add some spacing between buttons */
+        }
+
+        /* Center the modal horizontally */
+        .modal-dialog {
+            margin: auto;
+            max-width: 70%;
+        }
     </style>
 </head>
 
 <body>
 
-    <input type="file" id="jsonFileInput" accept=".json" />
 
 
     <div class="container mt-5" data-bind="with: formViewModel">
         <h1 class="text-center mb-4">Form Builder</h1>
-        <div class="container">
+        <div class="form-container">
+
+            <input type="file" id="jsonFileInput" accept=".json" />
+
             <form id="formDefinition" data-bind="submit: downloadJSON.bind(formViewModel)">
                 <h2>General Information</h2>
                 <div class="form-group">
@@ -331,8 +368,11 @@
                 </div>
                 <button type="button" class="btn btn-primary add-section"
                     data-bind="click: addSection.bind(formViewModel)">+ Add Section</button>
-                <button type="button" class="btn btn-primary mt-3" data-bind="click: previewJSON">Preview JSON</button>
-                <button type="submit" class="btn btn-success mt-3">Download JSON</button>
+                <div class="sticky-footer">
+                    <button type="button" class="btn btn-primary mt-3" data-bind="click: previewJSON">Preview
+                        JSON</button>
+                    <button type="submit" class="btn btn-success mt-3">Download JSON</button>
+                </div>
             </form>
         </div>
     </div>

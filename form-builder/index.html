@@ -152,10 +152,14 @@
             /* Ensure the form container does not exceed the viewport width */
             margin: 0 auto;
             /* Center the form container */
-            padding-bottom: 60px;
+            padding-bottom: 100px;
             /* Add padding to prevent overlap with the sticky footer */
             position: relative;
             /* Ensure the form container is positioned relative to the sticky footer */
+        }
+
+        form {
+            padding-bottom: 20px;
         }
 
         .sticky-footer .btn {
@@ -209,7 +213,7 @@
         <h1 class="text-center mb-4">Form Builder</h1>
         <div class="form-container">
 
-            <div>Welcome to the Form Builder
+            <div class="text-center">
                 <p>You can create a new form using the tool, or edit an existing one by uploading a json file into the
                     uploader below.</p>
             </div>
@@ -273,11 +277,30 @@
                                 <input type="text" class="form-control"
                                     data-bind="attr: { id: 'sectionSubtitle_' + sectionId() }, value: subtitle">
                             </div>
-                            <div class="form-group form-check">
+                            <div class="form-group">
+                                <label data-bind="attr: { for: 'sectionHelpText_' + sectionId() }">Section
+                                    Help Text</label>
+                                <input type="text" class="form-control"
+                                    data-bind="attr: { id: 'sectionHelpText_' + sectionId() }, value: sectionHelpText">
+                            </div>
+                            <div style="display: inline-block; margin-left: 1rem" class="form-group form-check">
                                 <label class="form-check-label"
                                     data-bind="attr: { for: 'repeatable_' + sectionId() }">Repeatable?</label>
                                 <input type="checkbox" class="form-check-input"
                                     data-bind="attr: { id: 'repeatable_' + sectionId() }, checked: repeatable">
+                            </div>
+                            <div style="display: inline-block; margin-left: 1rem" data-bind="if: sectionId() > 1"
+                                class="form-group form-check">
+                                <label class="form-check-label"
+                                    data-bind="attr: { for: 'reviewPage_' + sectionId() }">Review Page?</label>
+                                <input type="checkbox" class="form-check-input"
+                                    data-bind="attr: { id: 'reviewPage_' + sectionId() }, checked: reviewPage">
+                            </div>
+                            <div style="display: inline-block; margin-left: 1rem" class="form-group form-check">
+                                <label class="form-check-label" data-bind="attr: { for: 'newPage_' + sectionId() }">New
+                                    Page?</label>
+                                <input type="checkbox" class="form-check-input"
+                                    data-bind="attr: { id: 'newPage_' + sectionId() }, checked: newPage">
                             </div>
                             <div class="question-list" data-bind="foreach: questions">
                                 <div class="card mb-3 question"
@@ -315,6 +338,13 @@
                                                 Subtitle</label>
                                             <input type="text" class="form-control"
                                                 data-bind="attr: { id: 'questionSubtitle_' + questionId() }, value: subtitle">
+                                        </div>
+                                        <div class="form-group">
+                                            <label
+                                                data-bind="attr: { for: 'questionHelpText_' + questionId() }">Question
+                                                Help Text</label>
+                                            <input type="text" class="form-control"
+                                                data-bind="attr: { id: 'questionHelpText_' + questionId() }, value: questionHelpText">
                                         </div>
                                         <div class="form-group">
                                             <label data-bind="attr: { for: 'questionType_' + questionId() }">Question
@@ -448,6 +478,7 @@
                 this.questionId = ko.observable(questionId);
                 this.title = ko.observable('');
                 this.subtitle = ko.observable('');
+                this.questionHelpText = ko.observable('');
                 this.type = ko.observable('');
                 this.choices = ko.observableArray([ko.observable(' ')]);
                 this.minimum = ko.observable(null);
@@ -500,7 +531,10 @@
                 this.sectionId = ko.observable(sectionId);
                 this.title = ko.observable('');
                 this.subtitle = ko.observable('');
+                this.sectionHelpText = ko.observable('');
                 this.repeatable = ko.observable(false);
+                this.newPage = ko.observable(false);
+                this.reviewPage = ko.observable(false);
                 this.questions = ko.observableArray([]);
             }
 
@@ -521,6 +555,7 @@
                 const newQuestion = new QuestionViewModel(this.sectionId(), question.questionId());
                 newQuestion.title(question.title());
                 newQuestion.subtitle(question.subtitle());
+                newQuestion.questionHelpText(question.questionHelpText());
                 newQuestion.type(question.type());
                 newQuestion.choices(question.choices()?.map(choice => ko.observable(choice())));
                 newQuestion.minimum(question.minimum());
@@ -562,10 +597,13 @@
                 newSection.title(section.title());
                 newSection.subtitle(section.subtitle());
                 newSection.repeatable(section.repeatable());
+                newSection.newPage(section.newPage());
+                newSection.sectionHelpText(section.sectionHelpText());
                 section.questions().forEach(question => {
                     const newQuestion = new QuestionViewModel(newSection.sectionId(), question.questionId());
                     newQuestion.title(question.title());
                     newQuestion.subtitle(question.subtitle());
+                    newQuestion.questionHelpText(question.questionHelpText());
                     newQuestion.type(question.type());
                     newQuestion.choices(question.choices().map(choice => ko.observable(choice())));
                     newQuestion.minimum(question.minimum());
@@ -644,6 +682,8 @@
                 let isValid = true;
                 let errorMessages = [];
                 let questionIds = new Set();
+                let reviewPageCount = 0;
+                let reviewPageIndex = -1;
 
                 // Validate form title
                 if (!this.title().trim()) {
@@ -656,6 +696,11 @@
                     if (!section.title().trim()) {
                         isValid = false;
                         errorMessages.push(`Section "${section.sectionId()}" title is required.`);
+                    }
+
+                    if (section.reviewPage()) {
+                        reviewPageCount++;
+                        reviewPageIndex = section.sectionId();
                     }
 
                     section.questions().forEach(question => {
@@ -713,6 +758,17 @@
                     });
                 });
 
+                if (reviewPageCount > 1) {
+                    isValid = false;
+                    errorMessages.push(`There must be exactly one review page.`);
+                }
+
+                // A form definition must contain no more than one section marked reviewPage=true. If there are any newPage=true or reviewPage=true on subsequent sections, the definition is invalid. Also, if there are no sections prior to the reviewPage=true, the form is invalid.
+                if (reviewPageIndex == 1) {
+                    isValid = false;
+                    errorMessage.push(`The review page must not be the first section.`);
+                }
+
                 if (errorMessages.length > 0) {
                     alert(errorMessages.join('\n'));
                 }
@@ -736,14 +792,16 @@
                             section.title(sectionData.title);
                             section.subtitle(sectionData.subtitle);
                             section.repeatable(sectionData.repeatable);
+                            section.newPage(sectionData.newPage);
+                            section.sectionHelpText(sectionData.sectionHelpText);
                             sectionData.questions.forEach(questionData => {
                                 const question = new QuestionViewModel(index + 1, questionData.questionId);
                                 question.title(questionData.title);
                                 question.subtitle(questionData.subtitle);
                                 question.type(questionData.type);
                                 question.choices(questionData.choices?.map(choice => ko.observable(choice)));
-                                question.minimum(questionData.minimum);
-                                question.maximum(questionData.maximum);
+                                question.minimum(questionData.minimum || questionData.exclusiveMinimum);
+                                question.maximum(questionData.maximum || questionData.exclusiveMaximum);
                                 question.exclusiveMinimum(questionData.exclusiveMinimum);
                                 question.exclusiveMaximum(questionData.exclusiveMaximum);
                                 question.multiChoice(questionData.multiChoice);
@@ -763,6 +821,7 @@
                 if (Array.isArray(obj)) {
                     return obj.filter(item => item !== null && item !== false && item !== '').map(item => this.removeNullsAndFalse(item));
                 } else if (typeof obj === 'object' && obj !== null) {
+                    obj = this.replaceMinimumWithExclusiveMinimum(obj);
                     return Object.fromEntries(
                         Object.entries(obj)
                             .filter(([key, value]) => {
@@ -774,6 +833,18 @@
                             })
                             .map(([key, value]) => [key, this.removeNullsAndFalse(value)])
                     );
+                }
+                return obj;
+            }
+
+            replaceMinimumWithExclusiveMinimum(obj) {
+                if (obj.exclusiveMinimum && obj.minimum !== undefined) {
+                    obj.exclusiveMinimum = obj.minimum;
+                    delete obj.minimum;
+                }
+                if (obj.exclusiveMaximum && obj.maximum !== undefined) {
+                    obj.exclusiveMaximum = obj.maximum;
+                    delete obj.maximum;
                 }
                 return obj;
             }

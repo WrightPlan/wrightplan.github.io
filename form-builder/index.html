@@ -567,7 +567,7 @@
             }
 
             addQuestion() {
-                this.questions.push(new QuestionViewModel(this.sectionId(), ' '));
+                this.questions.push(new QuestionViewModel(this.sectionId(), ''));
             }
 
             removeQuestion(question) {
@@ -672,20 +672,7 @@
                     return;
                 }
 
-                const json = ko.toJS(this);
-                delete json.forAnnotationOptions;
-                json.sections.forEach(section => {
-                    delete section.sectionId;
-                    section.questions.forEach(question => {
-                        delete question.sectionId;
-                        // rename forAnnotation to for
-                        if (question.forAnnotation) {
-                            question.for = question.forAnnotation;
-                            delete question.forAnnotation;
-                        }
-                    });
-                });
-
+                const json = this.createJsonFromViewModel(this);
                 const cleanedJson = this.removeNullsAndFalse(json);
 
                 // Insert JSON into the modal
@@ -700,21 +687,7 @@
                     return;
                 }
 
-                const json = ko.toJS(this);
-                delete json.forAnnotationOptions;
-                json.sections.forEach(section => {
-                    delete section.sectionId;
-                    section.questions.forEach(question => {
-                        delete question.sectionId;
-                        // rename forAnnotation to for
-                        if (question.forAnnotation) {
-                            question.for = question.forAnnotation;
-                            delete question.forAnnotation;
-                        }
-
-                    });
-                });
-
+                const json = this.createJsonFromViewModel(this)
                 const cleanedJson = this.removeNullsAndFalse(json);
 
                 // Extract form title to use as filename
@@ -733,6 +706,24 @@
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+            }
+
+            createJsonFromViewModel(viewModel) {
+                const json = ko.toJS(this);
+                delete json.forAnnotationOptions;
+                json.sections.forEach(section => {
+                    delete section.sectionId;
+                    section.questions.forEach(question => {
+                        delete question.sectionId;
+                        // rename forAnnotation to for
+                        if (question.forAnnotation) {
+                            question.for = question.forAnnotation;
+                            delete question.forAnnotation;
+                        }
+                    });
+                });
+
+                return json;
             }
 
             validateForm() {

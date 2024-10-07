@@ -202,6 +202,16 @@
         .file-uploader-label i {
             margin-right: 10px;
         }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .question-list {
+            margin-top: 2rem;
+        }
     </style>
 </head>
 
@@ -427,9 +437,25 @@
                                             <input type="checkbox" class="form-check-input"
                                                 data-bind="attr: { id: 'multiChoice_' + questionId() }, checked: multiChoice">
                                         </div>
+                                        <div class="form-group for-annotation"
+                                            data-bind="visible: type() === 'signature' || type() === 'initials'">
+                                            <label data-bind="attr: { for: 'forAnnotation_' + questionId() }">For
+                                                (Question
+                                                Id)</label>
+                                            <pre data-bind="text: ko.toJSON($root.forAnnotationOptions, null, 2)"></pre>
+
+                                            <select class="form-control"
+                                                data-bind="attr: { id: 'forAnnotation_' + questionId() }, value: forAnnotation">
+                                                <option value="">Select a question</option>
+                                                <!-- ko foreach: $root.formViewModel.forAnnotationOptions -->
+                                                <option data-bind="text: $data, value: $data"></option>
+                                                <!-- /ko -->
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
                             <button type="button" class="btn btn-primary add-question"
                                 data-bind="click: addQuestion.bind($data)">+ Add Question</button>
                         </div>
@@ -437,6 +463,7 @@
                 </div>
                 <button type="button" class="btn btn-primary add-section"
                     data-bind="click: addSection.bind(formViewModel)">+ Add Section</button>
+
                 <div class="sticky-footer">
                     <button type="button" class="btn btn-primary mt-3" data-bind="click: previewJSON">Preview
                         JSON</button>
@@ -488,6 +515,7 @@
                 this.multiChoice = ko.observable(false);
                 this.multiLineText = ko.observable(false);
                 this.required = ko.observable(false);
+                this.forAnnotation = ko.observable(null);
 
                 this.type.subscribe(newValue => {
                     this.removeUnnecessaryFields();
@@ -543,7 +571,6 @@
             }
 
             removeQuestion(question) {
-                console.log(formViewModel.sections())
                 if (confirm('Are you sure you want to remove this question?')) {
                     const section = formViewModel.sections().find(section => section.sectionId() === this.sectionId());
                     section.questions.remove(question);
@@ -565,6 +592,7 @@
                 newQuestion.multiChoice(question.multiChoice());
                 newQuestion.multiLineText(question.multiLineText());
                 newQuestion.required(question.required());
+                newQuestion.forAnnotation(question.forAnnotation());
                 this.questions.push(newQuestion);
             }
 
@@ -577,6 +605,19 @@
                 this.description = ko.observable('');
                 this.associatedEntity = ko.observable('');
                 this.sections = ko.observableArray([]);
+                this.forAnnotationOptions = ko.observableArray([]);
+
+                ko.computed(() => {
+                    this.forAnnotationOptions(this.sections().reduce((acc, section) => {
+                        section.questions().forEach(question => {
+                            if (question.type() === 'geolocation' || question.type() === 'acknowledgement') {
+                                acc.push(question.questionId());
+                            }
+                        });
+                        return acc;
+                    }, []));
+                });
+
             }
 
             addSection() {
@@ -613,6 +654,7 @@
                     newQuestion.multiChoice(question.multiChoice());
                     newQuestion.multiLineText(question.multiLineText());
                     newQuestion.required(question.required());
+                    newQuestion.forAnnotation(question.forAnnotation());
                     newSection.questions.push(newQuestion);
                 });
                 this.sections.push(newSection);
@@ -631,12 +673,19 @@
                 }
 
                 const json = ko.toJS(this);
+                delete json.forAnnotationOptions;
                 json.sections.forEach(section => {
                     delete section.sectionId;
                     section.questions.forEach(question => {
                         delete question.sectionId;
+                        // rename forAnnotation to for
+                        if (question.forAnnotation) {
+                            question.for = question.forAnnotation;
+                            delete question.forAnnotation;
+                        }
                     });
                 });
+
                 const cleanedJson = this.removeNullsAndFalse(json);
 
                 // Insert JSON into the modal
@@ -652,12 +701,20 @@
                 }
 
                 const json = ko.toJS(this);
+                delete json.forAnnotationOptions;
                 json.sections.forEach(section => {
                     delete section.sectionId;
                     section.questions.forEach(question => {
                         delete question.sectionId;
+                        // rename forAnnotation to for
+                        if (question.forAnnotation) {
+                            question.for = question.forAnnotation;
+                            delete question.forAnnotation;
+                        }
+
                     });
                 });
+
                 const cleanedJson = this.removeNullsAndFalse(json);
 
                 // Extract form title to use as filename
@@ -807,6 +864,7 @@
                                 question.multiChoice(questionData.multiChoice);
                                 question.multiLineText(questionData.multiLineText);
                                 question.required(questionData.required);
+                                question.forAnnotation(questionData.for);
                                 section.questions.push(question);
                             });
                             this.sections.push(section);

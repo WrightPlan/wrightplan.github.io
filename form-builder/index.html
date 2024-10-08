@@ -443,7 +443,7 @@
                                                 data-bind="attr: { id: 'multiChoice_' + questionId() }, checked: multiChoice">
                                         </div>
                                         <div class="form-group for-annotation"
-                                            data-bind="visible: type() === 'signature' || type() === 'initials'">
+                                            data-bind="visible: type() === 'geolocation' || type() === 'acknowledgement'">
                                             <label data-bind="attr: { for: 'forAnnotation_' + questionId() }">For
                                                 (Question
                                                 Id)</label>
@@ -615,7 +615,7 @@
                 ko.computed(() => {
                     this.forAnnotationOptions(this.sections().reduce((acc, section) => {
                         section.questions().forEach(question => {
-                            if (question.type() === 'geolocation' || question.type() === 'acknowledgement') {
+                            if (question.type() === 'initials' || question.type() === 'signature') {
                                 acc.push(question.questionId());
                             }
                         });

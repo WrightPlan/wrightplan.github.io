@@ -222,6 +222,11 @@
             color: red;
             padding-left: 0.25rem;
         }
+
+        .toggleVisibility:hover {
+            cursor: pointer;
+            color: #007bff;
+        }
     </style>
 </head>
 
@@ -270,12 +275,24 @@
                     </select>
                 </div>
 
-                <h2>Sections</h2>
+                <h2 style="display: inline">Sections</h2>
+                <span class="toggleVisibility" data-bind="click: function(){
+                    sections().forEach(section => {
+                        section.isSectionVisible(!section.isSectionVisible())
+                        section.questions().forEach(question => {
+                            question.isQuestionVisible(!question.isQuestionVisible())
+                        });
+                    }
+                        );                }">
+                    <i class="fa-solid fa-eye"></i>
+                </span>
                 <div id="sections" class="mb-4" data-bind="foreach: sections">
                     <div class="card mb-4 section"
                         data-bind="attr: { id: 'section_' + sectionId() }, css: { 'section-odd': $index() % 2 === 0, 'section-even': $index() % 2 !== 0 }">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h3 data-bind="text: 'Section ' + sectionId()"></h3>
+                            <i class="fa-solid toggleVisibility"
+                                data-bind="click: function(){isSectionVisible(!isSectionVisible())}, css: { 'fa-eye': !isSectionVisible(), 'fa-eye-slash': isSectionVisible() }"></i>
+                            <h3 style="display:inline" data-bind="text: 'Section ' + sectionId()"></h3>
                             <div>
                                 <span type="button" class="duplicate-button"
                                     data-bind="click: $parent.duplicateSection.bind($parent)">
@@ -285,7 +302,7 @@
                                     data-bind="click: $parent.removeSection.bind($parent)">&times;</button>
                             </div>
                         </div>
-                        <div class="card-body">
+                        <div data-bind="visible: isSectionVisible()" class="card-body">
                             <div class="form-group">
                                 <label class="required" data-bind="attr: { for: 'sectionTitle_' + sectionId() }">Section
                                     Title</label>
@@ -327,8 +344,12 @@
                                 <div class="card mb-3 question"
                                     data-bind="attr: { id: 'question_' + questionId() }, css: { 'question-odd': $index() % 2 === 0, 'question-even': $index() % 2 !== 0 }">
                                     <div class="card-header d-flex justify-content-between align-items-center">
-                                        <span class="drag-handle">&#x2630;</span>
-                                        <h4 data-bind="text: 'Question: ' + questionId()"></h4>
+                                        <div>
+                                            <span class="drag-handle">&#x2630; </span>
+                                            <i class="fa-solid toggleVisibility"
+                                                data-bind="click: function(){isQuestionVisible(!isQuestionVisible())}, css: { 'fa-eye': !isQuestionVisible(), 'fa-eye-slash': isQuestionVisible() }"></i>
+                                        </div>
+                                        <h4 style="display: inline" data-bind="text: 'Question: ' + questionId()"></h4>
                                         <div>
                                             <span type="button" class="duplicate-button"
                                                 data-bind="click: $parent.duplicateQuestion.bind($parent)">
@@ -338,7 +359,7 @@
                                                 data-bind="click: $parent.removeQuestion.bind($parent)">&times;</button>
                                         </div>
                                     </div>
-                                    <div class="card-body">
+                                    <div data-bind="visible: isQuestionVisible()" class="card-body">
                                         <div class="form-group">
                                             <label class="required"
                                                 data-bind="attr: { for: 'questionId_' + questionId() }">Question
@@ -535,6 +556,7 @@
                 this.multiLineText = ko.observable(false);
                 this.required = ko.observable(false);
                 this.forAnnotation = ko.observable(null);
+                this.isQuestionVisible = ko.observable(true);
 
                 this.type.subscribe(newValue => {
                     this.removeUnapplicableFields();
@@ -583,6 +605,7 @@
                 this.newPage = ko.observable(false);
                 this.reviewPage = ko.observable(false);
                 this.questions = ko.observableArray([]);
+                this.isSectionVisible = ko.observable(true);
             }
 
             addQuestion() {
@@ -731,6 +754,8 @@
 
                 json.sections.forEach(section => {
                     delete section.sectionId;
+                    // Remove isSectionVisible property
+                    delete section.isSectionVisible;
                     section.questions = section.questions
                         .filter(question => question !== null && question !== false && question !== '')
                         .map(question => {
@@ -767,6 +792,9 @@
                             question = Object.fromEntries(
                                 Object.entries(question).filter(([key, value]) => value !== null && value !== false && value !== '')
                             );
+
+                            // Remove isQuestionVisible property
+                            delete question.isQuestionVisible;
 
                             return question;
                         });

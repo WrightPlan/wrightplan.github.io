@@ -216,6 +216,12 @@
         .question-list {
             margin-top: 2rem;
         }
+
+        .required::after {
+            content: "*";
+            color: red;
+            padding-left: 0.25rem;
+        }
     </style>
 </head>
 
@@ -240,11 +246,11 @@
             <form id="formDefinition" data-bind="submit: downloadJSON.bind(formViewModel)">
                 <h3>Form Information</h3>
                 <div class="form-group">
-                    <label for="formId">Form ID</label>
+                    <label class="required" for="formId">Form ID</label>
                     <input type="text" class="form-control" id="formId" data-bind="value: formId" required>
                 </div>
                 <div class="form-group">
-                    <label for="title">Title</label>
+                    <label class="required" for="title">Title</label>
                     <input type="text" class="form-control" id="title" data-bind="value: title" required>
                 </div>
                 <div class="form-group">
@@ -252,8 +258,9 @@
                     <textarea class="form-control" id="description" data-bind="value: description" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="associatedEntity">Associated Entity</label>
+                    <label class="required" for="associatedEntity">Associated Entity</label>
                     <select class="form-control" id="associatedEntity" data-bind="value: associatedEntity" required>
+                        <option style="color:#545b62" value="" disabled selected>Select an associated entity...</option>
                         <option value="dispatch-job">Dispatch Job</option>
                         <option value="work-order">Work Order</option>
                         <option value="customer-company">Customer Company</option>
@@ -280,7 +287,7 @@
                         </div>
                         <div class="card-body">
                             <div class="form-group">
-                                <label data-bind="attr: { for: 'sectionTitle_' + sectionId() }">Section
+                                <label class="required" data-bind="attr: { for: 'sectionTitle_' + sectionId() }">Section
                                     Title</label>
                                 <input type="text" class="form-control"
                                     data-bind="attr: { id: 'sectionTitle_' + sectionId() }, value: title" required>
@@ -333,14 +340,16 @@
                                     </div>
                                     <div class="card-body">
                                         <div class="form-group">
-                                            <label data-bind="attr: { for: 'questionId_' + questionId() }">Question
+                                            <label class="required"
+                                                data-bind="attr: { for: 'questionId_' + questionId() }">Question
                                                 ID</label>
                                             <input type="text" class="form-control"
                                                 data-bind="attr: { id: 'questionId_' + questionId() }, value: questionId"
                                                 required>
                                         </div>
                                         <div class="form-group">
-                                            <label data-bind="attr: { for: 'questionTitle_' + questionId() }">Question
+                                            <label class="required"
+                                                data-bind="attr: { for: 'questionTitle_' + questionId() }">Question
                                                 Title</label>
                                             <input type="text" class="form-control"
                                                 data-bind="attr: { id: 'questionTitle_' + questionId() }, value: title"
@@ -361,10 +370,14 @@
                                                 data-bind="attr: { id: 'questionHelpText_' + questionId() }, value: questionHelpText">
                                         </div>
                                         <div class="form-group">
-                                            <label data-bind="attr: { for: 'questionType_' + questionId() }">Question
+                                            <label class="required"
+                                                data-bind="attr: { for: 'questionType_' + questionId() }">Question
                                                 Type</label>
                                             <select class="form-control"
-                                                data-bind="attr: { id: 'questionType_' + questionId() }, value: type, event: { change: $parent.toggleQuestionFields }">
+                                                data-bind="attr: { id: 'questionType_' + questionId() }, value: type, event: { change: $parent.toggleQuestionFields }"
+                                                required>
+                                                <option style="color:#545b62" value="" disabled selected>Select a
+                                                    question type...</option>
                                                 <option value="acknowledgement">Acknowledgement</option>
                                                 <option value="boolean">Boolean</option>
                                                 <option value="choice">Choice</option>
@@ -395,7 +408,8 @@
                                             </label>
                                         </div>
                                         <div class="form-group choices-field" data-bind="if: type() === 'choice'">
-                                            <label data-bind="attr: { for: 'choices_' + questionId() }">Choices</label>
+                                            <label class="required"
+                                                data-bind="attr: { for: 'choices_' + questionId() }">Choices</label>
                                             <div class="choices-container" data-bind="foreach: choices">
                                                 <div class="choice-item mb-2">
                                                     <input type="text" class="form-control d-inline-block w-75"
@@ -451,7 +465,7 @@
 
                                             <select class="form-control"
                                                 data-bind="attr: { id: 'forAnnotation_' + questionId() }, value: forAnnotation">
-                                                <option value="">Select a question</option>
+                                                <option value="">Select a question...</option>
                                                 <!-- ko foreach: $root.formViewModel.forAnnotationOptions -->
                                                 <option data-bind="text: $data, value: $data"></option>
                                                 <!-- /ko -->
@@ -512,7 +526,7 @@
                 this.subtitle = ko.observable('');
                 this.questionHelpText = ko.observable('');
                 this.type = ko.observable('');
-                this.choices = ko.observableArray([ko.observable(' ')]);
+                this.choices = ko.observableArray([ko.observable('')]);
                 this.minimum = ko.observable(null);
                 this.maximum = ko.observable(null);
                 this.exclusiveMinimum = ko.observable(false);
@@ -523,11 +537,11 @@
                 this.forAnnotation = ko.observable(null);
 
                 this.type.subscribe(newValue => {
-                    this.removeUnnecessaryFields();
+                    this.removeUnapplicableFields();
                 });
             }
 
-            removeUnnecessaryFields() {
+            removeUnapplicableFields() {
 
                 if (this.type() !== 'choice' && this.choices()) {
                     this.choices?.removeAll();
@@ -551,7 +565,7 @@
             }
 
             addChoice() {
-                this.choices.push(ko.observable(' '));
+                this.choices.push(ko.observable(''));
             }
 
             removeChoice(choice) {

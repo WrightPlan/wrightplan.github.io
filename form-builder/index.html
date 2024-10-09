@@ -354,9 +354,7 @@
                                     <input type="checkbox" class="form-check-input"
                                         data-bind="attr: { id: 'tabular_' + sectionId() }, checked: tabular"></label>
                             </div>
-
                             <!-- ko if: tabular() -->
-                            <!-- collect an input with label questionHeader -->
                             <div class="form-group">
                                 <label class="required"
                                     data-bind="attr: { for: 'questionHeader_' + sectionId() }">Question
@@ -392,7 +390,6 @@
                                     data-bind="click: addChoice.bind($data)">+ Add Choice</button>
                             </div>
                             <!-- /ko -->
-
 
                             <div class="question-list" data-bind="foreach: questions">
                                 <div class="card mb-3 question"
@@ -498,6 +495,15 @@
                                         <!-- /ko -->
 
                                         <!-- ko if: type() === 'choice' -->
+                                        <div class="form-group multiChoice-field d-inline-block"
+                                            data-bind="if: type() === 'choice'">
+                                            <label data-bind="attr: { for: 'multiChoice_' + questionId() }">Multi
+                                                Choice
+                                                <input type="checkbox" class="form-check-input"
+                                                    data-bind="attr: { id: 'multiChoice_' + questionId() }, checked: multiChoice">
+                                            </label>
+
+                                        </div>
                                         <div class="form-group choices-field">
                                             <label class="required"
                                                 data-bind="attr: { for: 'choices_' + questionId() }">Choices</label>
@@ -515,15 +521,7 @@
                                             <button type="button" class="btn btn-primary add-choice"
                                                 data-bind="click: addChoice.bind($data)">+ Add Choice</button>
                                         </div>
-                                        <div class="form-group multiChoice-field d-inline-block"
-                                            data-bind="if: type() === 'choice'">
-                                            <label data-bind="attr: { for: 'multiChoice_' + questionId() }">Multi
-                                                Choice
-                                                <input type="checkbox" class="form-check-input"
-                                                    data-bind="attr: { id: 'multiChoice_' + questionId() }, checked: multiChoice">
-                                            </label>
 
-                                        </div>
                                         <!-- /ko -->
 
                                         <!-- ko if: type() === 'integer' || type() === 'decimal' -->
@@ -644,7 +642,7 @@
                 this.isIdEditable = ko.observable(false);
 
                 this.type.subscribe(newValue => {
-                    this.removeUnapplicableFields();
+                    this.removeUnapplicableFields(choiceHeaders);
                 });
 
                 this.title.subscribe(newValue => {
@@ -655,7 +653,7 @@
                 })
             }
 
-            removeUnapplicableFields() {
+            removeUnapplicableFields(choiceHeaders) {
 
                 if (this.type() !== 'choice' && this.choices()) {
                     this.choices?.removeAll();
@@ -672,6 +670,10 @@
                     this.maximum(null);
                     this.exclusiveMinimum(false);
                     this.exclusiveMaximum(false);
+                }
+
+                if (this.type() === 'choice') {
+                    this.choices = ko.observableArray(choiceHeaders.map(choice => ko.observable(choice)));
                 }
 
             }
@@ -694,12 +696,13 @@
                 this.repeatable = ko.observable(false);
                 this.newPage = ko.observable(false);
                 this.reviewPage = ko.observable(false);
-                this.questions = ko.observableArray([]);
                 this.isSectionVisible = ko.observable(true);
                 this.tabular = ko.observable(false);
                 this.questionHeader = ko.observable('');
                 this.choiceHeaders = ko.observableArray([ko.observable('')]);
                 this.choiceHeaderDisplayText = ko.observable({});
+                this.questions = ko.observableArray([]);
+
 
                 this.tabular.subscribe(newValue => {
                     this.removeUnapplicableFields();
@@ -876,34 +879,37 @@
 
                 // capture time will add acknowledgement question, location will add geolocation type question to the same section
                 function processCaptureOptions(section) {
-                    section.questions.forEach(question => {
+                    for (let i = 0; i < section.questions.length; i++) {
+                        const question = section.questions[i];
+
                         if (question.captureTime) {
-                            section.questions.push({
+                            section.questions.splice(i + 1, 0, {
                                 questionId: question.questionId + 'acknowledgement',
                                 title: 'acknowledgement for ' + question.questionId,
                                 type: 'acknowledgement',
-                                required: true,
+                                required: question.required,
                                 for: question.questionId
                             });
                             delete question.captureTime;
+                            i++; // Skip the newly added question
                         }
 
                         if (question.captureLocation) {
-                            section.questions.push({
+                            section.questions.splice(i + 1, 0, {
                                 questionId: question.questionId + 'geolocation',
                                 title: 'geolocation for ' + question.questionId,
                                 type: 'geolocation',
-                                required: true,
+                                required: question.required,
                                 for: question.questionId
                             });
                             delete question.captureLocation;
+                            i++; // Skip the newly added question
                         }
-                    });
+                    }
                 }
 
 
                 json.sections = json.sections.map(section => {
-
                     // Clean the section itself
                     section = cleanObject(section);
                     processCaptureOptions(section);
@@ -1101,7 +1107,7 @@
                             section.sectionHelpText(sectionData.sectionHelpText);
                             section.reviewPage(sectionData.reviewPage);
 
-                            if (section.choiceHeaders) {
+                            if (sectionData.choiceHeaders) {
                                 section.questionHeader(sectionData.questionHeader);
                                 section.choiceHeaders(sectionData.choiceHeaders.map(choiceHeader => ko.observable(choiceHeader)));
                                 section.choiceHeaderDisplayText(sectionData.choiceHeaderDisplayText);
@@ -1110,7 +1116,7 @@
 
                             sectionData.questions.forEach(questionData => {
 
-                                const question = new QuestionViewModel(index + 1, questionData.questionId);
+                                const question = new QuestionViewModel(index + 1, questionData.questionId, section.choiceHeaders().map(choice => choice()));
                                 question.title(questionData.title);
                                 question.subtitle(questionData.subtitle);
                                 question.questionHelpText(questionData.questionHelpText);

@@ -623,14 +623,14 @@
     <script>
 
         class QuestionViewModel {
-            constructor(sectionId, questionId) {
+            constructor(sectionId, questionId, choiceHeaders = []) {
                 this.sectionId = sectionId;
                 this.questionId = ko.observable(questionId);
                 this.title = ko.observable('');
                 this.subtitle = ko.observable('');
                 this.questionHelpText = ko.observable('');
                 this.type = ko.observable('');
-                this.choices = ko.observableArray([ko.observable('')]);
+                this.choices = ko.observableArray(choiceHeaders.map(choice => ko.observable(choice)));
                 this.minimum = ko.observable(null);
                 this.maximum = ko.observable(null);
                 this.exclusiveMinimum = ko.observable(false);
@@ -715,7 +715,7 @@
             }
 
             addQuestion() {
-                this.questions.push(new QuestionViewModel(this.sectionId(), ''));
+                this.questions.push(new QuestionViewModel(this.sectionId(), '', this.choiceHeaders().map(choice => choice())));
             }
 
             removeQuestion(question) {
@@ -903,8 +903,6 @@
 
 
                 json.sections = json.sections.map(section => {
-                    delete section.sectionId;
-                    delete section.isSectionVisible;
 
                     // Clean the section itself
                     section = cleanObject(section);
@@ -913,13 +911,11 @@
                         delete section.questionHeader;
                         delete section.choiceHeaders;
                         delete section.choiceHeaderDisplayText;
-                        delete section.tabular;
                     }
 
                     if (section.choiceHeaderDisplayText) {
                         section.choiceHeaderDisplayText = cleanObject(section.choiceHeaderDisplayText);
                     }
-
 
                     section.questions = section.questions.map(question => {
                         delete question.sectionId;
@@ -952,6 +948,11 @@
                         return cleanObject(question);
                     });
 
+
+                    // delete unrequired fields
+                    delete section.sectionId;
+                    delete section.isSectionVisible;
+                    delete section.tabular;
                     return section;
                 });
 

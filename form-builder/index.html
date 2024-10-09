@@ -574,7 +574,6 @@
                 this.multiChoice = ko.observable(false);
                 this.multiLineText = ko.observable(false);
                 this.required = ko.observable(false);
-                this.forAnnotation = ko.observable(null);
                 this.isQuestionVisible = ko.observable(true);
                 this.captureTime = ko.observable(false);
                 this.captureLocation = ko.observable(false);
@@ -653,7 +652,8 @@
                 newQuestion.multiChoice(question.multiChoice());
                 newQuestion.multiLineText(question.multiLineText());
                 newQuestion.required(question.required());
-                newQuestion.forAnnotation(question.forAnnotation());
+                newQuestion.captureTime(question.captureTime());
+                newQuestion.captureLocation(question.captureLocation());
                 this.questions.push(newQuestion);
             }
 
@@ -702,7 +702,8 @@
                     newQuestion.multiChoice(question.multiChoice());
                     newQuestion.multiLineText(question.multiLineText());
                     newQuestion.required(question.required());
-                    newQuestion.forAnnotation(question.forAnnotation());
+                    newQuestion.captureTime(question.captureTime());
+                    newQuestion.captureLocation(question.captureLocation());
                     newSection.questions.push(newQuestion);
                 });
                 this.sections.push(newSection);
@@ -764,22 +765,43 @@
                     );
                 }
 
+                // capture time will add acknowledgement question, location will add geolocation type question to the same section
+                function processCaptureOptions(section) {
+                    section.questions.forEach(question => {
+                        if (question.captureTime) {
+                            section.questions.push({
+                                questionId: question.questionId + 'acknowledgement',
+                                title: 'acknowledgement for ' + question.questionId,
+                                type: 'acknowledgement',
+                                required: true,
+                                for: question.questionId
+                            });
+                        }
+
+                        if (question.captureLocation) {
+                            section.questions.push({
+                                questionId: question.questionId + 'geolocation',
+                                title: 'geolocation for ' + question.questionId,
+                                type: 'geolocation',
+                                required: true,
+                                for: question.questionId
+                            });
+                        }
+                    });
+                }
+
+
                 json.sections = json.sections.map(section => {
                     delete section.sectionId;
                     delete section.isSectionVisible;
 
                     // Clean the section itself
                     section = cleanObject(section);
+                    processCaptureOptions(section);
 
                     section.questions = section.questions.map(question => {
                         delete question.sectionId;
                         delete question.isQuestionVisible;
-
-                        // Rename forAnnotation to for
-                        if (question.forAnnotation) {
-                            question.for = question.forAnnotation;
-                            delete question.forAnnotation;
-                        }
 
                         // If question type is integer or decimal, the min/max values should be numbers
                         if (question.type === 'integer' || question.type === 'decimal') {
@@ -928,7 +950,6 @@
 
             readJSON(event) {
                 const file = event.target.files[0];
-                console.log(this);
                 if (file) {
                     const reader = new FileReader();
                     reader.onload = (e) => {
@@ -938,6 +959,7 @@
                         this.title(json.title);
                         this.description(json.description);
                         this.associatedEntity(json.associatedEntity);
+
                         json.sections.forEach((sectionData, index) => {
                             const section = new SectionViewModel(index + 1);
                             section.title(sectionData.title);
@@ -945,7 +967,23 @@
                             section.repeatable(sectionData.repeatable);
                             section.newPage(sectionData.newPage);
                             section.sectionHelpText(sectionData.sectionHelpText);
+                            section.reviewPage(sectionData.reviewPage);
+
                             sectionData.questions.forEach(questionData => {
+                                // if questionData is acknowledgement or geolocation, read the 'for' attribute, find the question and set captureTime or captureLocation to true for that question
+                                if (questionData.type === 'acknowledgement' || questionData.type === 'geolocation') {
+                                    const question = section.questions().find(q => q.questionId() === questionData.for);
+                                    if (question) {
+                                        if (questionData.type === 'acknowledgement') {
+                                            question.captureTime(true);
+                                        } else {
+                                            question.captureLocation(true);
+                                        }
+                                    }
+                                    return;
+                                }
+
+
                                 const question = new QuestionViewModel(index + 1, questionData.questionId);
                                 question.title(questionData.title);
                                 question.subtitle(questionData.subtitle);
@@ -958,7 +996,8 @@
                                 question.multiChoice(questionData.multiChoice);
                                 question.multiLineText(questionData.multiLineText);
                                 question.required(questionData.required);
-                                question.forAnnotation(questionData.for);
+                                question.captureTime(questionData.captureTime);
+                                question.captureLocation(questionData.captureLocation);
                                 section.questions.push(question);
                             });
                             this.sections.push(section);

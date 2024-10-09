@@ -253,12 +253,21 @@
             <form id="formDefinition" data-bind="submit: downloadJSON.bind(documentViewModel.formViewModel)">
                 <h3>Form Information</h3>
                 <div class="form-group">
-                    <label class="required" for="formId">Form ID</label>
-                    <input type="text" class="form-control" id="formId" data-bind="value: formId" required>
-                </div>
-                <div class="form-group">
                     <label class="required" for="title">Title</label>
                     <input type="text" class="form-control" id="title" data-bind="value: title" required>
+                </div>
+                <div class="form-group">
+                    <label class="required" for="formId">Form ID</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="formId"
+                            data-bind="value: formId, disable: documentViewModel.isUploaded() || !isIdEditable()"
+                            required>
+                        <div class="input-group-append" data-bind="if: !documentViewModel.isUploaded()">
+                            <span class="input-group-text" data-bind="click: function() { isIdEditable(true)}">
+                                <i class="fa fa-pencil"></i>
+                            </span>
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="description">Description</label>
@@ -280,13 +289,12 @@
                 <h2 style="display: inline">Sections</h2>
                 <span class="toggleVisibility" data-bind="click: function(){
                     sections().forEach(section => {
-                        section.isSectionVisible(!section.isSectionVisible())
+                        section.isSectionVisible(false)
                         section.questions().forEach(question => {
-                            question.isQuestionVisible(!question.isQuestionVisible())
+                            question.isQuestionVisible(false)
                         });
-                    }
-                        );                }">
-                    <i class="fa-solid fa-eye"></i>
+                    } ); }">
+                    <i class="fa-solid fa-eye-slash"></i>
                 </span>
                 <hr>
                 <div id="sections" class="mb-4" data-bind="foreach: sections">
@@ -366,19 +374,28 @@
                                     <div data-bind="visible: isQuestionVisible()" class="card-body">
                                         <div class="form-group">
                                             <label class="required"
-                                                data-bind="attr: { for: 'questionId_' + questionId() }">Question
-                                                ID</label>
-                                            <input type="text" class="form-control"
-                                                data-bind="attr: { id: 'questionId_' + questionId() }, value: questionId"
-                                                required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="required"
                                                 data-bind="attr: { for: 'questionTitle_' + questionId() }">Question
                                                 Title</label>
                                             <input type="text" class="form-control"
                                                 data-bind="attr: { id: 'questionTitle_' + questionId() }, value: title"
                                                 required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="required"
+                                                data-bind="attr: { for: 'questionId_' + questionId() }">Question
+                                                ID</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control"
+                                                    data-bind="attr: { id: 'questionId_' + questionId() }, value: questionId, disable: documentViewModel.isUploaded() || !isIdEditable()"
+                                                    required>
+                                                <div class="input-group-append"
+                                                    data-bind="if: !$root.documentViewModel.isUploaded()">
+                                                    <span class="input-group-text"
+                                                        data-bind="click: function() { isIdEditable(true)}">
+                                                        <i class="fa fa-pencil"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="form-group">
                                             <label
@@ -456,9 +473,11 @@
                                         <div class="form-group multiChoice-field d-inline-block"
                                             data-bind="if: type() === 'choice'">
                                             <label data-bind="attr: { for: 'multiChoice_' + questionId() }">Multi
-                                                Choice?</label>
-                                            <input type="checkbox" class="form-check-input"
-                                                data-bind="attr: { id: 'multiChoice_' + questionId() }, checked: multiChoice">
+                                                Choice
+                                                <input type="checkbox" class="form-check-input"
+                                                    data-bind="attr: { id: 'multiChoice_' + questionId() }, checked: multiChoice">
+                                            </label>
+
                                         </div>
                                         <!-- /ko -->
 
@@ -577,10 +596,18 @@
                 this.isQuestionVisible = ko.observable(true);
                 this.captureTime = ko.observable(false);
                 this.captureLocation = ko.observable(false);
+                this.isIdEditable = ko.observable(false);
 
                 this.type.subscribe(newValue => {
                     this.removeUnapplicableFields();
                 });
+
+                this.title.subscribe(newValue => {
+                    if (newValue && !documentViewModel.isUploaded() && !this.isIdEditable()) {
+                        var camelCaseId = documentViewModel.toCamelCase(newValue);
+                        this.questionId(camelCaseId);
+                    }
+                })
             }
 
             removeUnapplicableFields() {
@@ -666,6 +693,14 @@
                 this.description = ko.observable('');
                 this.associatedEntity = ko.observable('');
                 this.sections = ko.observableArray([]);
+                this.isIdEditable = ko.observable(false);
+
+                this.title.subscribe(newValue => {
+                    if (newValue && !documentViewModel.isUploaded() && !this.isIdEditable()) {
+                        var camelCaseId = documentViewModel.toCamelCase(newValue);
+                        this.formId(camelCaseId);
+                    }
+                })
             }
 
             addSection() {
@@ -694,7 +729,7 @@
                     newQuestion.subtitle(question.subtitle());
                     newQuestion.questionHelpText(question.questionHelpText());
                     newQuestion.type(question.type());
-                    newQuestion.choices(question.choices().map(choice => ko.observable(choice())));
+                    newQuestion.choices(question.choices()?.map(choice => ko.observable(choice())));
                     newQuestion.minimum(question.minimum());
                     newQuestion.maximum(question.maximum());
                     newQuestion.exclusiveMinimum(question.exclusiveMinimum());
@@ -757,6 +792,7 @@
 
             createJsonFromViewModel(viewModel) {
                 const json = ko.toJS(viewModel);
+                delete json.isIdEditable;
 
                 // Helper function to remove null, false, and empty string values
                 function cleanObject(obj) {
@@ -776,6 +812,7 @@
                                 required: true,
                                 for: question.questionId
                             });
+                            delete question.captureTime;
                         }
 
                         if (question.captureLocation) {
@@ -786,6 +823,7 @@
                                 required: true,
                                 for: question.questionId
                             });
+                            delete question.captureLocation;
                         }
                     });
                 }
@@ -802,11 +840,18 @@
                     section.questions = section.questions.map(question => {
                         delete question.sectionId;
                         delete question.isQuestionVisible;
+                        delete question.isIdEditable;
 
                         // If question type is integer or decimal, the min/max values should be numbers
                         if (question.type === 'integer' || question.type === 'decimal') {
                             question.minimum = question.minimum ? Number(question.minimum) : null;
                             question.maximum = question.maximum ? Number(question.maximum) : null;
+                        }
+
+                        // Clean the choices for non 'choice' type questions
+                        if (question.type !== 'choice') {
+                            delete question.choices;
+                            delete question.multiChoice;
                         }
 
                         // Replace minimum with exclusiveMinimum
@@ -949,13 +994,15 @@
             }
 
             readJSON(event) {
+
+                documentViewModel.isUploaded(true);
                 const file = event.target.files[0];
                 if (file) {
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         const json = JSON.parse(e.target.result);
                         this.sections.removeAll();
-                        this.formId(json.formId);
+                        this.formId(documentViewModel.toCamelCase(json.formId));
                         this.title(json.title);
                         this.description(json.description);
                         this.associatedEntity(json.associatedEntity);
@@ -970,23 +1017,11 @@
                             section.reviewPage(sectionData.reviewPage);
 
                             sectionData.questions.forEach(questionData => {
-                                // if questionData is acknowledgement or geolocation, read the 'for' attribute, find the question and set captureTime or captureLocation to true for that question
-                                if (questionData.type === 'acknowledgement' || questionData.type === 'geolocation') {
-                                    const question = section.questions().find(q => q.questionId() === questionData.for);
-                                    if (question) {
-                                        if (questionData.type === 'acknowledgement') {
-                                            question.captureTime(true);
-                                        } else {
-                                            question.captureLocation(true);
-                                        }
-                                    }
-                                    return;
-                                }
-
 
                                 const question = new QuestionViewModel(index + 1, questionData.questionId);
                                 question.title(questionData.title);
                                 question.subtitle(questionData.subtitle);
+                                question.questionHelpText(questionData.questionHelpText);
                                 question.type(questionData.type);
                                 question.choices(questionData.choices?.map(choice => ko.observable(choice)));
                                 question.minimum(questionData.minimum || questionData.exclusiveMinimum);
@@ -1000,6 +1035,26 @@
                                 question.captureLocation(questionData.captureLocation);
                                 section.questions.push(question);
                             });
+
+                            // if questionData is acknowledgement or geolocation, read the 'for' attribute, 
+                            // find the question and set captureTime or captureLocation to true for that question
+                            // and remove the annotated question from the list. 
+                            sectionData.questions.forEach(questionData => {
+
+                                if (questionData.type === 'acknowledgement' || questionData.type === 'geolocation') {
+                                    const question = section.questions().find(q => q.questionId() === questionData.for);
+                                    if (question) {
+                                        if (questionData.type === 'acknowledgement') {
+                                            question.captureTime(true);
+                                        } else {
+                                            question.captureLocation(true);
+                                        }
+                                        //remove the annotated question from the list
+                                        section.questions.remove(q => q.questionId() === questionData.questionId);
+                                    }
+                                    return;
+                                }
+                            });
                             this.sections.push(section);
                         });
                     };
@@ -1011,6 +1066,13 @@
         class DocumentViewModel {
             constructor() {
                 this.formViewModel = new FormViewModel();
+                this.isUploaded = ko.observable(false);
+            }
+
+            toCamelCase = (str) => {
+                return str.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function (match, index) {
+                    return index === 0 ? match.toLowerCase() : match.toUpperCase();
+                }).replace(/\s+/g, '');
             }
 
         }

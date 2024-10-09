@@ -37,11 +37,6 @@
             z-index: 0;
         }
 
-        .btn-primary:hover {
-            background-color: #5a6268;
-            border-color: #545b62;
-        }
-
         .form-group label {
             color: #5a5c69;
         }
@@ -338,20 +333,67 @@
                                     <input type="checkbox" class="form-check-input"
                                         data-bind="attr: { id: 'repeatable_' + sectionId() }, checked: repeatable"></label>
                             </div>
-                            <div class="form-group form-check d-inline-block" data-bind="if: sectionId() > 1"
+                            <!-- ko if: sectionId() > 1 -->
+                            <div class="form-group form-check d-inline-block"
                                 class="form-group form-check d-inline-block">
                                 <label class="form-check-label" data-bind="attr: { for: 'reviewPage_' + sectionId() }">
                                     Review Page
                                     <input type="checkbox" class="form-check-input"
                                         data-bind="attr: { id: 'reviewPage_' + sectionId() }, checked: reviewPage"></label>
                             </div>
+                            <!-- /ko -->
                             <div class="form-group form-check d-inline-block">
                                 <label class="form-check-label" data-bind="attr: { for: 'newPage_' + sectionId() }">
                                     New Page
                                     <input type="checkbox" class="form-check-input"
                                         data-bind="attr: { id: 'newPage_' + sectionId() }, checked: newPage"></label>
-
                             </div>
+                            <div class="form-group form-check d-inline-block">
+                                <label class="form-check-label" data-bind="attr: { for: 'tabular_' + sectionId() }">
+                                    Tabular Section
+                                    <input type="checkbox" class="form-check-input"
+                                        data-bind="attr: { id: 'tabular_' + sectionId() }, checked: tabular"></label>
+                            </div>
+
+                            <!-- ko if: tabular() -->
+                            <!-- collect an input with label questionHeader -->
+                            <div class="form-group">
+                                <label class="required"
+                                    data-bind="attr: { for: 'questionHeader_' + sectionId() }">Question
+                                    Header</label>
+                                <input type="text" class="form-control"
+                                    data-bind="attr: { id: 'questionHeader_' + sectionId() }, value: questionHeader"
+                                    required>
+                            </div>
+
+                            <div class="form-group choices-field">
+                                <label style="width: 40%" class="required d-inline-block"
+                                    data-bind="attr: { for: 'choices_' + sectionId() }">Choice
+                                    Headers</label>
+                                <label class="d-inline-block"
+                                    data-bind="attr: { for: 'choices_' + sectionId() }">Display
+                                    Text</label>
+                                <div class="choices-container" data-bind="foreach: choiceHeaders">
+                                    <div class="choice-item mb-2">
+                                        <input style="padding-top: 0; width: 40%" type="text"
+                                            class="form-control d-inline-block" data-bind="textInput: $rawData"
+                                            required>
+                                        <input style="padding-top: 0; width: 40%" type="text"
+                                            class="form-control d-inline-block" placeholder="Display Text"
+                                            data-bind="value: $parent.choiceHeaderDisplayText()[$data], valueUpdate: 'input', event: { input: $parent.updateDisplayText.bind($parent, $data) }">
+
+                                        <button type="button" class="btn btn-danger d-inline-block w-20"
+                                            data-bind="click: $parent.removeChoice.bind($parent)">
+                                            <i class="fa fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-primary add-choice"
+                                    data-bind="click: addChoice.bind($data)">+ Add Choice</button>
+                            </div>
+                            <!-- /ko -->
+
+
                             <div class="question-list" data-bind="foreach: questions">
                                 <div class="card mb-3 question"
                                     data-bind="attr: { id: 'question_' + questionId() }, css: { 'question-odd': $index() % 2 === 0, 'question-even': $index() % 2 !== 0 }">
@@ -461,10 +503,13 @@
                                                 data-bind="attr: { for: 'choices_' + questionId() }">Choices</label>
                                             <div class="choices-container" data-bind="foreach: choices">
                                                 <div class="choice-item mb-2">
-                                                    <input type="text" class="form-control d-inline-block w-75"
+                                                    <input style="padding-top: 0" type="text"
+                                                        class="form-control d-inline-block w-75"
                                                         data-bind="textInput: $rawData" required>
                                                     <button type="button" class="btn btn-danger d-inline-block w-20"
-                                                        data-bind="click: $parent.removeChoice.bind($parent)">Remove</button>
+                                                        data-bind="click: $parent.removeChoice.bind($parent)"> <i
+                                                            class="fa fa-times"></i>
+                                                    </button>
                                                 </div>
                                             </div>
                                             <button type="button" class="btn btn-primary add-choice"
@@ -534,7 +579,7 @@
                                 </div>
                             </div>
 
-                            <button type="button" class="btn btn-primary add-question"
+                            <button type="button" class="btn-dark add-question"
                                 data-bind="click: addQuestion.bind($data)">+ Add Question</button>
                         </div>
                     </div>
@@ -651,6 +696,22 @@
                 this.reviewPage = ko.observable(false);
                 this.questions = ko.observableArray([]);
                 this.isSectionVisible = ko.observable(true);
+                this.tabular = ko.observable(false);
+                this.questionHeader = ko.observable('');
+                this.choiceHeaders = ko.observableArray([ko.observable('')]);
+                this.choiceHeaderDisplayText = ko.observable({});
+
+                this.tabular.subscribe(newValue => {
+                    this.removeUnapplicableFields();
+                });
+            }
+
+            addChoice() {
+                this.choiceHeaders.push(ko.observable(''));
+            }
+
+            removeChoice(choice) {
+                this.choiceHeaders.remove(item => item.peek() === choice);
             }
 
             addQuestion() {
@@ -682,6 +743,18 @@
                 newQuestion.captureTime(question.captureTime());
                 newQuestion.captureLocation(question.captureLocation());
                 this.questions.push(newQuestion);
+            }
+
+            updateDisplayText = function (choice, data, event) {
+                var displayText = this.choiceHeaderDisplayText();
+                displayText[choice] = event.target.value;
+                this.choiceHeaderDisplayText(displayText);
+            };
+
+            removeUnapplicableFields() {
+                if (!this.tabular()) {
+                    this.choiceHeaders.removeAll();
+                }
             }
 
         }
@@ -836,6 +909,17 @@
                     // Clean the section itself
                     section = cleanObject(section);
                     processCaptureOptions(section);
+                    if (!section.tabular) {
+                        delete section.questionHeader;
+                        delete section.choiceHeaders;
+                        delete section.choiceHeaderDisplayText;
+                        delete section.tabular;
+                    }
+
+                    if (section.choiceHeaderDisplayText) {
+                        section.choiceHeaderDisplayText = cleanObject(section.choiceHeaderDisplayText);
+                    }
+
 
                     section.questions = section.questions.map(question => {
                         delete question.sectionId;
@@ -1015,6 +1099,13 @@
                             section.newPage(sectionData.newPage);
                             section.sectionHelpText(sectionData.sectionHelpText);
                             section.reviewPage(sectionData.reviewPage);
+
+                            if (section.choiceHeaders) {
+                                section.questionHeader(sectionData.questionHeader);
+                                section.choiceHeaders(sectionData.choiceHeaders.map(choiceHeader => ko.observable(choiceHeader)));
+                                section.choiceHeaderDisplayText(sectionData.choiceHeaderDisplayText);
+                                section.tabular(true);
+                            }
 
                             sectionData.questions.forEach(questionData => {
 

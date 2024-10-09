@@ -95,11 +95,6 @@
             /* Darker color on hover */
         }
 
-
-        .form-check-input {
-            margin-left: 0.75rem;
-        }
-
         .drag-handle {
             cursor: move;
             padding: 10px;
@@ -162,8 +157,19 @@
             padding-bottom: 20px;
         }
 
+        .form-check {
+            margin-right: 2rem;
+            padding-left: 0;
+            padding-bottom: 1rem;
+        }
+
         .form-check-label {
             display: inline;
+        }
+
+        .form-check-input {
+            margin-top: 0.4rem;
+            margin-left: 0.5rem;
         }
 
         .sticky-footer .btn {
@@ -213,10 +219,6 @@
             display: block;
         }
 
-        .question-list {
-            margin-top: 2rem;
-        }
-
         .required::after {
             content: "*";
             color: red;
@@ -234,7 +236,7 @@
 
 
 
-    <div class="container mt-5" data-bind="with: formViewModel">
+    <div class="container mt-5" data-bind="with: documentViewModel.formViewModel">
         <h1 class="text-center mb-4">Form Builder</h1>
         <div class="form-container">
 
@@ -248,7 +250,7 @@
                     <i class="fa fa-upload"></i> Choose a JSON file
                 </label>
             </div>
-            <form id="formDefinition" data-bind="submit: downloadJSON.bind(formViewModel)">
+            <form id="formDefinition" data-bind="submit: downloadJSON.bind(documentViewModel.formViewModel)">
                 <h3>Form Information</h3>
                 <div class="form-group">
                     <label class="required" for="formId">Form ID</label>
@@ -267,11 +269,11 @@
                     <select class="form-control" id="associatedEntity" data-bind="value: associatedEntity" required>
                         <option style="color:#545b62" value="" disabled selected>Select an associated entity...</option>
                         <option value="dispatch-job">Dispatch Job</option>
-                        <option value="work-order">Work Order</option>
-                        <option value="customer-company">Customer Company</option>
+                        <!-- <option value="work-order">Work Order</option> -->
+                        <!-- <option value="customer-company">Customer Company</option> -->
                         <option value="employee">Employee</option>
                         <option value="equipment">Equipment</option>
-                        <option value="job-site">Job Site</option>
+                        <!-- <option value="job-site">Job Site</option> -->
                     </select>
                 </div>
 
@@ -286,6 +288,7 @@
                         );                }">
                     <i class="fa-solid fa-eye"></i>
                 </span>
+                <hr>
                 <div id="sections" class="mb-4" data-bind="foreach: sections">
                     <div class="card mb-4 section"
                         data-bind="attr: { id: 'section_' + sectionId() }, css: { 'section-odd': $index() % 2 === 0, 'section-even': $index() % 2 !== 0 }">
@@ -321,24 +324,25 @@
                                 <input type="text" class="form-control"
                                     data-bind="attr: { id: 'sectionHelpText_' + sectionId() }, value: sectionHelpText">
                             </div>
-                            <div style="display: inline-block; margin-left: 1rem" class="form-group form-check">
-                                <label class="form-check-label"
-                                    data-bind="attr: { for: 'repeatable_' + sectionId() }">Repeatable?</label>
-                                <input type="checkbox" class="form-check-input"
-                                    data-bind="attr: { id: 'repeatable_' + sectionId() }, checked: repeatable">
+                            <div class="form-group form-check d-inline-block">
+                                <label class="form-check-label" data-bind="attr: { for: 'repeatable_' + sectionId() }">
+                                    Repeatable
+                                    <input type="checkbox" class="form-check-input"
+                                        data-bind="attr: { id: 'repeatable_' + sectionId() }, checked: repeatable"></label>
                             </div>
-                            <div style="display: inline-block; margin-left: 1rem" data-bind="if: sectionId() > 1"
-                                class="form-group form-check">
-                                <label class="form-check-label"
-                                    data-bind="attr: { for: 'reviewPage_' + sectionId() }">Review Page?</label>
-                                <input type="checkbox" class="form-check-input"
-                                    data-bind="attr: { id: 'reviewPage_' + sectionId() }, checked: reviewPage">
+                            <div class="form-group form-check d-inline-block" data-bind="if: sectionId() > 1"
+                                class="form-group form-check d-inline-block">
+                                <label class="form-check-label" data-bind="attr: { for: 'reviewPage_' + sectionId() }">
+                                    Review Page
+                                    <input type="checkbox" class="form-check-input"
+                                        data-bind="attr: { id: 'reviewPage_' + sectionId() }, checked: reviewPage"></label>
                             </div>
-                            <div style="display: inline-block; margin-left: 1rem" class="form-group form-check">
-                                <label class="form-check-label" data-bind="attr: { for: 'newPage_' + sectionId() }">New
-                                    Page?</label>
-                                <input type="checkbox" class="form-check-input"
-                                    data-bind="attr: { id: 'newPage_' + sectionId() }, checked: newPage">
+                            <div class="form-group form-check d-inline-block">
+                                <label class="form-check-label" data-bind="attr: { for: 'newPage_' + sectionId() }">
+                                    New Page
+                                    <input type="checkbox" class="form-check-input"
+                                        data-bind="attr: { id: 'newPage_' + sectionId() }, checked: newPage"></label>
+
                             </div>
                             <div class="question-list" data-bind="foreach: questions">
                                 <div class="card mb-3 question"
@@ -407,7 +411,7 @@
                                                 <option value="dispatch-job">Dispatch Job (ID)</option>
                                                 <option value="employee">Employee (ID)</option>
                                                 <option value="equipment">Equipment (ID)</option>
-                                                <option value="geolocation">Geolocation</option>
+                                                <!-- <option value="geolocation">Geolocation</option> -->
                                                 <option value="initials">Initials</option>
                                                 <option value="integer">Integer</option>
                                                 <option value="signature">Signature</option>
@@ -416,19 +420,26 @@
                                             </select>
                                         </div>
 
-                                        <div class="form-group">
-                                            <label>
-                                                <input type="checkbox" data-bind="checked: required"> Required
+                                        <div class="form-group form-check d-inline-block">
+                                            <label class="form-check-label">
+                                                Required
+                                                <input class="form-check-input" type="checkbox"
+                                                    data-bind="checked: required">
                                             </label>
                                         </div>
 
-                                        <div class="form-group" data-bind="if: type() === 'text'">
-                                            <label>
-                                                <input type="checkbox" data-bind="checked: multiLineText"> Multi-Line
-                                                Text
+                                        <!-- ko if: type() === 'text' -->
+                                        <div class="form-group form-check d-inline-block">
+                                            <label class="form-check-label">
+                                                Multi-Line Text
+                                                <input class="form-check-input" type="checkbox"
+                                                    data-bind="checked: multiLineText">
                                             </label>
                                         </div>
-                                        <div class="form-group choices-field" data-bind="if: type() === 'choice'">
+                                        <!-- /ko -->
+
+                                        <!-- ko if: type() === 'choice' -->
+                                        <div class="form-group choices-field">
                                             <label class="required"
                                                 data-bind="attr: { for: 'choices_' + questionId() }">Choices</label>
                                             <div class="choices-container" data-bind="foreach: choices">
@@ -442,56 +453,64 @@
                                             <button type="button" class="btn btn-primary add-choice"
                                                 data-bind="click: addChoice.bind($data)">+ Add Choice</button>
                                         </div>
-                                        <div class="form-group number-field"
-                                            data-bind="visible: type() === 'integer' || type() === 'decimal'">
-                                            <label data-bind="attr: { for: 'minimum_' + questionId() }">Minimum</label>
-                                            <input type="number" class="form-control"
-                                                data-bind="attr: { id: 'minimum_' + questionId() }, value: minimum">
-                                        </div>
-                                        <div class="form-group number-field"
-                                            data-bind="visible: type() === 'integer' || type() === 'decimal'">
-                                            <label class="form-check-label"
-                                                data-bind="attr: { for: 'exclusiveMinimum_' + questionId() }">Exclusive
-                                                Minimum?</label>
-                                            <input type="checkbox" class="form-check-input"
-                                                data-bind="attr: { id: 'exclusiveMinimum_' + questionId() }, checked: exclusiveMinimum">
-                                        </div>
-                                        <div class="form-group number-field"
-                                            data-bind="visible: type() === 'integer' || type() === 'decimal'">
-                                            <label data-bind="attr: { for: 'maximum_' + questionId() }">Maximum</label>
-                                            <input type="number" class="form-control"
-                                                data-bind="attr: { id: 'maximum_' + questionId() }, value: maximum">
-                                        </div>
-                                        <div class="form-group number-field"
-                                            data-bind="visible: type() === 'integer' || type() === 'decimal'">
-                                            <label class="form-check-label"
-                                                data-bind="attr: { for: 'exclusiveMaximum_' + questionId() }">Exclusive
-                                                Maximum?</label>
-                                            <input type="checkbox" class="form-check-input"
-                                                data-bind="attr: { id: 'exclusiveMaximum_' + questionId() }, checked: exclusiveMaximum">
-                                        </div>
-                                        <div class="form-group multiChoice-field"
-                                            data-bind="visible: type() === 'choice'">
+                                        <div class="form-group multiChoice-field d-inline-block"
+                                            data-bind="if: type() === 'choice'">
                                             <label data-bind="attr: { for: 'multiChoice_' + questionId() }">Multi
                                                 Choice?</label>
                                             <input type="checkbox" class="form-check-input"
                                                 data-bind="attr: { id: 'multiChoice_' + questionId() }, checked: multiChoice">
                                         </div>
-                                        <div class="form-group for-annotation"
-                                            data-bind="visible: type() === 'geolocation' || type() === 'acknowledgement'">
-                                            <label data-bind="attr: { for: 'forAnnotation_' + questionId() }">For
-                                                (Question
-                                                Id)</label>
-                                            <pre data-bind="text: ko.toJSON($root.forAnnotationOptions, null, 2)"></pre>
+                                        <!-- /ko -->
 
-                                            <select class="form-control"
-                                                data-bind="attr: { id: 'forAnnotation_' + questionId() }, value: forAnnotation">
-                                                <option value="">Select a question...</option>
-                                                <!-- ko foreach: $root.formViewModel.forAnnotationOptions -->
-                                                <option data-bind="text: $data, value: $data"></option>
-                                                <!-- /ko -->
-                                            </select>
+                                        <!-- ko if: type() === 'integer' || type() === 'decimal' -->
+                                        <div class="form-group number-field">
+                                            <label data-bind="attr: { for: 'minimum_' + questionId() }">Minimum</label>
+                                            <input type="number" class="form-control"
+                                                data-bind="attr: { id: 'minimum_' + questionId() }, value: minimum">
                                         </div>
+                                        <div class="form-group form-check d-inline-blocknumber-field">
+                                            <label class="form-check-label"
+                                                data-bind="attr: { for: 'exclusiveMinimum_' + questionId() }">
+                                                Exclusive Minimum
+                                                <input type="checkbox" class="form-check-input"
+                                                    data-bind="attr: { id: 'exclusiveMinimum_' + questionId() }, checked: exclusiveMinimum"></label>
+
+                                        </div>
+                                        <div class="form-group number-field">
+                                            <label data-bind="attr: { for: 'maximum_' + questionId() }">Maximum</label>
+                                            <input type="number" class="form-control"
+                                                data-bind="attr: { id: 'maximum_' + questionId() }, value: maximum">
+                                        </div>
+                                        <div class="form-group form-check d-inline-blocknumber-field"
+                                            data-bind="if: type() === 'integer' || type() === 'decimal'">
+                                            <label class="form-check-label"
+                                                data-bind="attr: { for: 'exclusiveMaximum_' + questionId() }">
+                                                Exclusive Maximum
+                                                <input type="checkbox" class="form-check-input"
+                                                    data-bind="attr: { id: 'exclusiveMaximum_' + questionId() }, checked: exclusiveMaximum"></label>
+                                        </div>
+                                        <!-- /ko -->
+
+                                        <!-- ko if: type() === 'initials' || type() === 'signature' -->
+                                        <div class="form-group form-check captureTime-field d-inline-block">
+                                            <label class="form-check-label"
+                                                data-bind="attr: { for: 'captureTime' + questionId() }">Capture
+                                                Time</label>
+                                            <input class="form-check-input" type="checkbox" class="form-check-input"
+                                                data-bind="attr: { id: 'captureTime' + questionId() }, checked: captureTime">
+                                        </div>
+                                        <!-- /ko -->
+
+                                        <!-- ko if: type() === 'acknowledgement' || type() === 'initials' || type() === 'signature' -->
+                                        <div class="form-group form-check captureLocation-field d-inline-block">
+                                            <label class="form-check-label"
+                                                data-bind="attr: { for: 'captureLocation' + questionId() }">Capture
+                                                Location
+                                                <input class="form-check-input" type="checkbox" class="form-check-input"
+                                                    data-bind="attr: { id: 'captureLocation' + questionId() }, checked: captureLocation">
+                                            </label>
+                                        </div>
+                                        <!-- /ko -->
                                     </div>
                                 </div>
                             </div>
@@ -502,7 +521,7 @@
                     </div>
                 </div>
                 <button type="button" class="btn btn-primary add-section"
-                    data-bind="click: addSection.bind(formViewModel)">+ Add Section</button>
+                    data-bind="click: addSection.bind(documentViewModel.formViewModel)">+ Add Section</button>
 
                 <div class="sticky-footer">
                     <button type="button" class="btn btn-primary mt-3" data-bind="click: previewJSON">Preview
@@ -557,6 +576,8 @@
                 this.required = ko.observable(false);
                 this.forAnnotation = ko.observable(null);
                 this.isQuestionVisible = ko.observable(true);
+                this.captureTime = ko.observable(false);
+                this.captureLocation = ko.observable(false);
 
                 this.type.subscribe(newValue => {
                     this.removeUnapplicableFields();
@@ -568,8 +589,6 @@
                 if (this.type() !== 'choice' && this.choices()) {
                     this.choices?.removeAll();
                     this.multiChoice(false);
-                } else {
-                    this.addChoice();
                 }
 
                 if (this.type() !== 'text') {
@@ -614,7 +633,7 @@
 
             removeQuestion(question) {
                 if (confirm('Are you sure you want to remove this question?')) {
-                    const section = formViewModel.sections().find(section => section.sectionId() === this.sectionId());
+                    const section = documentViewModel.formViewModel.sections().find(section => section.sectionId() === this.sectionId());
                     section.questions.remove(question);
                 }
             }
@@ -647,19 +666,6 @@
                 this.description = ko.observable('');
                 this.associatedEntity = ko.observable('');
                 this.sections = ko.observableArray([]);
-                this.forAnnotationOptions = ko.observableArray([]);
-
-                ko.computed(() => {
-                    this.forAnnotationOptions(this.sections().reduce((acc, section) => {
-                        section.questions().forEach(question => {
-                            if (question.type() === 'initials' || question.type() === 'signature') {
-                                acc.push(question.questionId());
-                            }
-                        });
-                        return acc;
-                    }, []));
-                });
-
             }
 
             addSection() {
@@ -749,57 +755,56 @@
             }
 
             createJsonFromViewModel(viewModel) {
-                const json = ko.toJS(this);
-                delete json.forAnnotationOptions;
+                const json = ko.toJS(viewModel);
 
-                json.sections.forEach(section => {
+                // Helper function to remove null, false, and empty string values
+                function cleanObject(obj) {
+                    return Object.fromEntries(
+                        Object.entries(obj).filter(([key, value]) => value !== null && value !== false && value !== '')
+                    );
+                }
+
+                json.sections = json.sections.map(section => {
                     delete section.sectionId;
-                    // Remove isSectionVisible property
                     delete section.isSectionVisible;
-                    section.questions = section.questions
-                        .filter(question => question !== null && question !== false && question !== '')
-                        .map(question => {
-                            delete question.sectionId;
 
-                            // Rename forAnnotation to for
-                            if (question.forAnnotation) {
-                                question.for = question.forAnnotation;
-                                delete question.forAnnotation;
-                            }
+                    // Clean the section itself
+                    section = cleanObject(section);
 
-                            // If question type is integer or decimal, the min/max values should be numbers
-                            if (question.type === 'integer' || question.type === 'decimal') {
-                                question.minimum = question.minimum ? Number(question.minimum) : null;
-                                question.maximum = question.maximum ? Number(question.maximum) : null;
-                            }
+                    section.questions = section.questions.map(question => {
+                        delete question.sectionId;
+                        delete question.isQuestionVisible;
 
-                            // Replace minimum with exclusiveMinimum
-                            if (question.exclusiveMinimum && question.minimum !== undefined) {
-                                question.exclusiveMinimum = question.minimum;
-                                delete question.minimum;
-                            }
-                            if (question.exclusiveMaximum && question.maximum !== undefined) {
-                                question.exclusiveMaximum = question.maximum;
-                                delete question.maximum;
-                            }
+                        // Rename forAnnotation to for
+                        if (question.forAnnotation) {
+                            question.for = question.forAnnotation;
+                            delete question.forAnnotation;
+                        }
 
-                            // Remove choices if type is not 'choice'
-                            if (question.choices && question.type !== 'choice') {
-                                delete question.choices;
-                            }
+                        // If question type is integer or decimal, the min/max values should be numbers
+                        if (question.type === 'integer' || question.type === 'decimal') {
+                            question.minimum = question.minimum ? Number(question.minimum) : null;
+                            question.maximum = question.maximum ? Number(question.maximum) : null;
+                        }
 
-                            // Remove null, false, and empty string values
-                            question = Object.fromEntries(
-                                Object.entries(question).filter(([key, value]) => value !== null && value !== false && value !== '')
-                            );
+                        // Replace minimum with exclusiveMinimum
+                        if (question.exclusiveMinimum && question.minimum !== undefined) {
+                            question.exclusiveMinimum = question.minimum;
+                            delete question.minimum;
+                        }
+                        if (question.exclusiveMaximum && question.maximum !== undefined) {
+                            question.exclusiveMaximum = question.maximum;
+                            delete question.maximum;
+                        }
 
-                            // Remove isQuestionVisible property
-                            delete question.isQuestionVisible;
+                        // Clean the question itself
+                        return cleanObject(question);
+                    });
 
-                            return question;
-                        });
+                    return section;
                 });
 
+                // Generate the final JSON using the cleaned data
                 return json;
             }
 
@@ -816,11 +821,16 @@
                     errorMessages.push('Form title is required.');
                 }
 
+                if (this.associatedEntity() === '') {
+                    isValid = false;
+                    errorMessages.push('Associated Entity is required.');
+                }
+
                 this.sections().forEach(section => {
                     // Validate section title
                     if (!section.title().trim()) {
                         isValid = false;
-                        errorMessages.push(`Section "${section.sectionId()}" title is required.`);
+                        errorMessages.push(`Section ${section.sectionId()} title is required.`);
                     }
 
                     if (section.reviewPage()) {
@@ -832,13 +842,18 @@
                         // Validate question title
                         if (!question.title().trim()) {
                             isValid = false;
-                            errorMessages.push(`Question "${question.questionId()}" in section "${section.sectionId()}" must have a title.`);
+                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} must have a title.`);
+                        }
+
+                        if (question.type() === '') {
+                            isValid = false;
+                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} must have a question type.`);
                         }
 
                         // Check for duplicate questionId
                         if (questionIds.has(question.questionId())) {
                             isValid = false;
-                            errorMessages.push(`Duplicate questionId found: "${question.questionId()}" in section "${section.sectionId()}". Each question must have a unique questionId.`);
+                            errorMessages.push(`Duplicate questionId found: "${question.questionId()}" in section ${section.sectionId()}" Each question must have a unique questionId.`);
                         } else {
                             questionIds.add(question.questionId());
                         }
@@ -847,7 +862,7 @@
                         if (question.type() === 'choice') {
                             if (question.choices().length === 0) {
                                 isValid = false;
-                                errorMessages.push(`Question "${question.questionId()}" in section "${section.sectionId()}" must have at least one choice.`);
+                                errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} must have at least one choice.`);
                             }
 
                             // Validate unique choices
@@ -855,40 +870,40 @@
                             const uniqueChoices = new Set(choiceValues);
                             if (uniqueChoices.size !== choiceValues.length) {
                                 isValid = false;
-                                errorMessages.push(`Question "${question.questionId()}" in section "${section.sectionId()}" has duplicate choices.`);
+                                errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} has duplicate choices.`);
                             }
 
                             // Validate multi-choice
                             if (question.multiChoice() && question.choices().length < 2) {
                                 isValid = false;
-                                errorMessages.push(`Question "${question.questionId()}" in section "${section.sectionId()}" must have at least two choices for multi-choice.`);
+                                errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} must have at least two choices for multi-choice.`);
                             }
                         }
 
                         // Validate numeric range
                         if (question.minimum() !== null && question.maximum() !== null && question.minimum() >= question.maximum()) {
                             isValid = false;
-                            errorMessages.push(`Question "${question.questionId()}" in section "${section.sectionId()}" has an invalid numeric range. Minimum should be less than maximum.`);
+                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} has an invalid numeric range. Minimum should be less than maximum.`);
                         }
 
                         // Validate exclusive minimum/maximum
                         if (question.exclusiveMinimum() && question.minimum() === null) {
                             isValid = false;
-                            errorMessages.push(`Question "${question.questionId()}" in section "${section.sectionId()}" has exclusive minimum set but no minimum value.`);
+                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} has exclusive minimum set but no minimum value.`);
                         }
                         if (question.exclusiveMaximum() && question.maximum() === null) {
                             isValid = false;
-                            errorMessages.push(`Question "${question.questionId()}" in section "${section.sectionId()}" has exclusive maximum set but no maximum value.`);
+                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} has exclusive maximum set but no maximum value.`);
                         }
 
                         // validate integer vs decimal input
-                        if (question.type() === 'integer' && question.minimum() !== null && question.minimum() % 1 !== 0) {
+                        if (question.type() === 'integer' && question.minimum() % 1 !== 0 && question.minimum() !== null && question.minimum() !== undefined) {
                             isValid = false;
-                            errorMessages.push(`Question "${question.questionId()}" in section "${section.sectionId()}" has a minimum value that is not an integer.`);
+                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} has a minimum value that is not an integer.`);
                         }
-                        if (question.type() === 'integer' && question.maximum() !== null && question.maximum() % 1 !== 0) {
+                        if (question.type() === 'integer' && question.maximum() % 1 !== 0 && question.maximum() !== null && question.maximum() !== undefined) {
                             isValid = false;
-                            errorMessages.push(`Question "${question.questionId()}" in section "${section.sectionId()}" has a maximum value that is not an integer.`);
+                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} has a maximum value that is not an integer.`);
                         }
                     });
                 });
@@ -913,6 +928,7 @@
 
             readJSON(event) {
                 const file = event.target.files[0];
+                console.log(this);
                 if (file) {
                     const reader = new FileReader();
                     reader.onload = (e) => {
@@ -953,8 +969,16 @@
             };
         }
 
-        const formViewModel = new FormViewModel();
-        ko.applyBindings({ formViewModel });
+        class DocumentViewModel {
+            constructor() {
+                this.formViewModel = new FormViewModel();
+            }
+
+        }
+
+        const documentViewModel = new DocumentViewModel();
+        ko.applyBindings({ documentViewModel });
+
 
         // Enable sorting for questions
         $(document).on('mouseover', '.question-list', function () {
@@ -962,7 +986,7 @@
                 handle: ".drag-handle",
                 update: function (event, ui) {
                     const sectionId = $(this).closest('.section').attr('id').split('_')[1];
-                    const section = formViewModel.sections().find(s => s.sectionId() == sectionId);
+                    const section = documentViewModel.formViewModel.sections().find(s => s.sectionId() == sectionId);
                     const sortedQuestions = $(this).children('.question').map(function () {
                         const questionId = $(this).attr('id').split('_')[1];
                         return section.questions().find(q => q.questionId() == questionId);
@@ -973,7 +997,7 @@
         });
 
         document.getElementById('jsonFileInput').addEventListener('change', function (event) {
-            formViewModel.readJSON(event);
+            documentViewModel.formViewModel.readJSON(event);
         });
 
     </script>

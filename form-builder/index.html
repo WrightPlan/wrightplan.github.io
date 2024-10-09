@@ -322,10 +322,10 @@
                                     data-bind="attr: { id: 'sectionSubtitle_' + sectionId() }, value: subtitle">
                             </div>
                             <div class="form-group">
-                                <label data-bind="attr: { for: 'sectionHelpText_' + sectionId() }">Section
+                                <label data-bind="attr: { for: 'helpText_' + sectionId() }">Section
                                     Help Text</label>
                                 <input type="text" class="form-control"
-                                    data-bind="attr: { id: 'sectionHelpText_' + sectionId() }, value: sectionHelpText">
+                                    data-bind="attr: { id: 'helpText_' + sectionId() }, value: helpText">
                             </div>
                             <div class="form-group form-check d-inline-block">
                                 <label class="form-check-label" data-bind="attr: { for: 'repeatable_' + sectionId() }">
@@ -444,11 +444,10 @@
                                                 data-bind="attr: { id: 'questionSubtitle_' + questionId() }, value: subtitle">
                                         </div>
                                         <div class="form-group">
-                                            <label
-                                                data-bind="attr: { for: 'questionHelpText_' + questionId() }">Question
+                                            <label data-bind="attr: { for: 'helpText_' + questionId() }">Question
                                                 Help Text</label>
                                             <input type="text" class="form-control"
-                                                data-bind="attr: { id: 'questionHelpText_' + questionId() }, value: questionHelpText">
+                                                data-bind="attr: { id: 'helpText_' + questionId() }, value: helpText">
                                         </div>
                                         <div class="form-group">
                                             <label class="required"
@@ -626,7 +625,7 @@
                 this.questionId = ko.observable(questionId);
                 this.title = ko.observable('');
                 this.subtitle = ko.observable('');
-                this.questionHelpText = ko.observable('');
+                this.helpText = ko.observable('');
                 this.type = ko.observable('');
                 this.choices = ko.observableArray(choiceHeaders.map(choice => ko.observable(choice)));
                 this.minimum = ko.observable(null);
@@ -692,7 +691,7 @@
                 this.sectionId = ko.observable(sectionId);
                 this.title = ko.observable('');
                 this.subtitle = ko.observable('');
-                this.sectionHelpText = ko.observable('');
+                this.helpText = ko.observable('');
                 this.repeatable = ko.observable(false);
                 this.newPage = ko.observable(false);
                 this.reviewPage = ko.observable(false);
@@ -733,7 +732,7 @@
                 const newQuestion = new QuestionViewModel(this.sectionId(), question.questionId());
                 newQuestion.title(question.title());
                 newQuestion.subtitle(question.subtitle());
-                newQuestion.questionHelpText(question.questionHelpText());
+                newQuestion.helpText(question.helpText());
                 newQuestion.type(question.type());
                 newQuestion.choices(question.choices()?.map(choice => ko.observable(choice())));
                 newQuestion.minimum(question.minimum());
@@ -798,12 +797,12 @@
                 newSection.subtitle(section.subtitle());
                 newSection.repeatable(section.repeatable());
                 newSection.newPage(section.newPage());
-                newSection.sectionHelpText(section.sectionHelpText());
+                newSection.helpText(section.helpText());
                 section.questions().forEach(question => {
                     const newQuestion = new QuestionViewModel(newSection.sectionId(), question.questionId());
                     newQuestion.title(question.title());
                     newQuestion.subtitle(question.subtitle());
-                    newQuestion.questionHelpText(question.questionHelpText());
+                    newQuestion.helpText(question.helpText());
                     newQuestion.type(question.type());
                     newQuestion.choices(question.choices()?.map(choice => ko.observable(choice())));
                     newQuestion.minimum(question.minimum());
@@ -1104,7 +1103,7 @@
                             section.subtitle(sectionData.subtitle);
                             section.repeatable(sectionData.repeatable);
                             section.newPage(sectionData.newPage);
-                            section.sectionHelpText(sectionData.sectionHelpText);
+                            section.helpText(sectionData.helpText);
                             section.reviewPage(sectionData.reviewPage);
 
                             if (sectionData.choiceHeaders) {
@@ -1119,7 +1118,7 @@
                                 const question = new QuestionViewModel(index + 1, questionData.questionId, section.choiceHeaders().map(choice => choice()));
                                 question.title(questionData.title);
                                 question.subtitle(questionData.subtitle);
-                                question.questionHelpText(questionData.questionHelpText);
+                                question.helpText(questionData.helpText);
                                 question.type(questionData.type);
                                 question.choices(questionData.choices?.map(choice => ko.observable(choice)));
                                 question.minimum(questionData.minimum || questionData.exclusiveMinimum);

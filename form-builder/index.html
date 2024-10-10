@@ -620,7 +620,7 @@
     <script>
 
         class QuestionViewModel {
-            constructor(sectionId, questionId, choiceHeaders = []) {
+            constructor(sectionId, questionId, choiceHeaders = [], isNew = true) {
                 this.sectionId = sectionId;
                 this.questionId = ko.observable(questionId);
                 this.title = ko.observable('');
@@ -639,13 +639,15 @@
                 this.captureTime = ko.observable(false);
                 this.captureLocation = ko.observable(false);
                 this.isIdEditable = ko.observable(false);
+                this.isNew = ko.observable(isNew); // Add a flag to indicate if the question is new
+
 
                 this.type.subscribe(newValue => {
                     this.removeUnapplicableFields(choiceHeaders);
                 });
 
                 this.title.subscribe(newValue => {
-                    if (newValue && !documentViewModel.isUploaded() && !this.isIdEditable()) {
+                    if (newValue && !this.isIdEditable() && this.isNew()) {
                         var camelCaseId = documentViewModel.toCamelCase(newValue);
                         this.questionId(camelCaseId);
                     }
@@ -926,6 +928,7 @@
                         delete question.sectionId;
                         delete question.isQuestionVisible;
                         delete question.isIdEditable;
+                        delete question.isNew;
 
                         // If question type is integer or decimal, the min/max values should be numbers
                         if (question.type === 'integer' || question.type === 'decimal') {
@@ -1115,7 +1118,7 @@
 
                             sectionData.questions.forEach(questionData => {
 
-                                const question = new QuestionViewModel(index + 1, questionData.questionId, section.choiceHeaders().map(choice => choice()));
+                                const question = new QuestionViewModel(index + 1, questionData.questionId, section.choiceHeaders().map(choice => choice()), false);
                                 question.title(questionData.title);
                                 question.subtitle(questionData.subtitle);
                                 question.helpText(questionData.helpText);

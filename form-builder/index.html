@@ -439,6 +439,45 @@
             gap: 0.5rem;
             justify-content: end;
         }
+
+        /* Custom scrollbar styles */
+        .form-preview-container::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+            transition: width 0.3s ease, height 0.3s ease;
+        }
+
+        .form-preview-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .form-preview-container::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            transition: background 0.3s ease, width 0.3s ease, height 0.3s ease;
+        }
+
+        .form-preview-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.6);
+            width: 12px;
+            height: 12px;
+        }
+
+        .form-preview-container::-webkit-scrollbar-thumb:active {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        /* For Firefox */
+        .form-preview-container {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 0, 0, 0.4) rgba(0, 0, 0, 0.1);
+            transition: scrollbar-color 0.3s ease;
+        }
+
+        .form-preview-container:hover {
+            scrollbar-color: rgba(0, 0, 0, 0.6) rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 
@@ -827,19 +866,13 @@
                         data-bind="click: addSection.bind(documentViewModel.formViewModel)">+ Add
                         Section</button>
 
-                    <<<<<<< HEAD <div class="sticky-footer">
+                    <div class="sticky-footer">
                         <button type="button" class="btn btn-primary mt-3" data-bind="click: previewJSON">Preview
                             JSON</button>
-                        <button type="submit" class="btn btn-success mt-3">Download JSON</button>
-                </div>
-                =======
-                <div class="sticky-footer">
-                    <button type="button" class="btn btn-primary mt-3" data-bind="click: previewJSON">Preview
-                        JSON</button>
-                    <button type="submit" class="btn btn-success mt-3">Download JSON</button>
-                    <button type="button" class="btn btn-info mt-3" data-bind="click: previewForm">Preview Form</button>
-                    >>>>>>> e2a166e (add support for preview of sections)
-                </div>
+                        <button type="button" class="btn btn-primary mt-3" data-bind="click: previewForm">Preview
+                            Form</button>
+                        <button type="submit" class="btn btn-success mt-3">Download Form</button>
+                    </div>
             </form>
         </div>
     </div>
@@ -864,7 +897,7 @@
         </div>
     </div>
 
-    <!-- modal to show when user clicks on preview form button. The modal should look like a phone -->
+    <!-- form preview modal to show when user clicks on preview form button. -->
     <div class="modal" id="previewModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
@@ -925,9 +958,9 @@
                                             </div>
                                             <!-- ko if: type !== 'acknowledgement' && ((type !== 'choice' &&  !$parent.tabular) || (type !== 'choice' && $parent.tabular))  -->
                                             <span style="margin-bottom: 0; font-size: small"
-                                                data-bind="text: title"></span>
+                                                data-bind="text: title, css: {'required': required }"></span>
                                             <!-- ko if: subtitle -->
-                                            <i>
+                                            <i class="d-block">
                                                 <span data-bind="text: subtitle"></span>
                                             </i>
                                             <!-- /ko -->
@@ -1047,7 +1080,7 @@
                                                 <!-- ko if: subtitle -->
                                                 <tr>
                                                     <td>
-                                                        <i>
+                                                        <i class="d-block">
                                                             <span data-bind="text: subtitle"></span>
                                                         </i>
                                                     </td>
@@ -1607,7 +1640,9 @@
                     // validate choice headers uniqueness
                     if (section.tabular()) {
                         const choiceHeaderValues = section.choiceHeaders().map(choiceHeader => choiceHeader.value().trim());
-                        const choiceHeaderDisplayTexts = section.choiceHeaders().map(choiceHeader => choiceHeader.displayText().trim());
+                        const choiceHeaderDisplayTexts = section.choiceHeaders()
+                            .map(choiceHeader => choiceHeader.displayText().trim())
+                            .filter(displayText => displayText !== ""); // Filter out empty strings
 
                         const uniqueChoiceHeaderValues = new Set(choiceHeaderValues);
                         const uniqueChoiceHeaderDisplayTexts = new Set(choiceHeaderDisplayTexts);
@@ -1815,11 +1850,11 @@
                             helpText: helpTextParsed,
                             helpTextContainsLink: helpTextContainsLink,
                             choiceHeaders: section.choiceHeaders().map(choiceHeader => {
-                                // if the choiceHeaderDisplayText object has the key, use it, otherwise use the choiceHeader
-                                if (section.choiceHeaderDisplayText()) {
-                                    return section.choiceHeaderDisplayText()[choiceHeader()] || choiceHeader();
+                                // if the choiceHeaders has a displayText property, use it, otherwise use the choiceHeader
+                                if (choiceHeader.displayText() && choiceHeader.displayText().trim() !== '') {
+                                    return choiceHeader.displayText();
                                 }
-                                return choiceHeader();
+                                return choiceHeader.value();
                             }),
                             questionHeader: section.questionHeader(),
                             choiceHeaderDisplayText: section.choiceHeaderDisplayText(),
@@ -1830,8 +1865,8 @@
                                 var helpTextContainsLink = false;
                                 var helpTextParsed = this.parseMarkdown(question.helpText());
                                 var hasOnlyTabularChoices = question.type() === 'choice' && question.choices().length > 0 && question.choices().every(choice => {
-                                    const unwrappedChoice = ko.unwrap(choice).toLowerCase();
-                                    const unwrappedChoiceHeaders = section.choiceHeaders().map(header => ko.unwrap(header).toLowerCase());
+                                    const unwrappedChoice = ko.unwrap(choice.value).toLowerCase();
+                                    const unwrappedChoiceHeaders = section.choiceHeaders().map(header => ko.unwrap(header.value).toLowerCase());
                                     return unwrappedChoiceHeaders.includes(unwrappedChoice);
                                 });
 
@@ -1839,7 +1874,7 @@
                                     if (section.choiceHeaderDisplayText()) {
                                         return section.choiceHeaderDisplayText()[choice()] || choice();
                                     }
-                                    return choice();
+                                    return choice.value();
                                 })
 
                                 return {
@@ -1848,7 +1883,7 @@
                                     helpText: helpTextParsed,
                                     helpTextContainsLink: helpTextContainsLink,
                                     type: question.type(),
-                                    choices: hasOnlyTabularChoices ? choices : question.choices()?.map(choice => choice()),
+                                    choices: hasOnlyTabularChoices ? choices : question.choices()?.map(choice => choice.value()),
                                     minimum: question.minimum(),
                                     maximum: question.maximum(),
                                     exclusiveMinimum: question.exclusiveMinimum(),
@@ -1864,7 +1899,7 @@
                                         if (section.choiceHeaderDisplayText()) {
                                             return section.choiceHeaderDisplayText()[choiceHeader()] || choiceHeader();
                                         }
-                                        return choiceHeader();
+                                        return choiceHeader.value();
                                     })
                                 }
                             })

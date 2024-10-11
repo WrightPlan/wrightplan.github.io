@@ -375,8 +375,7 @@
         }
 
         .form-preview-body {
-            padding-left: 0.5rem;
-            padding-bottom: 0.5rem;
+            padding: 0.5rem;
         }
 
         .signature-container {
@@ -426,6 +425,19 @@
         textarea:active {
             border-bottom: 2px solid #304f87;
             /* Optional: thicker border on focus */
+        }
+
+        .tabular-section-preview-header {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+
+        .tabular-input-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.5rem;
+            justify-content: end;
         }
     </style>
 </head>
@@ -896,9 +908,22 @@
                                             <br>
                                         </div>
 
+                                        <div style="margin-right: 0.5rem;" class="tabular-section-preview-header"
+                                            data-bind="if: tabular">
+                                            <div>
+                                                <span style="font-size: small" data-bind="text: questionHeader"></span>
+                                            </div>
+                                            <div data-bind="foreach: choiceHeaders">
+                                                <span data-bind="text: $data"></span>&nbsp;
+                                            </div>
+                                        </div>
+
                                         <!-- ko foreach: questions -->
                                         <div style="width: 98%">
-                                            <!-- ko if: type !== 'acknowledgement' -->
+                                            <div data-bind="visible: $parent.tabular">
+                                                <hr style="margin: 0;">
+                                            </div>
+                                            <!-- ko if: type !== 'acknowledgement' && ((type !== 'choice' &&  !$parent.tabular) || (type !== 'choice' && $parent.tabular))  -->
                                             <span style="margin-bottom: 0; font-size: small"
                                                 data-bind="text: title"></span>
                                             <!-- ko if: subtitle -->
@@ -907,7 +932,7 @@
                                             </i>
                                             <!-- /ko -->
                                             <!-- ko if: helpText -->
-                                            <span class="d-inline" data-bind="html: helpText"> </span>
+                                            <span class="d-inline-block" data-bind="html: helpText"> </span>
                                             <span data-bind="if: helpTextContainsLink">
                                                 <i style="font-size: smaller" class="fa-solid fa-link"></i>
                                             </span>
@@ -990,31 +1015,66 @@
                                             </div>
                                             <!-- /ko -->
 
-                                            <!-- ko if: type === 'choice' -->
+                                            <!-- ko if: type === 'choice' && !$parent.tabular -->
                                             <div>
-                                                <!-- ko ifnot: multiChoice -->
                                                 <div class="choices-container">
                                                     <!-- ko foreach: choices -->
                                                     <div class="choice-item">
-                                                        <input type="radio" data-bind="attr: {name: $parent.title}">
+                                                        <input
+                                                            data-bind="attr: {name: $parent.title, type: $parent.multiChoice ? 'checkbox' : 'radio'}">
                                                         <span data-bind="text: $data"></span>
                                                     </div>
                                                     <!-- /ko -->
                                                 </div>
-                                                <!-- /ko -->
-                                                <!-- ko if: multiChoice -->
-                                                <div class="choices-container">
-                                                    <!-- ko foreach: choices -->
-                                                    <div class="choice-item">
-                                                        <input type="checkbox">
-                                                        <span data-bind="text: $data"></span>
-                                                    </div>
-                                                    <!-- /ko -->
-                                                </div>
-                                                <!-- /ko -->
                                             </div>
                                             <!-- /ko -->
 
+                                            <!-- ko if: type === 'choice' && $parent.tabular -->
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td style="margin-bottom: 0; font-size: small"
+                                                        data-bind="text: title"></td>
+                                                    <!-- ko if: hasOnlyTabularChoices -->
+                                                    <td style="padding-right: 0.5rem" rowspan="3">
+                                                        <div class="tabular-input-container"
+                                                            data-bind="foreach: sectionHeaderChoices">
+                                                            <input
+                                                                data-bind="attr: {name: $parent.title, type: $parent.multiChoice ? 'checkbox': 'radio', disabled: !$parents[2].isHeaderChoiceInQuestionChoice($data, $parent.choices)}" />
+                                                        </div>
+                                                    </td>
+                                                    <!-- /ko -->
+                                                </tr>
+                                                <!-- ko if: subtitle -->
+                                                <tr>
+                                                    <td>
+                                                        <i>
+                                                            <span data-bind="text: subtitle"></span>
+                                                        </i>
+                                                    </td>
+                                                </tr>
+                                                <!-- /ko -->
+                                                <tr>
+                                                    <td>
+                                                        <!-- ko if: helpText -->
+                                                        <span class="d-inline-block" data-bind="html: helpText"></span>
+                                                        <span data-bind="if: helpTextContainsLink">
+                                                            <i style="font-size: smaller" class="fa-solid fa-link"></i>
+                                                        </span>
+                                                        <!-- /ko -->
+
+                                                        <!-- ko if: !hasOnlyTabularChoices -->
+                                                        <!-- ko foreach: choices -->
+                                                        <div>
+                                                            <input
+                                                                data-bind="attr: {name: $parent.title, type: $parent.multiChoice ? 'checkbox': 'radio'}" />
+                                                            <span data-bind="text: $data"></span>
+                                                        </div>
+                                                        <!-- /ko -->
+                                                        <!-- /ko -->
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            <!-- /ko -->
                                             <br>
                                         </div>
                                         <!-- /ko -->
@@ -1042,7 +1102,6 @@
                             </div>
                         </div>
 
-                        <!-- <iframe src="/w3css/tryw3css_templates_band.htm" style="width:100%;border:none;height:100%" /> -->
                     </div>
                 </div>
             </div>
@@ -1755,7 +1814,13 @@
                             subtitle: section.subtitle(),
                             helpText: helpTextParsed,
                             helpTextContainsLink: helpTextContainsLink,
-                            choiceHeaders: section.choiceHeaders().map(choiceHeader => choiceHeader()),
+                            choiceHeaders: section.choiceHeaders().map(choiceHeader => {
+                                // if the choiceHeaderDisplayText object has the key, use it, otherwise use the choiceHeader
+                                if (section.choiceHeaderDisplayText()) {
+                                    return section.choiceHeaderDisplayText()[choiceHeader()] || choiceHeader();
+                                }
+                                return choiceHeader();
+                            }),
                             questionHeader: section.questionHeader(),
                             choiceHeaderDisplayText: section.choiceHeaderDisplayText(),
                             newPage: ko.observable(section.newPage()),
@@ -1764,13 +1829,26 @@
                             questions: section.questions().map(question => {
                                 var helpTextContainsLink = false;
                                 var helpTextParsed = this.parseMarkdown(question.helpText());
+                                var hasOnlyTabularChoices = question.type() === 'choice' && question.choices().length > 0 && question.choices().every(choice => {
+                                    const unwrappedChoice = ko.unwrap(choice).toLowerCase();
+                                    const unwrappedChoiceHeaders = section.choiceHeaders().map(header => ko.unwrap(header).toLowerCase());
+                                    return unwrappedChoiceHeaders.includes(unwrappedChoice);
+                                });
+
+                                var choices = question.choices()?.map(choice => {
+                                    if (section.choiceHeaderDisplayText()) {
+                                        return section.choiceHeaderDisplayText()[choice()] || choice();
+                                    }
+                                    return choice();
+                                })
+
                                 return {
                                     title: question.title(),
                                     subtitle: question.subtitle(),
                                     helpText: helpTextParsed,
                                     helpTextContainsLink: helpTextContainsLink,
                                     type: question.type(),
-                                    choices: question.choices()?.map(choice => choice()),
+                                    choices: hasOnlyTabularChoices ? choices : question.choices()?.map(choice => choice()),
                                     minimum: question.minimum(),
                                     maximum: question.maximum(),
                                     exclusiveMinimum: question.exclusiveMinimum(),
@@ -1779,8 +1857,16 @@
                                     multiLineText: question.multiLineText(),
                                     required: question.required(),
                                     captureTime: question.captureTime(),
-                                    captureLocation: question.captureLocation()
-                                };
+                                    captureLocation: question.captureLocation(),
+                                    hasOnlyTabularChoices: hasOnlyTabularChoices,
+                                    sectionHeaderChoices: section.choiceHeaders().map(choiceHeader => {
+                                        // if the choiceHeaderDisplayText object has the key, use it, otherwise use the choiceHeader
+                                        if (section.choiceHeaderDisplayText()) {
+                                            return section.choiceHeaderDisplayText()[choiceHeader()] || choiceHeader();
+                                        }
+                                        return choiceHeader();
+                                    })
+                                }
                             })
                         };
                     });
@@ -1867,6 +1953,11 @@
                     text = text.replace(/`(.*?)`/g, '<code>$1</code>');
                 }
                 return text;
+            }
+
+
+            isHeaderChoiceInQuestionChoice(headerChoice, questionChoices) {
+                return questionChoices.some(choice => choice.toLowerCase() === headerChoice.toLowerCase());
             }
         }
 

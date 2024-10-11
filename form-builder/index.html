@@ -271,6 +271,162 @@
             background-color: #e6e6e6;
             border-color: #adadad;
         }
+
+        /* The device with borders */
+        .smartphone {
+            position: relative;
+            width: 360px;
+            height: 640px;
+            margin: auto;
+            border: 16px black solid;
+            border-top-width: 60px;
+            border-bottom-width: 60px;
+            border-radius: 36px;
+        }
+
+        /* The horizontal line on the top of the device */
+        .smartphone:before {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 5px;
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #333;
+            border-radius: 10px;
+        }
+
+        /* The circle on the bottom of the device */
+        .smartphone:after {
+            content: '';
+            display: block;
+            width: 35px;
+            height: 35px;
+            position: absolute;
+            left: 50%;
+            bottom: -65px;
+            transform: translate(-50%, -50%);
+            background: #333;
+            border-radius: 50%;
+        }
+
+        /* The screen (or content) of the device */
+        .smartphone .content {
+            width: 100%;
+            height: 100%;
+            background: white;
+        }
+
+        .form-preview-container {
+            overflow-y: scroll;
+            height: 100%;
+            font-size: smaller;
+        }
+
+        .form-preview-container h5 {
+            font-size: larger;
+        }
+
+        .form-preview-title {
+            font-size: larger !important;
+            display: block;
+        }
+
+        .form-preview-description {
+            font-size: smaller !important;
+            display: block;
+            padding-bottom: 0.5rem;
+        }
+
+        .form-preview-date {
+            font-size: small !important;
+            display: block;
+        }
+
+        .form-preview-container span {
+            font-size: smaller;
+        }
+
+        .acknowledgement-question-container {
+            display: flex;
+            align-items: baseline;
+        }
+
+        .acknowledgement-checkbox-container {
+            margin-right: 10px;
+        }
+
+        code {
+            background-color: #d9dcdf;
+            padding-top: 0.15rem;
+            color: black;
+        }
+
+        .form-preview-header {
+            position: sticky;
+            top: 0;
+            color: white;
+            z-index: 1;
+            background-color: #304f87;
+            padding: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-preview-body {
+            padding-left: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .signature-container {
+            width: 98%;
+            height: 70px;
+            border: 1px solid #ced4da;
+            border-radius: 2%
+        }
+
+        .form-preview-button {
+            border-radius: 5px;
+            cursor: pointer;
+            border: 2px solid #304f87;
+            color: #304f87;
+            background-color: white;
+            transition: background-color 0.3s, color 0.3s;
+            flex: 1;
+            margin-right: 1%;
+        }
+
+        .form-preview-button-2 {
+            background-color: #304f87;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            border: 2px solid #304f87;
+            flex: 1;
+            margin-right: 1%;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+
+        .line-input {
+            border: none;
+            border-bottom: 1px solid rgb(46, 45, 45);
+            width: 100%;
+            padding: 5px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .line-input:focus,
+        textarea:active {
+            border-bottom: 2px solid #304f87;
+            /* Optional: thicker border on focus */
+        }
     </style>
 </head>
 
@@ -659,11 +815,18 @@
                         data-bind="click: addSection.bind(documentViewModel.formViewModel)">+ Add
                         Section</button>
 
-                    <div class="sticky-footer">
+                    <<<<<<< HEAD <div class="sticky-footer">
                         <button type="button" class="btn btn-primary mt-3" data-bind="click: previewJSON">Preview
                             JSON</button>
                         <button type="submit" class="btn btn-success mt-3">Download JSON</button>
-                    </div>
+                </div>
+                =======
+                <div class="sticky-footer">
+                    <button type="button" class="btn btn-primary mt-3" data-bind="click: previewJSON">Preview
+                        JSON</button>
+                    <button type="submit" class="btn btn-success mt-3">Download JSON</button>
+                    <button type="button" class="btn btn-info mt-3" data-bind="click: previewForm">Preview Form</button>
+                    >>>>>>> e2a166e (add support for preview of sections)
                 </div>
             </form>
         </div>
@@ -689,6 +852,202 @@
         </div>
     </div>
 
+    <!-- modal to show when user clicks on preview form button. The modal should look like a phone -->
+    <div class="modal" id="previewModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Form Preview</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body
+                    d-flex justify-content-center align-items-center">
+                    <div class="smartphone">
+                        <div class="content">
+                            <div class="form-preview-container" data-bind="with: formPreviewViewModel">
+                                <div class="form-preview-header">
+                                    <span class="form-preview-title" data-bind=" text: title">
+                                    </span>
+                                    <span class="form-preview-description" data-bind="text: description"></span>
+                                    <span class="form-preview-date"
+                                        data-bind="text: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })">
+                                    </span>
+                                </div>
+                                <div class="form-preview-body">
+                                    <br>
+                                    <div class="section-preview-header" data-bind="if: reviewMode">
+                                        <h5 data-bind="text: reviewSectionTitle">
+                                        </h5>
+                                        <span data-bind="text: reviewSectionSubTitle"></span><br>
+                                        <span class="d-inline" data-bind="html: reviewSectionHelpText"> </span>
+                                        <br>
+                                    </div>
+                                    <!-- ko foreach: sections -->
+                                    <div
+                                        data-bind="visible: $parent.isCurrentSection($index()) || !$data.newPage || $parent.reviewMode()">
+
+                                        <div class="section-preview-header" data-bind="ifnot: reviewPage">
+                                            <h5 data-bind="text: title">
+                                            </h5>
+                                            <span data-bind="text: subtitle"></span><br>
+                                            <span class="d-inline" data-bind="html: helpText"> </span>
+                                            <br>
+                                        </div>
+
+                                        <!-- ko foreach: questions -->
+                                        <div style="width: 98%">
+                                            <!-- ko if: type !== 'acknowledgement' -->
+                                            <span style="margin-bottom: 0; font-size: small"
+                                                data-bind="text: title"></span>
+                                            <!-- ko if: subtitle -->
+                                            <i>
+                                                <span data-bind="text: subtitle"></span>
+                                            </i>
+                                            <!-- /ko -->
+                                            <!-- ko if: helpText -->
+                                            <span class="d-inline" data-bind="html: helpText"> </span>
+                                            <span data-bind="if: helpTextContainsLink">
+                                                <i style="font-size: smaller" class="fa-solid fa-link"></i>
+                                            </span>
+                                            <!-- /ko -->
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type === 'text' || type === 'integer' || type ==='decimal'-->
+                                            <div>
+                                                <!-- ko if: !multiLineText -->
+                                                <input type="text" class="line-input"> <!-- /ko -->
+                                                <!-- ko if: multiLineText === true  -->
+                                                <textarea style="width: 98%"></textarea>
+                                                <!-- /ko -->
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type === 'employee' -->
+                                            <div>
+                                                <select style="width: 98%">
+                                                    <option value="1">Select an employee...</option>
+                                                </select>
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type === 'equipment' -->
+                                            <div>
+                                                <select style="width: 98%">
+                                                    <option value="1">Select an equipment...</option>
+                                                </select>
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type === 'date' -->
+                                            <div>
+                                                <input style="border: 0;" type="date">
+                                                <hr style="margin-top: 0">
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type === 'time' -->
+                                            <div>
+                                                <input style="border: 0;" type="time">
+                                                <hr style="margin-top: 0">
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type === 'acknowledgement' -->
+                                            <div class="acknowledgement-question-container">
+                                                <div class="acknowledgement-checkbox-container">
+                                                    <input type="checkbox">
+                                                </div>
+                                                <div class="question-title">
+                                                    <span data-bind="text: title"></span>
+                                                    <!-- ko if: subtitle -->
+                                                    <div>
+                                                        <i>
+                                                            <span data-bind="text: subtitle"></span>
+                                                        </i>
+                                                    </div>
+                                                    <!-- /ko -->
+                                                </div>
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type === 'initials' || type === 'signature' -->
+                                            <div>
+                                                <div class="signature-container">
+                                                    <i style="font-size: x-small; color: grey">
+                                                        &nbsp;&nbsp;Click to Initials/Signature...</i>
+                                                </div>
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type === 'boolean' -->
+                                            <div>
+                                                <span class="d-block"><input style="vertical-align: middle;"
+                                                        type="radio" name="yesNo"> &nbsp;Yes </span>
+                                                <span class="d-block"><input style="vertical-align: middle;"
+                                                        type="radio" name="yesNo"> &nbsp;No </span>
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type === 'choice' -->
+                                            <div>
+                                                <!-- ko ifnot: multiChoice -->
+                                                <div class="choices-container">
+                                                    <!-- ko foreach: choices -->
+                                                    <div class="choice-item">
+                                                        <input type="radio" data-bind="attr: {name: $parent.title}">
+                                                        <span data-bind="text: $data"></span>
+                                                    </div>
+                                                    <!-- /ko -->
+                                                </div>
+                                                <!-- /ko -->
+                                                <!-- ko if: multiChoice -->
+                                                <div class="choices-container">
+                                                    <!-- ko foreach: choices -->
+                                                    <div class="choice-item">
+                                                        <input type="checkbox">
+                                                        <span data-bind="text: $data"></span>
+                                                    </div>
+                                                    <!-- /ko -->
+                                                </div>
+                                                <!-- /ko -->
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <br>
+                                        </div>
+                                        <!-- /ko -->
+                                    </div>
+                                    <!-- /ko -->
+                                    <div class="button-container">
+                                        <!-- ko if: currentSectionIndex() > 0 -->
+                                        <button class="form-preview-button btn-sm"
+                                            data-bind="click: previousSection">Back</button>
+                                        <!-- /ko -->
+                                        <!-- ko if: hasNextSectionNewPage() -->
+                                        <button class="form-preview-button-2 btn-sm"
+                                            data-bind="click: nextSection">Next</button>
+                                        <!-- /ko -->
+                                        <!-- ko if: sections()[currentSectionIndex()+1] && sections()[currentSectionIndex()+1].reviewPage && !reviewMode() -->
+                                        <button class="form-preview-button-2 btn-sm"
+                                            data-bind="click: showReviewPage">Review</button>
+                                        <!-- /ko -->
+                                        <!-- ko if: reviewMode() -->
+                                        <button class="form-preview-button-2 btn-sm">Submit</button>
+                                        <!-- /ko -->
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- <iframe src="/w3css/tryw3css_templates_band.htm" style="width:100%;border:none;height:100%" /> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
@@ -994,6 +1353,15 @@
                 // Display the modal
                 $('#jsonModal').modal('show');
             };
+
+            previewForm() {
+                if (!this.validateForm()) {
+                    return;
+                }
+
+                // Display the modal
+                $('#previewModal').modal('show');
+            }
 
             downloadJSON() {
                 if (!this.validateForm()) {
@@ -1374,8 +1742,138 @@
 
         }
 
+        class FormPreviewViewModel {
+            constructor() {
+                this.title = ko.computed(() => documentViewModel.formViewModel.title());
+                this.description = ko.computed(() => documentViewModel.formViewModel.description());
+                this.sections = ko.computed(() => {
+                    return documentViewModel.formViewModel.sections().map(section => {
+                        var helpTextContainsLink = false;
+                        var helpTextParsed = this.parseMarkdown(section.helpText());
+                        return {
+                            title: section.title(),
+                            subtitle: section.subtitle(),
+                            helpText: helpTextParsed,
+                            helpTextContainsLink: helpTextContainsLink,
+                            choiceHeaders: section.choiceHeaders().map(choiceHeader => choiceHeader()),
+                            questionHeader: section.questionHeader(),
+                            choiceHeaderDisplayText: section.choiceHeaderDisplayText(),
+                            newPage: ko.observable(section.newPage()),
+                            reviewPage: section.reviewPage(),
+                            tabular: section.tabular(),
+                            questions: section.questions().map(question => {
+                                var helpTextContainsLink = false;
+                                var helpTextParsed = this.parseMarkdown(question.helpText());
+                                return {
+                                    title: question.title(),
+                                    subtitle: question.subtitle(),
+                                    helpText: helpTextParsed,
+                                    helpTextContainsLink: helpTextContainsLink,
+                                    type: question.type(),
+                                    choices: question.choices()?.map(choice => choice()),
+                                    minimum: question.minimum(),
+                                    maximum: question.maximum(),
+                                    exclusiveMinimum: question.exclusiveMinimum(),
+                                    exclusiveMaximum: question.exclusiveMaximum(),
+                                    multiChoice: question.multiChoice(),
+                                    multiLineText: question.multiLineText(),
+                                    required: question.required(),
+                                    captureTime: question.captureTime(),
+                                    captureLocation: question.captureLocation()
+                                };
+                            })
+                        };
+                    });
+                });
+
+                this.currentSectionIndex = ko.observable(0);
+                this.reviewMode = ko.observable(false);
+                this.reviewSectionTitle = ko.observable(null);
+                this.reviewSectionSubTitle = ko.observable(null);
+                this.reviewSectionHelpText = ko.observable(null);
+
+                ko.computed(() => {
+                    var reviewSection = this.sections().find(section => section.reviewPage);
+                    if (reviewSection) {
+                        this.reviewSectionTitle(reviewSection.title);
+                        this.reviewSectionSubTitle(reviewSection.subtitle);
+                        this.reviewSectionHelpText(reviewSection.helpText);
+                    }
+                });
+            }
+
+            nextSection() {
+                var currentIndex = this.currentSectionIndex();
+                if (currentIndex < this.sections().length - 1) {
+                    if (this.sections()[currentIndex + 1].reviewPage) {
+                        this.reviewMode(true);
+                    } else if (this.sections()[currentIndex + 1].newPage) {
+                        this.currentSectionIndex(currentIndex + 1);
+                    } else {
+                        this.sections()[currentIndex].visible(false);
+                        this.sections()[currentIndex + 1].newPage(false);
+                        this.currentSectionIndex(currentIndex + 1);
+                    }
+                    this.scrollToTop();
+                }
+            }
+
+            previousSection() {
+                var currentIndex = this.currentSectionIndex();
+                if (this.reviewMode()) {
+                    // Exit review mode and go to the section before the review page
+                    this.reviewMode(false);
+                } else if (currentIndex > 0) {
+                    this.currentSectionIndex(currentIndex - 1);
+                }
+                this.scrollToTop();
+            }
+
+            isCurrentSection(index) {
+                return this.currentSectionIndex() === index;
+            };
+
+            hasNextSectionNewPage() {
+                var currentIndex = this.currentSectionIndex();
+                if (currentIndex < this.sections().length - 1) {
+                    return this.sections()[currentIndex + 1].newPage;
+                }
+                return false;
+            };
+
+            showReviewPage() {
+                this.reviewMode(true);
+                this.scrollToTop();
+            }
+
+            scrollToTop() {
+                const formPreviewContainer = document.querySelector('.form-preview-body');
+                if (formPreviewContainer) {
+                    formPreviewContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+
+            parseMarkdown(text) {
+                if (text) {
+                    // Replace ***text*** with <b><i>text</i></b>
+                    text = text.replace(/\*\*\*(.*?)\*\*\*/g, '<b><i>$1</i></b>');
+                    // Replace __text__ with <b>text</b>
+                    text = text.replace(/__(.*?)__/g, '<b>$1</b>');
+                    // Replace *text* with <i>text</i>
+                    text = text.replace(/\*(.*?)\*/g, '<i>$1</i>');
+                    // Replace [text](url) with <a href="url">text</a>
+                    text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2"> $1 <i style="font-size: smaller" class="fa-solid fa-up-right-from-square"></i></a>');
+                    // replace `code` with <code>code</code>
+                    text = text.replace(/`(.*?)`/g, '<code>$1</code>');
+                }
+                return text;
+            }
+        }
+
+
         const documentViewModel = new DocumentViewModel();
-        ko.applyBindings({ documentViewModel });
+        const formPreviewViewModel = new FormPreviewViewModel();
+        ko.applyBindings({ documentViewModel, formPreviewViewModel });
 
 
         // Enable sorting for questions

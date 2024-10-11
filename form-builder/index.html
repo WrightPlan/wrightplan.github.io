@@ -90,6 +90,18 @@
             /* Darker color on hover */
         }
 
+        .btn-primary {
+            color: #fff;
+            background-color: #337ab7;
+            border-color: #2e6da4;
+        }
+
+        .btn-primary:hover {
+            color: #fff;
+            background-color: #286090;
+            border-color: #204d74;
+        }
+
         .drag-handle {
             cursor: move;
             padding: 10px;
@@ -193,15 +205,29 @@
         .file-uploader-label {
             display: inline-block;
             padding: 10px 20px;
-            background-color: #007bff;
+            color: #fff;
+            background-color: #337ab7;
+            border-color: #2e6da4;
             color: white;
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
 
-        .file-uploader-label:hover {
-            background-color: #0056b3;
+        .btn-success {
+            color: #fff;
+            background-color: #5cb85c;
+            border-color: #4cae4c;
+        }
+
+        .btn-success:hover {
+            color: #fff;
+            background-color: #449d44;
+            border-color: #398439;
+        }
+
+        .btn-sm {
+            font-size: smaller;
         }
 
         .file-uploader-label i {
@@ -241,7 +267,7 @@
             </div>
             <div class="file-uploader-container">
                 <input type="file" id="jsonFileInput" accept=".json" />
-                <label for="jsonFileInput" class="file-uploader-label">
+                <label for="jsonFileInput" class="file-uploader-label btn-primary">
                     <i class="fa fa-upload"></i> Choose a JSON file
                 </label>
             </div>
@@ -282,24 +308,31 @@
                 </div>
 
                 <h2 style="display: inline">Sections</h2>
-                <span class="toggleVisibility" data-bind="click: function(){
-                    sections().forEach(section => {
-                        section.isSectionVisible(false)
-                        section.questions().forEach(question => {
-                            question.isQuestionVisible(false)
-                        });
-                    } ); }">
-                    <i class="fa-solid fa-eye-slash"></i>
+                <span class="toggleVisibility" data-bind="click: toggleAllVisibility(false)">
+                    <button type="button" class="btn btn-sm btn-primary">Collapse All</button>
+                </span>
+                <span class="toggleVisibility" data-bind="click: toggleAllVisibility(true)">
+                    <button type="button" class="btn btn-sm btn-primary">Expand All</button>
                 </span>
                 <hr>
-                <div id="sections" class="mb-4" data-bind="foreach: sections">
+                <div id="sections" class="mb-4 section-list" data-bind="foreach: sections">
+                    <!-- if the next section is a newPage or a reviewPage, show a separator tro indicate -->
+                    <!-- ko if: $index() > 0 && ($parent.sections()[$index()].newPage() || $parent.sections()[$index()].reviewPage()) -->
+                    <hr style="height: 2rem; margin: 20px 0;">
+                    <!-- /ko -->
                     <div class="card mb-4 section"
                         data-bind="attr: { id: 'section_' + sectionId() }, css: { 'section-odd': $index() % 2 === 0, 'section-even': $index() % 2 !== 0 }">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <i class="fa-solid toggleVisibility"
-                                data-bind="click: function(){isSectionVisible(!isSectionVisible())}, css: { 'fa-eye': !isSectionVisible(), 'fa-eye-slash': isSectionVisible() }"></i>
-                            <h3 style="display:inline" data-bind="text: 'Section ' + sectionId()"></h3>
+                            <div><span data-bind="if: !reviewPage()" class="drag-handle">&#x2630; </span>
+                                <i class="fa-solid toggleVisibility"
+                                    data-bind="click: function(){isSectionVisible(!isSectionVisible())}, css: { 'fa-chevron-right': !isSectionVisible(), 'fa-chevron-down': isSectionVisible() }"></i>
+                            </div>
+                            <h3 style="display:inline" data-bind="text: 'Section: ' + sectionId()"></h3>
                             <div>
+                                <!-- ko if: reviewPage() -->
+                                <span class="badge badge-primary badge-pill p-2"
+                                    style="font-size: 0.75rem; background-color: #337ab7;">Review
+                                    Page</span> <!-- /ko -->
                                 <span type="button" class="duplicate-button"
                                     data-bind="click: $parent.duplicateSection.bind($parent)">
                                     <i class="fa-solid fa-copy fa-2x"></i>
@@ -330,29 +363,36 @@
                             <div class="form-group form-check d-inline-block">
                                 <label class="form-check-label" data-bind="attr: { for: 'repeatable_' + sectionId() }">
                                     Repeatable
-                                    <input type="checkbox" class="form-check-input"
-                                        data-bind="attr: { id: 'repeatable_' + sectionId() }, checked: repeatable"></label>
+                                </label>
+                                <input type="checkbox" class="form-check-input"
+                                    data-bind="attr: { id: 'repeatable_' + sectionId() }, checked: repeatable">
                             </div>
                             <!-- ko if: sectionId() > 1 -->
                             <div class="form-group form-check d-inline-block"
                                 class="form-group form-check d-inline-block">
                                 <label class="form-check-label" data-bind="attr: { for: 'reviewPage_' + sectionId() }">
                                     Review Page
-                                    <input type="checkbox" class="form-check-input"
-                                        data-bind="attr: { id: 'reviewPage_' + sectionId() }, checked: reviewPage"></label>
+                                </label>
+                                <input type="checkbox" class="form-check-input"
+                                    data-bind="attr: { id: 'reviewPage_' + sectionId() }, checked: reviewPage">
                             </div>
                             <!-- /ko -->
+
+                            <!-- ko ifnot: reviewPage() -->
                             <div class="form-group form-check d-inline-block">
                                 <label class="form-check-label" data-bind="attr: { for: 'newPage_' + sectionId() }">
                                     New Page
                                     <input type="checkbox" class="form-check-input"
                                         data-bind="attr: { id: 'newPage_' + sectionId() }, checked: newPage"></label>
                             </div>
+                            <!-- /ko -->
+
                             <div class="form-group form-check d-inline-block">
                                 <label class="form-check-label" data-bind="attr: { for: 'tabular_' + sectionId() }">
                                     Tabular Section
-                                    <input type="checkbox" class="form-check-input"
-                                        data-bind="attr: { id: 'tabular_' + sectionId() }, checked: tabular"></label>
+                                </label>
+                                <input type="checkbox" class="form-check-input"
+                                    data-bind="attr: { id: 'tabular_' + sectionId() }, checked: tabular">
                             </div>
                             <!-- ko if: tabular() -->
                             <div class="form-group">
@@ -382,7 +422,7 @@
 
                                         <button type="button" class="btn btn-danger d-inline-block w-20"
                                             data-bind="click: $parent.removeChoice.bind($parent)">
-                                            <i class="fa fa-times"></i>
+                                            <i class="fa fa-trash-can"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -398,7 +438,7 @@
                                         <div>
                                             <span class="drag-handle">&#x2630; </span>
                                             <i class="fa-solid toggleVisibility"
-                                                data-bind="click: function(){isQuestionVisible(!isQuestionVisible())}, css: { 'fa-eye': !isQuestionVisible(), 'fa-eye-slash': isQuestionVisible() }"></i>
+                                                data-bind="click: function(){isQuestionVisible(!isQuestionVisible())}, css: { 'fa-chevron-right': !isQuestionVisible(), 'fa-chevron-down': isQuestionVisible() }"></i>
                                         </div>
                                         <h4 style="display: inline" data-bind="text: 'Question: ' + questionId()"></h4>
                                         <div>
@@ -478,30 +518,30 @@
                                         <div class="form-group form-check d-inline-block">
                                             <label class="form-check-label">
                                                 Required
-                                                <input class="form-check-input" type="checkbox"
-                                                    data-bind="checked: required">
                                             </label>
+                                            <input class="form-check-input" type="checkbox"
+                                                data-bind="checked: required">
                                         </div>
 
                                         <!-- ko if: type() === 'text' -->
                                         <div class="form-group form-check d-inline-block">
                                             <label class="form-check-label">
                                                 Multi-Line Text
-                                                <input class="form-check-input" type="checkbox"
-                                                    data-bind="checked: multiLineText">
                                             </label>
+                                            <input class="form-check-input" type="checkbox"
+                                                data-bind="checked: multiLineText">
                                         </div>
                                         <!-- /ko -->
 
                                         <!-- ko if: type() === 'choice' -->
-                                        <div class="form-group multiChoice-field d-inline-block"
+                                        <div class="form-group form-check multiChoice-field d-inline-block"
                                             data-bind="if: type() === 'choice'">
-                                            <label data-bind="attr: { for: 'multiChoice_' + questionId() }">Multi
+                                            <label class="form-check-label"
+                                                data-bind="attr: { for: 'multiChoice_' + questionId() }">Multi
                                                 Choice
-                                                <input type="checkbox" class="form-check-input"
-                                                    data-bind="attr: { id: 'multiChoice_' + questionId() }, checked: multiChoice">
                                             </label>
-
+                                            <input type="checkbox" class="form-check-input"
+                                                data-bind="attr: { id: 'multiChoice_' + questionId() }, checked: multiChoice">
                                         </div>
                                         <div class="form-group choices-field">
                                             <label class="required"
@@ -513,7 +553,7 @@
                                                         data-bind="textInput: $rawData" required>
                                                     <button type="button" class="btn btn-danger d-inline-block w-20"
                                                         data-bind="click: $parent.removeChoice.bind($parent)"> <i
-                                                            class="fa fa-times"></i>
+                                                            class="fa fa-trash-can"></i>
                                                     </button>
                                                 </div>
                                             </div>
@@ -533,8 +573,9 @@
                                             <label class="form-check-label"
                                                 data-bind="attr: { for: 'exclusiveMinimum_' + questionId() }">
                                                 Exclusive Minimum
-                                                <input type="checkbox" class="form-check-input"
-                                                    data-bind="attr: { id: 'exclusiveMinimum_' + questionId() }, checked: exclusiveMinimum"></label>
+                                            </label>
+                                            <input type="checkbox" class="form-check-input"
+                                                data-bind="attr: { id: 'exclusiveMinimum_' + questionId() }, checked: exclusiveMinimum">
 
                                         </div>
                                         <div class="form-group number-field">
@@ -547,8 +588,9 @@
                                             <label class="form-check-label"
                                                 data-bind="attr: { for: 'exclusiveMaximum_' + questionId() }">
                                                 Exclusive Maximum
-                                                <input type="checkbox" class="form-check-input"
-                                                    data-bind="attr: { id: 'exclusiveMaximum_' + questionId() }, checked: exclusiveMaximum"></label>
+                                            </label>
+                                            <input type="checkbox" class="form-check-input"
+                                                data-bind="attr: { id: 'exclusiveMaximum_' + questionId() }, checked: exclusiveMaximum">
                                         </div>
                                         <!-- /ko -->
 
@@ -708,6 +750,13 @@
                 this.tabular.subscribe(newValue => {
                     this.removeUnapplicableFields();
                 });
+
+
+                this.title.subscribe(newValue => {
+                    var camelCaseId = documentViewModel.toCamelCase(newValue);
+                    this.sectionId(camelCaseId);
+                })
+
             }
 
             addChoice() {
@@ -719,6 +768,10 @@
             }
 
             addQuestion() {
+                // validate the form using the validateForm function
+                if (!documentViewModel.formViewModel.validateForm()) {
+                    return;
+                }
                 this.questions.push(new QuestionViewModel(this.sectionId(), '', this.choiceHeaders().map(choice => choice())));
             }
 
@@ -781,15 +834,27 @@
             }
 
             addSection() {
+                // validate previous section before adding a new one
+                if (!this.validateForm()) {
+                    return;
+                }
                 const sectionId = this.sections().length + 1;
                 this.sections.push(new SectionViewModel(sectionId));
-                this.renumberSections();
             }
 
             removeSection(section) {
                 if (confirm('Are you sure you want to remove this section?')) {
                     this.sections.remove(section);
-                } this.renumberSections();
+                }
+            }
+
+            toggleAllVisibility(bool) {
+                this.sections().forEach(section => {
+                    section.isSectionVisible(bool)
+                    section.questions().forEach(question => {
+                        question.isQuestionVisible(bool)
+                    });
+                });
             }
 
             duplicateSection(section) {
@@ -819,13 +884,6 @@
                     newSection.questions.push(newQuestion);
                 });
                 this.sections.push(newSection);
-                this.renumberSections();
-            }
-
-            renumberSections() {
-                this.sections().forEach((section, index) => {
-                    section.sectionId(index + 1);
-                });
             }
 
             previewJSON() {
@@ -1193,6 +1251,20 @@
                         return section.questions().find(q => q.questionId() == questionId);
                     }).get();
                     section.questions(sortedQuestions);
+                }
+            });
+        });
+
+        // Enable sorting for sections
+        $(document).on('mouseover', '.section-list', function () {
+            $(this).sortable({
+                handle: ".drag-handle",
+                update: function (event, ui) {
+                    const sortedSections = $(this).children('.section').map(function () {
+                        const sectionId = $(this).attr('id').split('_')[1];
+                        return documentViewModel.formViewModel.sections().find(s => s.sectionId() == sectionId);
+                    }).get();
+                    documentViewModel.formViewModel.sections(sortedSections);
                 }
             });
         });

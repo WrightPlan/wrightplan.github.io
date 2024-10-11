@@ -414,11 +414,11 @@
                                 <div class="choices-container" data-bind="foreach: choiceHeaders">
                                     <div class="choice-item mb-2">
                                         <input style="padding-top: 0; width: 40%" type="text"
-                                            class="form-control d-inline-block" data-bind="textInput: $rawData"
+                                            class="form-control d-inline-block" data-bind="textInput: $data.value"
                                             required>
                                         <input style="padding-top: 0; width: 40%" type="text"
                                             class="form-control d-inline-block" placeholder="Display Text"
-                                            data-bind="value: $parent.choiceHeaderDisplayText()[$data], valueUpdate: 'input', event: { input: $parent.updateDisplayText.bind($parent, $data) }">
+                                            data-bind="value: $data.displayText, valueUpdate: 'input'">
 
                                         <button type="button" class="btn btn-danger d-inline-block w-20"
                                             data-bind="click: $parent.removeChoice.bind($parent)">
@@ -550,7 +550,7 @@
                                                 <div class="choice-item mb-2">
                                                     <input style="padding-top: 0" type="text"
                                                         class="form-control d-inline-block w-75"
-                                                        data-bind="textInput: $rawData" required>
+                                                        data-bind="textInput: $data.value, required">
                                                     <button type="button" class="btn btn-danger d-inline-block w-20"
                                                         data-bind="click: $parent.removeChoice.bind($parent)"> <i
                                                             class="fa fa-trash-can"></i>
@@ -558,7 +558,7 @@
                                                 </div>
                                             </div>
                                             <button type="button" class="btn btn-primary add-choice"
-                                                data-bind="click: addChoice.bind($data)">+ Add Choice</button>
+                                                data-bind="click: addChoice">+ Add Choice</button>
                                         </div>
 
                                         <!-- /ko -->
@@ -661,6 +661,22 @@
     <script src="https://cdn.jsdelivr.net/npm/knockout@3.5.1/build/output/knockout-latest.js"></script>
     <script>
 
+        class Choice {
+            constructor(choice) {
+                this.id = ko.observable(Date.now() + Math.random()); // Unique identifier
+                this.value = ko.observable(choice);
+            }
+        }
+
+        class TabularChoiceHeader {
+            constructor(choice, displayText = '') {
+                this.id = ko.observable(Date.now() + Math.random()); // Unique identifier
+                this.value = ko.observable(choice);
+                this.displayText = ko.observable(displayText);
+            }
+        }
+
+
         class QuestionViewModel {
             constructor(sectionId, questionId, choiceHeaders = [], isNew = true) {
                 this.sectionId = sectionId;
@@ -669,7 +685,7 @@
                 this.subtitle = ko.observable('');
                 this.helpText = ko.observable('');
                 this.type = ko.observable('');
-                this.choices = ko.observableArray(choiceHeaders.map(choice => ko.observable(choice)));
+                this.choices = ko.observableArray(choiceHeaders.map(choice => new Choice(choice)));
                 this.minimum = ko.observable(null);
                 this.maximum = ko.observable(null);
                 this.exclusiveMinimum = ko.observable(false);
@@ -716,17 +732,19 @@
                 }
 
                 if (this.type() === 'choice') {
-                    this.choices = ko.observableArray(choiceHeaders.map(choice => ko.observable(choice)));
+                    this.choices = ko.observableArray(choiceHeaders.map(choice => new Choice(choice)));
                 }
 
             }
 
             addChoice() {
-                this.choices.push(ko.observable(''));
+                this.choices.push(new Choice(''));
             }
 
             removeChoice(choice) {
-                this.choices.remove(item => item.peek() === choice);
+                this.choices.remove(function (item) {
+                    return item.id() === choice.id();
+                });
             }
         }
 
@@ -742,8 +760,8 @@
                 this.isSectionVisible = ko.observable(true);
                 this.tabular = ko.observable(false);
                 this.questionHeader = ko.observable('');
-                this.choiceHeaders = ko.observableArray([ko.observable('')]);
-                this.choiceHeaderDisplayText = ko.observable({});
+                this.choiceHeaders = ko.observableArray([new TabularChoiceHeader('')]);
+                this.choiceHeaderDisplayText = ko.observable(null);
                 this.questions = ko.observableArray([]);
 
 
@@ -760,11 +778,13 @@
             }
 
             addChoice() {
-                this.choiceHeaders.push(ko.observable(''));
+                this.choiceHeaders.push(new TabularChoiceHeader(''));
             }
 
             removeChoice(choice) {
-                this.choiceHeaders.remove(item => item.peek() === choice);
+                this.choiceHeaders.remove(function (item) {
+                    return item.id() === choice.id();
+                });
             }
 
             addQuestion() {
@@ -772,7 +792,7 @@
                 if (!documentViewModel.formViewModel.validateForm()) {
                     return;
                 }
-                this.questions.push(new QuestionViewModel(this.sectionId(), '', this.choiceHeaders().map(choice => choice())));
+                this.questions.push(new QuestionViewModel(this.sectionId(), '', this.choiceHeaders().map(choice => choice.value())));
             }
 
             removeQuestion(question) {
@@ -783,6 +803,10 @@
             }
 
             duplicateQuestion(question) {
+                // validate previous section before adding a new one
+                if (!documentViewModel.formViewModel.validateForm()) {
+                    return;
+                }
                 //duplicate the question and add it to the section
                 const newQuestion = new QuestionViewModel(this.sectionId(), question.questionId());
                 newQuestion.title(question.title());
@@ -801,12 +825,6 @@
                 newQuestion.captureLocation(question.captureLocation());
                 this.questions.push(newQuestion);
             }
-
-            updateDisplayText = function (choice, data, event) {
-                var displayText = this.choiceHeaderDisplayText();
-                displayText[choice] = event.target.value;
-                this.choiceHeaderDisplayText(displayText);
-            };
 
             removeUnapplicableFields() {
                 if (!this.tabular()) {
@@ -858,6 +876,10 @@
             }
 
             duplicateSection(section) {
+                // validate previous section before adding a new one
+                if (!this.validateForm()) {
+                    return;
+                }
                 //duplicate the section and add it to the form
                 const newSection = new SectionViewModel(this.sections().length + 1);
                 newSection.title(section.title());
@@ -969,18 +991,28 @@
 
 
                 json.sections = json.sections.map(section => {
-                    // Clean the section itself
-                    section = cleanObject(section);
                     processCaptureOptions(section);
                     if (!section.tabular) {
                         delete section.questionHeader;
                         delete section.choiceHeaders;
-                        delete section.choiceHeaderDisplayText;
+                    } else {
+                        var choiceHeaders = [];
+                        var choiceHeaderDisplayText = {};
+
+                        section.choiceHeaders.forEach(choiceHeader => {
+                            choiceHeaders.push(choiceHeader.value);
+                            if (choiceHeader.displayText && choiceHeader.displayText.trim() !== '') {
+                                choiceHeaderDisplayText[choiceHeader.value] = choiceHeader.displayText;
+                            }
+                        });
+
+                        section.choiceHeaders = choiceHeaders;
+                        section.choiceHeaderDisplayText = choiceHeaderDisplayText;
                     }
 
-                    if (section.choiceHeaderDisplayText) {
-                        section.choiceHeaderDisplayText = cleanObject(section.choiceHeaderDisplayText);
-                    }
+                    // Clean the section itself
+                    section = cleanObject(section);
+
 
                     section.questions = section.questions.map(question => {
                         delete question.sectionId;
@@ -998,6 +1030,12 @@
                         if (question.type !== 'choice') {
                             delete question.choices;
                             delete question.multiChoice;
+                        }
+
+                        if (question.type === 'choice') {
+                            question.choices = question.choices.map(choice => {
+                                return choice.value
+                            })
                         }
 
                         // Replace minimum with exclusiveMinimum
@@ -1020,6 +1058,15 @@
                     delete section.isSectionVisible;
                     delete section.tabular;
                     return section;
+                });
+
+                // make sure questions array in a section is always on the bottom
+                json.sections = json.sections.map(section => {
+                    const { questions, ...rest } = section;
+                    return {
+                        ...rest,
+                        questions: questions
+                    };
                 });
 
                 // Generate the final JSON using the cleaned data
@@ -1056,6 +1103,26 @@
                         reviewPageIndex = section.sectionId();
                     }
 
+                    // validate choice headers uniqueness
+                    // validate choice headers uniqueness
+                    if (section.tabular()) {
+                        const choiceHeaderValues = section.choiceHeaders().map(choiceHeader => choiceHeader.value().trim());
+                        const choiceHeaderDisplayTexts = section.choiceHeaders().map(choiceHeader => choiceHeader.displayText().trim());
+
+                        const uniqueChoiceHeaderValues = new Set(choiceHeaderValues);
+                        const uniqueChoiceHeaderDisplayTexts = new Set(choiceHeaderDisplayTexts);
+
+                        if (uniqueChoiceHeaderValues.size !== choiceHeaderValues.length) {
+                            isValid = false;
+                            errorMessages.push(`Section ${section.sectionId()} has duplicate choice header values.`);
+                        }
+
+                        if (uniqueChoiceHeaderDisplayTexts.size !== choiceHeaderDisplayTexts.length) {
+                            isValid = false;
+                            errorMessages.push(`Section ${section.sectionId()} has duplicate choice header display texts.`);
+                        }
+                    }
+
                     section.questions().forEach(question => {
                         // Validate question title
                         if (!question.title().trim()) {
@@ -1084,7 +1151,7 @@
                             }
 
                             // Validate unique choices
-                            const choiceValues = question.choices().map(choice => choice().trim());
+                            const choiceValues = question.choices().map(choice => choice.value().trim());
                             const uniqueChoices = new Set(choiceValues);
                             if (uniqueChoices.size !== choiceValues.length) {
                                 isValid = false;
@@ -1169,19 +1236,18 @@
 
                             if (sectionData.choiceHeaders) {
                                 section.questionHeader(sectionData.questionHeader);
-                                section.choiceHeaders(sectionData.choiceHeaders.map(choiceHeader => ko.observable(choiceHeader)));
-                                section.choiceHeaderDisplayText(sectionData.choiceHeaderDisplayText);
+                                section.choiceHeaders(sectionData.choiceHeaders.map(choiceHeader => new TabularChoiceHeader(choiceHeader, sectionData.choiceHeaderDisplayText[choiceHeader])));
                                 section.tabular(true);
                             }
 
                             sectionData.questions.forEach(questionData => {
 
-                                const question = new QuestionViewModel(index + 1, questionData.questionId, section.choiceHeaders().map(choice => choice()), false);
+                                const question = new QuestionViewModel(index + 1, questionData.questionId, section.choiceHeaders().map(choice => choice.value()), false);
                                 question.title(questionData.title);
                                 question.subtitle(questionData.subtitle);
                                 question.helpText(questionData.helpText);
                                 question.type(questionData.type);
-                                question.choices(questionData.choices?.map(choice => ko.observable(choice)));
+                                question.choices(questionData.choices?.map(choice => new Choice(choice)));
                                 question.minimum(questionData.minimum || questionData.exclusiveMinimum);
                                 question.maximum(questionData.maximum || questionData.exclusiveMaximum);
                                 question.exclusiveMinimum(questionData.exclusiveMinimum);

@@ -956,7 +956,7 @@
                                             <div data-bind="visible: $parent.tabular">
                                                 <hr style="margin: 0;">
                                             </div>
-                                            <!-- ko if: type !== 'acknowledgement' && ((type !== 'choice' &&  !$parent.tabular) || (type !== 'choice' && $parent.tabular))  -->
+                                            <!-- ko if: type !== 'acknowledgement' && ((!$parent.tabular) || (type !== 'choice' && $parent.tabular))  -->
                                             <span style="margin-bottom: 0; font-size: small"
                                                 data-bind="text: title, css: {'required': required }"></span>
                                             <!-- ko if: subtitle -->

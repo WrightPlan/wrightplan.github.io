@@ -1985,6 +1985,7 @@
                 if (this.reviewMode()) {
                     // Exit review mode and go to the section before the review page
                     this.reviewMode(false);
+                    this.currentSectionIndex(currentIndex - 1)
                 } else if (currentIndex > 0) {
                     this.currentSectionIndex(currentIndex - 1);
                 }
@@ -2006,6 +2007,7 @@
 
             showReviewPage() {
                 this.reviewMode(true);
+                this.currentSectionIndex(this.sections().findIndex(section => section.reviewPage));
                 this.scrollToTop();
             }
 

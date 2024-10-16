@@ -9,10 +9,6 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
-        body {
-            background-color: #f7f9fc;
-        }
-
         .card {
             background-color: #ffffff;
             border: 1px solid #e3e6f0;
@@ -22,8 +18,8 @@
         }
 
         .card-header {
-            background-color: #e3e6f0;
-            border-bottom: 1px solid #e3e6f0;
+            background-color: #eee;
+            border-bottom: 1px solid #f4f4f4;
             position: sticky;
             top: 0;
             z-index: 1;
@@ -71,6 +67,7 @@
             line-height: 1;
             padding: 0;
             cursor: pointer;
+            font-size: larger;
         }
 
         .remove-button:hover {
@@ -80,14 +77,12 @@
         .duplicate-button {
             cursor: pointer;
             color: #25384b;
-            /* Add color to the icon */
             margin-right: 10px;
-            /* Add some spacing between the icons */
+            font-size: larger;
         }
 
         .duplicate-button:hover {
             color: #0056b3;
-            /* Darker color on hover */
         }
 
         .btn-primary {
@@ -107,22 +102,6 @@
             padding: 10px;
         }
 
-        .section-odd {
-            background-color: #f8f9fa;
-        }
-
-        .section-even {
-            background-color: #e9ecef;
-        }
-
-        .question-odd {
-            background-color: #ffffff;
-        }
-
-        .question-even {
-            background-color: #efdeaa1f;
-        }
-
         .section,
         .question {
             border: 1px solid #d1d3e2;
@@ -140,7 +119,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background-color: #f8f9fa;
+            background-color: #eee;
             padding: 10px;
             text-align: center;
             box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
@@ -166,7 +145,6 @@
 
         .form-check {
             margin-right: 2rem;
-            padding-left: 0;
             padding-bottom: 1rem;
         }
 
@@ -176,7 +154,6 @@
 
         .form-check-input {
             margin-top: 0.4rem;
-            margin-left: 0.5rem;
         }
 
         .sticky-footer .btn {
@@ -250,6 +227,50 @@
             cursor: pointer;
             color: #007bff;
         }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+        }
+
+        .section-header h2 {
+            margin-right: 10px;
+            /* Adjust spacing as needed */
+        }
+
+        .section-header .toggleVisibility {
+            margin-left: 10px;
+            /* Adjust spacing as needed */
+        }
+
+        .action-buttons {
+            display: flex;
+            align-items: center;
+        }
+
+        .action-buttons .badge,
+        .action-buttons .duplicate-button,
+        .action-buttons .remove-button {
+            margin-right: 10px;
+            /* Adjust spacing as needed */
+        }
+
+        .action-buttons .duplicate-button,
+        .action-buttons .remove-button {
+            cursor: pointer;
+        }
+
+        .btn-default {
+            color: #333;
+            background-color: #fff;
+            border-color: #ccc;
+        }
+
+        .btn-default:hover {
+            color: #333;
+            background-color: #e6e6e6;
+            border-color: #adadad;
+        }
     </style>
 </head>
 
@@ -272,73 +293,83 @@
                 </label>
             </div>
             <form id="formDefinition" data-bind="submit: downloadJSON.bind(documentViewModel.formViewModel)">
-                <h3>Form Information</h3>
-                <div class="form-group">
-                    <label class="required" for="title">Title</label>
-                    <input type="text" class="form-control" id="title" data-bind="value: title" required>
-                </div>
-                <div class="form-group">
-                    <label class="required" for="formId">Form ID</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="formId"
-                            data-bind="value: formId, disable: documentViewModel.isUploaded() || !isIdEditable()"
-                            required>
-                        <div class="input-group-append" data-bind="if: !documentViewModel.isUploaded()">
-                            <span class="input-group-text" data-bind="click: function() { isIdEditable(true)}">
-                                <i class="fa fa-pencil"></i>
-                            </span>
+                <div class="container-lg">
+                    <h2>Form Information</h2>
+                    <div class="form-group">
+                        <label class="required" for="title">Title</label>
+                        <input type="text" class="form-control" id="title" data-bind="value: title" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="required" for="formId">Form ID</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="formId"
+                                data-bind="value: formId, disable: documentViewModel.isUploaded() || !isIdEditable()"
+                                required>
+                            <div class="input-group-append" data-bind="if: !documentViewModel.isUploaded()">
+                                <span class="input-group-text" data-bind="click: function() { isIdEditable(true)}">
+                                    <i class="fa fa-pencil"></i>
+                                </span>
+                            </div>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea class="form-control" id="description" data-bind="value: description"
+                            rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="required" for="associatedEntity">Associated Entity</label>
+                        <select class="form-control" id="associatedEntity" data-bind="value: associatedEntity" required>
+                            <option style="color:#545b62" value="" disabled selected>Select an associated entity...
+                            </option>
+                            <option value="dispatch-job">Dispatch Job</option>
+                            <!-- <option value="work-order">Work Order</option> -->
+                            <!-- <option value="customer-company">Customer Company</option> -->
+                            <option value="employee">Employee</option>
+                            <option value="equipment">Equipment</option>
+                            <!-- <option value="job-site">Job Site</option> -->
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea class="form-control" id="description" data-bind="value: description" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label class="required" for="associatedEntity">Associated Entity</label>
-                    <select class="form-control" id="associatedEntity" data-bind="value: associatedEntity" required>
-                        <option style="color:#545b62" value="" disabled selected>Select an associated entity...</option>
-                        <option value="dispatch-job">Dispatch Job</option>
-                        <!-- <option value="work-order">Work Order</option> -->
-                        <!-- <option value="customer-company">Customer Company</option> -->
-                        <option value="employee">Employee</option>
-                        <option value="equipment">Equipment</option>
-                        <!-- <option value="job-site">Job Site</option> -->
-                    </select>
-                </div>
+                <hr style="padding-bottom: 3rem">
 
-                <h2 style="display: inline">Sections</h2>
-                <span class="toggleVisibility" data-bind="click: toggleAllVisibility(false)">
-                    <button type="button" class="btn btn-sm btn-primary">Collapse All</button>
-                </span>
-                <span class="toggleVisibility" data-bind="click: toggleAllVisibility(true)">
-                    <button type="button" class="btn btn-sm btn-primary">Expand All</button>
-                </span>
-                <hr>
+                <div class="section-header container" data-bind="if: sections().length > 0">
+                    <h3 style="display: inline">Sections</h3>
+                    <span class="toggleVisibility" data-bind="click: toggleAllVisibility(false)">
+                        <button type="button" class="btn btn-sm btn-default">Collapse All</button>
+                    </span>
+                    <span class="toggleVisibility" data-bind="click: toggleAllVisibility(true)">
+                        <button type="button" class="btn btn-sm btn-default">Expand All</button>
+                    </span>
+                    <hr>
+                </div>
                 <div id="sections" class="mb-4 section-list" data-bind="foreach: sections">
                     <!-- if the next section is a newPage or a reviewPage, show a separator tro indicate -->
                     <!-- ko if: $index() > 0 && ($parent.sections()[$index()].newPage() || $parent.sections()[$index()].reviewPage()) -->
                     <hr style="height: 2rem; margin: 20px 0;">
                     <!-- /ko -->
-                    <div class="card mb-4 section"
-                        data-bind="attr: { id: 'section_' + sectionId() }, css: { 'section-odd': $index() % 2 === 0, 'section-even': $index() % 2 !== 0 }">
+                    <div class="card mb-4 section" data-bind="attr: { id: 'section_' + sectionId() }">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <div><span data-bind="if: !reviewPage()" class="drag-handle">&#x2630; </span>
+                            <div>
+                                <!-- ko  if: !reviewPage() -->
+                                <span class="drag-handle">&#x2630; </span>
+                                <!-- /ko -->
                                 <i class="fa-solid toggleVisibility"
                                     data-bind="click: function(){isSectionVisible(!isSectionVisible())}, css: { 'fa-chevron-right': !isSectionVisible(), 'fa-chevron-down': isSectionVisible() }"></i>
                             </div>
-                            <h3 style="display:inline" data-bind="text: 'Section: ' + sectionId()"></h3>
-                            <div>
+                            <h4 style="display:inline" data-bind="text: 'Section: ' + sectionId()"></h4>
+                            <div class="action-buttons">
                                 <!-- ko if: reviewPage() -->
                                 <span class="badge badge-primary badge-pill p-2"
                                     style="font-size: 0.75rem; background-color: #337ab7;">Review
                                     Page</span> <!-- /ko -->
                                 <span type="button" class="duplicate-button"
                                     data-bind="click: $parent.duplicateSection.bind($parent)">
-                                    <i class="fa-solid fa-copy fa-2x"></i>
+                                    <i class="fa-solid fa-copy"></i>
                                 </span>
-                                <button type="button" class="remove-button"
-                                    data-bind="click: $parent.removeSection.bind($parent)">&times;</button>
+                                <span type="button" class="remove-button"
+                                    data-bind="click: $parent.removeSection.bind($parent)"><i
+                                        class="fa fa-trash-can"></i></span>
                             </div>
                         </div>
                         <div data-bind="visible: isSectionVisible()" class="card-body">
@@ -361,39 +392,40 @@
                                     data-bind="attr: { id: 'helpText_' + sectionId() }, value: helpText">
                             </div>
                             <div class="form-group form-check d-inline-block">
+                                <input type="checkbox" class="form-check-input"
+                                    data-bind="attr: { id: 'repeatable_' + sectionId() }, checked: repeatable">
                                 <label class="form-check-label" data-bind="attr: { for: 'repeatable_' + sectionId() }">
                                     Repeatable
                                 </label>
-                                <input type="checkbox" class="form-check-input"
-                                    data-bind="attr: { id: 'repeatable_' + sectionId() }, checked: repeatable">
                             </div>
-                            <!-- ko if: sectionId() > 1 -->
-                            <div class="form-group form-check d-inline-block"
-                                class="form-group form-check d-inline-block">
-                                <label class="form-check-label" data-bind="attr: { for: 'reviewPage_' + sectionId() }">
-                                    Review Page
-                                </label>
-                                <input type="checkbox" class="form-check-input"
-                                    data-bind="attr: { id: 'reviewPage_' + sectionId() }, checked: reviewPage">
-                            </div>
-                            <!-- /ko -->
-
-                            <!-- ko ifnot: reviewPage() -->
-                            <div class="form-group form-check d-inline-block">
-                                <label class="form-check-label" data-bind="attr: { for: 'newPage_' + sectionId() }">
-                                    New Page
-                                    <input type="checkbox" class="form-check-input"
-                                        data-bind="attr: { id: 'newPage_' + sectionId() }, checked: newPage"></label>
-                            </div>
-                            <!-- /ko -->
 
                             <div class="form-group form-check d-inline-block">
+                                <input type="checkbox" class="form-check-input"
+                                    data-bind="attr: { id: 'tabular_' + sectionId() }, checked: tabular">
                                 <label class="form-check-label" data-bind="attr: { for: 'tabular_' + sectionId() }">
                                     Tabular Section
                                 </label>
-                                <input type="checkbox" class="form-check-input"
-                                    data-bind="attr: { id: 'tabular_' + sectionId() }, checked: tabular">
                             </div>
+
+                            <!-- ko if: ko.utils.arrayIndexOf($parent.sections(), $data) > 0 -->
+                            <div class="form-group form-check d-inline-block"
+                                class="form-group form-check d-inline-block">
+                                <input type="checkbox" class="form-check-input"
+                                    data-bind="attr: { id: 'reviewPage_' + sectionId() }, checked: reviewPage, disable: disableIfReviewPageExists($parent.sections, $index)">
+                                <label class="form-check-label" data-bind="attr: { for: 'reviewPage_' + sectionId() }">
+                                    Review Page
+                                </label>
+                            </div>
+                            <!-- /ko -->
+
+                            <div class="form-group form-check d-inline-block">
+                                <input type="checkbox" class="form-check-input"
+                                    data-bind="attr: { id: 'newPage_' + sectionId() }, checked: reviewPage() ? true : newPage, disable: disableIfPreviousReviewPage($parent.sections, $index)">
+                                <label class="form-check-label" data-bind="attr: { for: 'newPage_' + sectionId() }">
+                                    New Page
+                                </label>
+                            </div>
+
                             <!-- ko if: tabular() -->
                             <div class="form-group">
                                 <label class="required"
@@ -432,22 +464,23 @@
                             <!-- /ko -->
 
                             <div class="question-list" data-bind="foreach: questions">
-                                <div class="card mb-3 question"
-                                    data-bind="attr: { id: 'question_' + questionId() }, css: { 'question-odd': $index() % 2 === 0, 'question-even': $index() % 2 !== 0 }">
+                                <div class="card mb-3 question" data-bind="attr: { id: 'question_' + questionId() }">
                                     <div class="card-header d-flex justify-content-between align-items-center">
                                         <div>
                                             <span class="drag-handle">&#x2630; </span>
                                             <i class="fa-solid toggleVisibility"
                                                 data-bind="click: function(){isQuestionVisible(!isQuestionVisible())}, css: { 'fa-chevron-right': !isQuestionVisible(), 'fa-chevron-down': isQuestionVisible() }"></i>
                                         </div>
-                                        <h4 style="display: inline" data-bind="text: 'Question: ' + questionId()"></h4>
+                                        <h5 style="display: inline" data-bind="text: 'Question: ' + questionId()">
+                                        </h5>
                                         <div>
                                             <span type="button" class="duplicate-button"
                                                 data-bind="click: $parent.duplicateQuestion.bind($parent)">
-                                                <i class="fa-solid fa-copy fa-2x"></i>
+                                                <i class="fa-solid fa-copy"></i>
                                             </span>
-                                            <button type="button" class="remove-button"
-                                                data-bind="click: $parent.removeQuestion.bind($parent)">&times;</button>
+                                            <span type="button" class="remove-button"
+                                                data-bind="click: $parent.removeQuestion.bind($parent)"><i
+                                                    class="fa fa-trash-can"></i></span>
                                         </div>
                                     </div>
                                     <div data-bind="visible: isQuestionVisible()" class="card-body">
@@ -496,7 +529,8 @@
                                             <select class="form-control"
                                                 data-bind="attr: { id: 'questionType_' + questionId() }, value: type, event: { change: $parent.toggleQuestionFields }"
                                                 required>
-                                                <option style="color:#545b62" value="" disabled selected>Select a
+                                                <option style="color:#545b62" value="" disabled selected>Select
+                                                    a
                                                     question type...</option>
                                                 <option value="acknowledgement">Acknowledgement</option>
                                                 <option value="boolean">Boolean</option>
@@ -516,32 +550,32 @@
                                         </div>
 
                                         <div class="form-group form-check d-inline-block">
+                                            <input class="form-check-input" type="checkbox"
+                                                data-bind="checked: required">
                                             <label class="form-check-label">
                                                 Required
                                             </label>
-                                            <input class="form-check-input" type="checkbox"
-                                                data-bind="checked: required">
                                         </div>
 
                                         <!-- ko if: type() === 'text' -->
                                         <div class="form-group form-check d-inline-block">
+                                            <input class="form-check-input" type="checkbox"
+                                                data-bind="checked: multiLineText">
                                             <label class="form-check-label">
                                                 Multi-Line Text
                                             </label>
-                                            <input class="form-check-input" type="checkbox"
-                                                data-bind="checked: multiLineText">
                                         </div>
                                         <!-- /ko -->
 
                                         <!-- ko if: type() === 'choice' -->
                                         <div class="form-group form-check multiChoice-field d-inline-block"
                                             data-bind="if: type() === 'choice'">
+                                            <input type="checkbox" class="form-check-input"
+                                                data-bind="attr: { id: 'multiChoice_' + questionId() }, checked: multiChoice">
                                             <label class="form-check-label"
                                                 data-bind="attr: { for: 'multiChoice_' + questionId() }">Multi
                                                 Choice
                                             </label>
-                                            <input type="checkbox" class="form-check-input"
-                                                data-bind="attr: { id: 'multiChoice_' + questionId() }, checked: multiChoice">
                                         </div>
                                         <div class="form-group choices-field">
                                             <label class="required"
@@ -552,8 +586,8 @@
                                                         class="form-control d-inline-block w-75"
                                                         data-bind="textInput: $data.value, required">
                                                     <button type="button" class="btn btn-danger d-inline-block w-20"
-                                                        data-bind="click: $parent.removeChoice.bind($parent)"> <i
-                                                            class="fa fa-trash-can"></i>
+                                                        data-bind="click: $parent.removeChoice.bind($parent)">
+                                                        <i class="fa fa-trash-can"></i>
                                                     </button>
                                                 </div>
                                             </div>
@@ -570,13 +604,12 @@
                                                 data-bind="attr: { id: 'minimum_' + questionId() }, value: minimum">
                                         </div>
                                         <div class="form-group form-check d-inline-blocknumber-field">
+                                            <input type="checkbox" class="form-check-input"
+                                                data-bind="attr: { id: 'exclusiveMinimum_' + questionId() }, checked: exclusiveMinimum">
                                             <label class="form-check-label"
                                                 data-bind="attr: { for: 'exclusiveMinimum_' + questionId() }">
                                                 Exclusive Minimum
                                             </label>
-                                            <input type="checkbox" class="form-check-input"
-                                                data-bind="attr: { id: 'exclusiveMinimum_' + questionId() }, checked: exclusiveMinimum">
-
                                         </div>
                                         <div class="form-group number-field">
                                             <label data-bind="attr: { for: 'maximum_' + questionId() }">Maximum</label>
@@ -585,32 +618,32 @@
                                         </div>
                                         <div class="form-group form-check d-inline-blocknumber-field"
                                             data-bind="if: type() === 'integer' || type() === 'decimal'">
+                                            <input type="checkbox" class="form-check-input"
+                                                data-bind="attr: { id: 'exclusiveMaximum_' + questionId() }, checked: exclusiveMaximum">
                                             <label class="form-check-label"
                                                 data-bind="attr: { for: 'exclusiveMaximum_' + questionId() }">
                                                 Exclusive Maximum
                                             </label>
-                                            <input type="checkbox" class="form-check-input"
-                                                data-bind="attr: { id: 'exclusiveMaximum_' + questionId() }, checked: exclusiveMaximum">
                                         </div>
                                         <!-- /ko -->
 
                                         <!-- ko if: type() === 'initials' || type() === 'signature' -->
                                         <div class="form-group form-check captureTime-field d-inline-block">
+                                            <input class="form-check-input" type="checkbox" class="form-check-input"
+                                                data-bind="attr: { id: 'captureTime' + questionId() }, checked: captureTime">
                                             <label class="form-check-label"
                                                 data-bind="attr: { for: 'captureTime' + questionId() }">Capture
                                                 Time</label>
-                                            <input class="form-check-input" type="checkbox" class="form-check-input"
-                                                data-bind="attr: { id: 'captureTime' + questionId() }, checked: captureTime">
                                         </div>
                                         <!-- /ko -->
 
                                         <!-- ko if: type() === 'acknowledgement' || type() === 'initials' || type() === 'signature' -->
                                         <div class="form-group form-check captureLocation-field d-inline-block">
+                                            <input class="form-check-input" type="checkbox" class="form-check-input"
+                                                data-bind="attr: { id: 'captureLocation' + questionId() }, checked: captureLocation">
                                             <label class="form-check-label"
                                                 data-bind="attr: { for: 'captureLocation' + questionId() }">Capture
                                                 Location
-                                                <input class="form-check-input" type="checkbox" class="form-check-input"
-                                                    data-bind="attr: { id: 'captureLocation' + questionId() }, checked: captureLocation">
                                             </label>
                                         </div>
                                         <!-- /ko -->
@@ -618,18 +651,21 @@
                                 </div>
                             </div>
 
-                            <button type="button" class="btn-dark add-question"
+                            <button type="button" class="btn btn-primary add-section"
                                 data-bind="click: addQuestion.bind($data)">+ Add Question</button>
                         </div>
                     </div>
                 </div>
-                <button type="button" class="btn btn-primary add-section"
-                    data-bind="click: addSection.bind(documentViewModel.formViewModel)">+ Add Section</button>
+                <div class="container" style="padding-bottom:10px;">
+                    <button type="button" class="btn btn-primary add-section"
+                        data-bind="click: addSection.bind(documentViewModel.formViewModel)">+ Add
+                        Section</button>
 
-                <div class="sticky-footer">
-                    <button type="button" class="btn btn-primary mt-3" data-bind="click: previewJSON">Preview
-                        JSON</button>
-                    <button type="submit" class="btn btn-success mt-3">Download JSON</button>
+                    <div class="sticky-footer">
+                        <button type="button" class="btn btn-primary mt-3" data-bind="click: previewJSON">Preview
+                            JSON</button>
+                        <button type="submit" class="btn btn-success mt-3">Download JSON</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -776,6 +812,27 @@
                 })
 
             }
+
+            disableIfPreviousReviewPage = function (sections, index) {
+                if (sections()[index()].reviewPage()) {
+                    return true;
+                }
+                for (var i = 0; i < index(); i++) {
+                    if (sections()[i].reviewPage()) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            disableIfReviewPageExists = function (sections, index) {
+                for (var i = 0; i < sections().length; i++) {
+                    if (sections()[i].reviewPage() && i !== index()) {
+                        return true;
+                    }
+                }
+                return false;
+            };
 
             addChoice() {
                 this.choiceHeaders.push(new TabularChoiceHeader(''));
@@ -1330,6 +1387,23 @@
                         const sectionId = $(this).attr('id').split('_')[1];
                         return documentViewModel.formViewModel.sections().find(s => s.sectionId() == sectionId);
                     }).get();
+
+                    // Check for restrictions
+                    const reviewPageIndex = sortedSections.findIndex(s => s.reviewPage());
+                    const newPageIndex = sortedSections.findIndex(s => s.newPage());
+
+                    if (reviewPageIndex === 0) {
+                        alert("Sections with reviewPage = true cannot be at the top.");
+                        $(this).sortable('cancel');
+                        return;
+                    }
+
+                    if (newPageIndex !== -1 && reviewPageIndex !== -1 && newPageIndex > reviewPageIndex) {
+                        alert("Sections with newPage = true cannot be below a reviewPage section.");
+                        $(this).sortable('cancel');
+                        return;
+                    }
+
                     documentViewModel.formViewModel.sections(sortedSections);
                 }
             });

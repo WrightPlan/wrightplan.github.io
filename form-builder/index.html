@@ -345,9 +345,7 @@
                 </div>
                 <div id="sections" class="mb-4 section-list" data-bind="foreach: sections">
                     <!-- if the next section is a newPage or a reviewPage, show a separator tro indicate -->
-                    <!-- ko if: $index() > 0 && ($parent.sections()[$index()].newPage() || $parent.sections()[$index()].reviewPage()) -->
-                    <hr style="height: 2rem; margin: 20px 0;">
-                    <!-- /ko -->
+
                     <div class="card mb-4 section" data-bind="attr: { id: 'section_' + sectionId() }">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <div>
@@ -358,6 +356,7 @@
                                     data-bind="click: function(){isSectionVisible(!isSectionVisible())}, css: { 'fa-chevron-right': !isSectionVisible(), 'fa-chevron-down': isSectionVisible() }"></i>
                             </div>
                             <h4 style="display:inline" data-bind="text: 'Section: ' + sectionId()"></h4>
+                            <span data-bind="text: $index()"></span>
                             <div class="action-buttons">
                                 <!-- ko if: reviewPage() -->
                                 <span class="badge badge-primary badge-pill p-2"
@@ -809,6 +808,24 @@
                 this.title.subscribe(newValue => {
                     var camelCaseId = documentViewModel.toCamelCase(newValue);
                     this.sectionId(camelCaseId);
+                })
+
+                this.newPage.subscribe(newValue => {
+                    if (newValue || this.reviewPage()) {
+                        // add an <hr> tag before the section to signify a new page
+                        $('#section_' + this.sectionId()).before('<hr style="height: 2rem; margin: 20px 0;">');
+                    } else {
+                        // remove the <hr> tag if it exists 
+                        $('#section_' + this.sectionId()).prev('hr').remove();
+                    }
+                })
+
+                this.reviewPage.subscribe(newValue => {
+                    if (newValue) {
+                        this.newPage(true);
+                    } else {
+                        this.newPage(false);
+                    }
                 })
 
             }
@@ -1378,7 +1395,6 @@
             });
         });
 
-        // Enable sorting for sections
         $(document).on('mouseover', '.section-list', function () {
             $(this).sortable({
                 handle: ".drag-handle",
@@ -1404,6 +1420,7 @@
                         return;
                     }
 
+                    // Update the observable array
                     documentViewModel.formViewModel.sections(sortedSections);
                 }
             });

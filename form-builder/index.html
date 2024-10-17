@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Builder</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        .card {
+            background-color: #ffffff;
+            border: 1px solid #e3e6f0;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 1rem;
+        }
+
+        .card-header {
+            background-color: #eee;
+            border-bottom: 1px solid #f4f4f4;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .section .card-header {
+            z-index: 1;
+        }
+
+        .section .question .card-header {
+            z-index: 0;
+        }
+
+        .form-group label {
+            color: #5a5c69;
+        }
+
+        .form-control {
+            border: 1px solid #d1d3e2;
+            border-radius: 0.35rem;
+        }
+
+        .add-section,
+        .add-question,
+        .add-choice {
+            background-color: #6c757d;
+            color: #ffffff;
+            border: none;
+            border-radius: 0.35rem;
+            padding: 0.5rem 1rem;
+            margin-top: 1rem;
+        }
+
+        .add-section:hover,
+        .add-question:hover,
+        .add-choice:hover {
+            background-color: #5a6268;
+        }
+
+        .remove-button {
+            background-color: transparent;
+            color: #dc3545;
+            border: none;
+            font-size: 2rem;
+            line-height: 1;
+            padding: 0;
+            cursor: pointer;
+            font-size: larger;
+        }
+
+        .remove-button:hover {
+            color: #c82333;
+        }
+
+        .duplicate-button {
+            cursor: pointer;
+            color: #25384b;
+            margin-right: 10px;
+            font-size: larger;
+        }
+
+        .duplicate-button:hover {
+            color: #0056b3;
+        }
+
+        .btn-primary {
+            color: #fff;
+            background-color: #337ab7;
+            border-color: #2e6da4;
+        }
+
+        .btn-primary:hover {
+            color: #fff;
+            background-color: #286090;
+            border-color: #204d74;
+        }
+
+        .drag-handle {
+            cursor: move;
+            padding: 10px;
+        }
+
+        .section,
+        .question {
+            border: 1px solid #d1d3e2;
+            border-radius: 0.35rem;
+            margin-bottom: 1rem;
+        }
+
+        .section:hover,
+        .question:hover {
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        .sticky-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #eee;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        .form-container {
+            max-width: 100%;
+            /* Ensure the form container does not exceed the viewport width */
+            margin: 0 auto;
+            /* Center the form container */
+            padding-bottom: 100px;
+            /* Add padding to prevent overlap with the sticky footer */
+            position: relative;
+            /* Ensure the form container is positioned relative to the sticky footer */
+        }
+
+        form {
+            padding-bottom: 20px;
+        }
+
+        .form-check {
+            margin-right: 2rem;
+            padding-bottom: 1rem;
+        }
+
+        .form-check-label {
+            display: inline;
+        }
+
+        .form-check-input {
+            margin-top: 0.4rem;
+        }
+
+        .sticky-footer .btn {
+            margin: 0 10px;
+            /* Add some spacing between buttons */
+        }
+
+        /* Center the modal horizontally */
+        .modal-dialog {
+            margin: auto;
+            max-width: 70%;
+        }
+
+        .file-uploader-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        #jsonFileInput {
+            display: none;
+            /* Hide the default file input */
+        }
+
+        .file-uploader-label {
+            display: inline-block;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #337ab7;
+            border-color: #2e6da4;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-success {
+            color: #fff;
+            background-color: #5cb85c;
+            border-color: #4cae4c;
+        }
+
+        .btn-success:hover {
+            color: #fff;
+            background-color: #449d44;
+            border-color: #398439;
+        }
+
+        .btn-sm {
+            font-size: smaller;
+        }
+
+        .file-uploader-label i {
+            margin-right: 10px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .required::after {
+            content: "*";
+            color: red;
+            padding-left: 0.25rem;
+        }
+
+        .toggleVisibility:hover {
+            cursor: pointer;
+            color: #007bff;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+        }
+
+        .section-header h2 {
+            margin-right: 10px;
+            /* Adjust spacing as needed */
+        }
+
+        .section-header .toggleVisibility {
+            margin-left: 10px;
+            /* Adjust spacing as needed */
+        }
+
+        .action-buttons {
+            display: flex;
+            align-items: center;
+        }
+
+        .action-buttons .badge,
+        .action-buttons .duplicate-button,
+        .action-buttons .remove-button {
+            margin-right: 10px;
+            /* Adjust spacing as needed */
+        }
+
+        .action-buttons .duplicate-button,
+        .action-buttons .remove-button {
+            cursor: pointer;
+        }
+
+        .btn-default {
+            color: #333;
+            background-color: #fff;
+            border-color: #ccc;
+        }
+
+        .btn-default:hover {
+            color: #333;
+            background-color: #e6e6e6;
+            border-color: #adadad;
+        }
+    </style>
+</head>
+
+<body>
+
+
+
+    <div class="container mt-5" data-bind="with: documentViewModel.formViewModel">
+        <h1 class="text-center mb-4">Form Builder</h1>
+        <div class="form-container">
+
+            <div class="text-center">
+                <p>You can create a new form using the tool, or edit an existing one by uploading a json file into the
+                    uploader below.</p>
+            </div>
+            <div class="file-uploader-container">
+                <input type="file" id="jsonFileInput" accept=".json" />
+                <label for="jsonFileInput" class="file-uploader-label btn-primary">
+                    <i class="fa fa-upload"></i> Choose a JSON file
+                </label>
+            </div>
+            <form id="formDefinition" data-bind="submit: downloadJSON.bind(documentViewModel.formViewModel)">
+                <div class="container-lg">
+                    <h2>Form Information</h2>
+                    <div class="form-group">
+                        <label class="required" for="title">Title</label>
+                        <input type="text" class="form-control" id="title" data-bind="value: title" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="required" for="formId">Form ID</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="formId"
+                                data-bind="value: formId, disable: documentViewModel.isUploaded() || !isIdEditable()"
+                                required>
+                            <div class="input-group-append" data-bind="if: !documentViewModel.isUploaded()">
+                                <span class="input-group-text" data-bind="click: function() { isIdEditable(true)}">
+                                    <i class="fa fa-pencil"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea class="form-control" id="description" data-bind="value: description"
+                            rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="required" for="associatedEntity">Associated Entity</label>
+                        <select class="form-control" id="associatedEntity" data-bind="value: associatedEntity" required>
+                            <option style="color:#545b62" value="" disabled selected>Select an associated entity...
+                            </option>
+                            <option value="dispatch-job">Dispatch Job</option>
+                            <!-- <option value="work-order">Work Order</option> -->
+                            <!-- <option value="customer-company">Customer Company</option> -->
+                            <option value="employee">Employee</option>
+                            <option value="equipment">Equipment</option>
+                            <!-- <option value="job-site">Job Site</option> -->
+                        </select>
+                    </div>
+                </div>
+                <hr style="padding-bottom: 3rem">
+
+                <div class="section-header container" data-bind="if: sections().length > 0">
+                    <h3 style="display: inline">Sections</h3>
+                    <span class="toggleVisibility" data-bind="click: toggleAllVisibility(false)">
+                        <button type="button" class="btn btn-sm btn-default">Collapse All</button>
+                    </span>
+                    <span class="toggleVisibility" data-bind="click: toggleAllVisibility(true)">
+                        <button type="button" class="btn btn-sm btn-default">Expand All</button>
+                    </span>
+                    <hr>
+                </div>
+                <div id="sections" class="mb-4 section-list" data-bind="foreach: sections">
+                    <!-- if the next section is a newPage or a reviewPage, show a separator tro indicate -->
+
+                    <div class="card mb-4 section" data-bind="attr: { id: 'section_' + sectionId() }">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <!-- ko  if: !reviewPage() -->
+                                <span class="drag-handle">&#x2630; </span>
+                                <!-- /ko -->
+                                <i class="fa-solid toggleVisibility"
+                                    data-bind="click: function(){isSectionVisible(!isSectionVisible())}, css: { 'fa-chevron-right': !isSectionVisible(), 'fa-chevron-down': isSectionVisible() }"></i>
+                            </div>
+                            <h4 style="display:inline" data-bind="text: 'Section: ' + sectionId()"></h4>
+                            <div class="action-buttons">
+                                <!-- ko if: reviewPage() -->
+                                <span class="badge badge-primary badge-pill p-2"
+                                    style="font-size: 0.75rem; background-color: #337ab7;">Review
+                                    Page</span> <!-- /ko -->
+                                <span type="button" class="duplicate-button"
+                                    data-bind="click: $parent.duplicateSection.bind($parent)">
+                                    <i class="fa-solid fa-copy"></i>
+                                </span>
+                                <span type="button" class="remove-button"
+                                    data-bind="click: $parent.removeSection.bind($parent)"><i
+                                        class="fa fa-trash-can"></i></span>
+                            </div>
+                        </div>
+                        <div data-bind="visible: isSectionVisible()" class="card-body">
+                            <div class="form-group">
+                                <label class="required" data-bind="attr: { for: 'sectionTitle_' + sectionId() }">Section
+                                    Title</label>
+                                <input type="text" class="form-control"
+                                    data-bind="attr: { id: 'sectionTitle_' + sectionId() }, value: title" required>
+                            </div>
+                            <div class="form-group">
+                                <label data-bind="attr: { for: 'sectionSubtitle_' + sectionId() }">Section
+                                    Subtitle</label>
+                                <input type="text" class="form-control"
+                                    data-bind="attr: { id: 'sectionSubtitle_' + sectionId() }, value: subtitle">
+                            </div>
+                            <div class="form-group">
+                                <label data-bind="attr: { for: 'helpText_' + sectionId() }">Section
+                                    Help Text</label>
+                                <input type="text" class="form-control"
+                                    data-bind="attr: { id: 'helpText_' + sectionId() }, value: helpText">
+                            </div>
+                            <div class="form-group form-check d-inline-block">
+                                <input type="checkbox" class="form-check-input"
+                                    data-bind="attr: { id: 'repeatable_' + sectionId() }, checked: repeatable">
+                                <label class="form-check-label" data-bind="attr: { for: 'repeatable_' + sectionId() }">
+                                    Repeatable
+                                </label>
+                            </div>
+
+                            <div class="form-group form-check d-inline-block">
+                                <input type="checkbox" class="form-check-input"
+                                    data-bind="attr: { id: 'tabular_' + sectionId() }, checked: tabular">
+                                <label class="form-check-label" data-bind="attr: { for: 'tabular_' + sectionId() }">
+                                    Tabular Section
+                                </label>
+                            </div>
+
+                            <!-- ko if: ko.utils.arrayIndexOf($parent.sections(), $data) > 0 -->
+                            <div class="form-group form-check d-inline-block"
+                                class="form-group form-check d-inline-block">
+                                <input type="checkbox" class="form-check-input"
+                                    data-bind="attr: { id: 'reviewPage_' + sectionId() }, checked: reviewPage, disable: disableIfReviewPageExists($parent.sections, $index)">
+                                <label class="form-check-label" data-bind="attr: { for: 'reviewPage_' + sectionId() }">
+                                    Review Page
+                                </label>
+                            </div>
+                            <!-- /ko -->
+
+                            <div class="form-group form-check d-inline-block">
+                                <input type="checkbox" class="form-check-input"
+                                    data-bind="attr: { id: 'newPage_' + sectionId() }, checked: reviewPage() ? true : newPage, disable: disableIfPreviousReviewPage($parent.sections, $index)">
+                                <label class="form-check-label" data-bind="attr: { for: 'newPage_' + sectionId() }">
+                                    New Page
+                                </label>
+                            </div>
+
+                            <!-- ko if: tabular() -->
+                            <div class="form-group">
+                                <label class="required"
+                                    data-bind="attr: { for: 'questionHeader_' + sectionId() }">Question
+                                    Header</label>
+                                <input type="text" class="form-control"
+                                    data-bind="attr: { id: 'questionHeader_' + sectionId() }, value: questionHeader"
+                                    required>
+                            </div>
+
+                            <div class="form-group choices-field">
+                                <label style="width: 40%" class="required d-inline-block"
+                                    data-bind="attr: { for: 'choices_' + sectionId() }">Choice
+                                    Headers</label>
+                                <label class="d-inline-block"
+                                    data-bind="attr: { for: 'choices_' + sectionId() }">Display
+                                    Text</label>
+                                <div class="choices-container" data-bind="foreach: choiceHeaders">
+                                    <div class="choice-item mb-2">
+                                        <input style="padding-top: 0; width: 40%" type="text"
+                                            class="form-control d-inline-block" data-bind="textInput: $data.value"
+                                            required>
+                                        <input style="padding-top: 0; width: 40%" type="text"
+                                            class="form-control d-inline-block" placeholder="Display Text"
+                                            data-bind="value: $data.displayText, valueUpdate: 'input'">
+
+                                        <button type="button" class="btn btn-danger d-inline-block w-20"
+                                            data-bind="click: $parent.removeChoice.bind($parent)">
+                                            <i class="fa fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-primary add-choice"
+                                    data-bind="click: addChoice.bind($data)">+ Add Choice</button>
+                            </div>
+                            <!-- /ko -->
+
+                            <div class="question-list" data-bind="foreach: questions">
+                                <div class="card mb-3 question" data-bind="attr: { id: 'question_' + questionId() }">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="drag-handle">&#x2630; </span>
+                                            <i class="fa-solid toggleVisibility"
+                                                data-bind="click: function(){isQuestionVisible(!isQuestionVisible())}, css: { 'fa-chevron-right': !isQuestionVisible(), 'fa-chevron-down': isQuestionVisible() }"></i>
+                                        </div>
+                                        <h5 style="display: inline" data-bind="text: 'Question: ' + questionId()">
+                                        </h5>
+                                        <div>
+                                            <span type="button" class="duplicate-button"
+                                                data-bind="click: $parent.duplicateQuestion.bind($parent)">
+                                                <i class="fa-solid fa-copy"></i>
+                                            </span>
+                                            <span type="button" class="remove-button"
+                                                data-bind="click: $parent.removeQuestion.bind($parent)"><i
+                                                    class="fa fa-trash-can"></i></span>
+                                        </div>
+                                    </div>
+                                    <div data-bind="visible: isQuestionVisible()" class="card-body">
+                                        <div class="form-group">
+                                            <label class="required"
+                                                data-bind="attr: { for: 'questionTitle_' + questionId() }">Question
+                                                Title</label>
+                                            <input type="text" class="form-control"
+                                                data-bind="attr: { id: 'questionTitle_' + questionId() }, value: title"
+                                                required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="required"
+                                                data-bind="attr: { for: 'questionId_' + questionId() }">Question
+                                                ID</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control"
+                                                    data-bind="attr: { id: 'questionId_' + questionId() }, value: questionId, disable: documentViewModel.isUploaded() || !isIdEditable()"
+                                                    required>
+                                                <div class="input-group-append"
+                                                    data-bind="if: !$root.documentViewModel.isUploaded()">
+                                                    <span class="input-group-text"
+                                                        data-bind="click: function() { isIdEditable(true)}">
+                                                        <i class="fa fa-pencil"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label
+                                                data-bind="attr: { for: 'questionSubtitle_' + questionId() }">Question
+                                                Subtitle</label>
+                                            <input type="text" class="form-control"
+                                                data-bind="attr: { id: 'questionSubtitle_' + questionId() }, value: subtitle">
+                                        </div>
+                                        <div class="form-group">
+                                            <label data-bind="attr: { for: 'helpText_' + questionId() }">Question
+                                                Help Text</label>
+                                            <input type="text" class="form-control"
+                                                data-bind="attr: { id: 'helpText_' + questionId() }, value: helpText">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="required"
+                                                data-bind="attr: { for: 'questionType_' + questionId() }">Question
+                                                Type</label>
+                                            <select class="form-control"
+                                                data-bind="attr: { id: 'questionType_' + questionId() }, value: type, event: { change: $parent.toggleQuestionFields }"
+                                                required>
+                                                <option style="color:#545b62" value="" disabled selected>Select
+                                                    a
+                                                    question type...</option>
+                                                <option value="acknowledgement">Acknowledgement</option>
+                                                <option value="boolean">Boolean</option>
+                                                <option value="choice">Choice</option>
+                                                <option value="date">Date</option>
+                                                <option value="decimal">Decimal</option>
+                                                <option value="dispatch-job">Dispatch Job (ID)</option>
+                                                <option value="employee">Employee (ID)</option>
+                                                <option value="equipment">Equipment (ID)</option>
+                                                <!-- <option value="geolocation">Geolocation</option> -->
+                                                <option value="initials">Initials</option>
+                                                <option value="integer">Integer</option>
+                                                <option value="signature">Signature</option>
+                                                <option value="text">Text</option>
+                                                <option value="time">Time</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group form-check d-inline-block">
+                                            <input class="form-check-input" type="checkbox"
+                                                data-bind="checked: required">
+                                            <label class="form-check-label">
+                                                Required
+                                            </label>
+                                        </div>
+
+                                        <!-- ko if: type() === 'text' -->
+                                        <div class="form-group form-check d-inline-block">
+                                            <input class="form-check-input" type="checkbox"
+                                                data-bind="checked: multiLineText">
+                                            <label class="form-check-label">
+                                                Multi-Line Text
+                                            </label>
+                                        </div>
+                                        <!-- /ko -->
+
+                                        <!-- ko if: type() === 'choice' -->
+                                        <div class="form-group form-check multiChoice-field d-inline-block"
+                                            data-bind="if: type() === 'choice'">
+                                            <input type="checkbox" class="form-check-input"
+                                                data-bind="attr: { id: 'multiChoice_' + questionId() }, checked: multiChoice">
+                                            <label class="form-check-label"
+                                                data-bind="attr: { for: 'multiChoice_' + questionId() }">Multi
+                                                Choice
+                                            </label>
+                                        </div>
+                                        <div class="form-group choices-field">
+                                            <label class="required"
+                                                data-bind="attr: { for: 'choices_' + questionId() }">Choices</label>
+                                            <div class="choices-container" data-bind="foreach: choices">
+                                                <div class="choice-item mb-2">
+                                                    <input style="padding-top: 0" type="text"
+                                                        class="form-control d-inline-block w-75"
+                                                        data-bind="textInput: $data.value, required">
+                                                    <button type="button" class="btn btn-danger d-inline-block w-20"
+                                                        data-bind="click: $parent.removeChoice.bind($parent)">
+                                                        <i class="fa fa-trash-can"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn btn-primary add-choice"
+                                                data-bind="click: addChoice">+ Add Choice</button>
+                                        </div>
+
+                                        <!-- /ko -->
+
+                                        <!-- ko if: type() === 'integer' || type() === 'decimal' -->
+                                        <div class="form-group number-field">
+                                            <label data-bind="attr: { for: 'minimum_' + questionId() }">Minimum</label>
+                                            <input type="number" class="form-control"
+                                                data-bind="attr: { id: 'minimum_' + questionId() }, value: minimum">
+                                        </div>
+                                        <div class="form-group form-check d-inline-blocknumber-field">
+                                            <input type="checkbox" class="form-check-input"
+                                                data-bind="attr: { id: 'exclusiveMinimum_' + questionId() }, checked: exclusiveMinimum">
+                                            <label class="form-check-label"
+                                                data-bind="attr: { for: 'exclusiveMinimum_' + questionId() }">
+                                                Exclusive Minimum
+                                            </label>
+                                        </div>
+                                        <div class="form-group number-field">
+                                            <label data-bind="attr: { for: 'maximum_' + questionId() }">Maximum</label>
+                                            <input type="number" class="form-control"
+                                                data-bind="attr: { id: 'maximum_' + questionId() }, value: maximum">
+                                        </div>
+                                        <div class="form-group form-check d-inline-blocknumber-field"
+                                            data-bind="if: type() === 'integer' || type() === 'decimal'">
+                                            <input type="checkbox" class="form-check-input"
+                                                data-bind="attr: { id: 'exclusiveMaximum_' + questionId() }, checked: exclusiveMaximum">
+                                            <label class="form-check-label"
+                                                data-bind="attr: { for: 'exclusiveMaximum_' + questionId() }">
+                                                Exclusive Maximum
+                                            </label>
+                                        </div>
+                                        <!-- /ko -->
+
+                                        <!-- ko if: type() === 'initials' || type() === 'signature' -->
+                                        <div class="form-group form-check captureTime-field d-inline-block">
+                                            <input class="form-check-input" type="checkbox" class="form-check-input"
+                                                data-bind="attr: { id: 'captureTime' + questionId() }, checked: captureTime">
+                                            <label class="form-check-label"
+                                                data-bind="attr: { for: 'captureTime' + questionId() }">Capture
+                                                Time</label>
+                                        </div>
+                                        <!-- /ko -->
+
+                                        <!-- ko if: type() === 'acknowledgement' || type() === 'initials' || type() === 'signature' -->
+                                        <div class="form-group form-check captureLocation-field d-inline-block">
+                                            <input class="form-check-input" type="checkbox" class="form-check-input"
+                                                data-bind="attr: { id: 'captureLocation' + questionId() }, checked: captureLocation">
+                                            <label class="form-check-label"
+                                                data-bind="attr: { for: 'captureLocation' + questionId() }">Capture
+                                                Location
+                                            </label>
+                                        </div>
+                                        <!-- /ko -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-primary add-section"
+                                data-bind="click: addQuestion.bind($data)">+ Add Question</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="container" style="padding-bottom:10px;">
+                    <button type="button" class="btn btn-primary add-section"
+                        data-bind="click: addSection.bind(documentViewModel.formViewModel)">+ Add
+                        Section</button>
+
+                    <div class="sticky-footer">
+                        <button type="button" class="btn btn-primary mt-3" data-bind="click: previewJSON">Preview
+                            JSON</button>
+                        <button type="submit" class="btn btn-success mt-3">Download JSON</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="jsonModal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">JSON Preview</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <pre id="jsonPreview"></pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/knockout@3.5.1/build/output/knockout-latest.js"></script>
+    <script>
+
+        class Choice {
+            constructor(choice) {
+                this.id = ko.observable(Date.now() + Math.random()); // Unique identifier
+                this.value = ko.observable(choice);
+            }
+        }
+
+        class TabularChoiceHeader {
+            constructor(choice, displayText = '') {
+                this.id = ko.observable(Date.now() + Math.random()); // Unique identifier
+                this.value = ko.observable(choice);
+                this.displayText = ko.observable(displayText);
+            }
+        }
+
+
+        class QuestionViewModel {
+            constructor(sectionId, questionId, choiceHeaders = [], isNew = true) {
+                this.sectionId = sectionId;
+                this.questionId = ko.observable(questionId);
+                this.title = ko.observable('');
+                this.subtitle = ko.observable('');
+                this.helpText = ko.observable('');
+                this.type = ko.observable('');
+                this.choices = ko.observableArray(choiceHeaders.map(choice => new Choice(choice)));
+                this.minimum = ko.observable(null);
+                this.maximum = ko.observable(null);
+                this.exclusiveMinimum = ko.observable(false);
+                this.exclusiveMaximum = ko.observable(false);
+                this.multiChoice = ko.observable(false);
+                this.multiLineText = ko.observable(false);
+                this.required = ko.observable(false);
+                this.isQuestionVisible = ko.observable(true);
+                this.captureTime = ko.observable(false);
+                this.captureLocation = ko.observable(false);
+                this.isIdEditable = ko.observable(false);
+                this.isNew = ko.observable(isNew); // Add a flag to indicate if the question is new
+
+
+                this.type.subscribe(newValue => {
+                    this.removeUnapplicableFields(choiceHeaders);
+                });
+
+                this.title.subscribe(newValue => {
+                    if (newValue && !this.isIdEditable() && this.isNew()) {
+                        var camelCaseId = documentViewModel.toCamelCase(newValue);
+                        this.questionId(camelCaseId);
+                    }
+                })
+            }
+
+            removeUnapplicableFields(choiceHeaders) {
+
+                if (this.type() !== 'choice' && this.choices()) {
+                    this.choices?.removeAll();
+                    this.multiChoice(false);
+                }
+
+                if (this.type() !== 'text') {
+                    this.multiLineText(false);
+                }
+
+
+                if (this.type() !== 'integer' && this.type() !== 'decimal') {
+                    this.minimum(null);
+                    this.maximum(null);
+                    this.exclusiveMinimum(false);
+                    this.exclusiveMaximum(false);
+                }
+
+                if (this.type() === 'choice') {
+                    this.choices = ko.observableArray(choiceHeaders.map(choice => new Choice(choice)));
+                }
+
+            }
+
+            addChoice() {
+                this.choices.push(new Choice(''));
+            }
+
+            removeChoice(choice) {
+                this.choices.remove(function (item) {
+                    return item.id() === choice.id();
+                });
+            }
+        }
+
+        class SectionViewModel {
+            constructor(sectionId) {
+                this.sectionId = ko.observable(sectionId);
+                this.title = ko.observable('');
+                this.subtitle = ko.observable('');
+                this.helpText = ko.observable('');
+                this.repeatable = ko.observable(false);
+                this.newPage = ko.observable(false);
+                this.reviewPage = ko.observable(false);
+                this.isSectionVisible = ko.observable(true);
+                this.tabular = ko.observable(false);
+                this.questionHeader = ko.observable('');
+                this.choiceHeaders = ko.observableArray([new TabularChoiceHeader('')]);
+                this.choiceHeaderDisplayText = ko.observable(null);
+                this.questions = ko.observableArray([]);
+
+
+                this.tabular.subscribe(newValue => {
+                    this.removeUnapplicableFields();
+                });
+
+
+                this.title.subscribe(newValue => {
+                    var camelCaseId = documentViewModel.toCamelCase(newValue);
+                    this.sectionId(camelCaseId);
+                })
+
+                this.newPage.subscribe(newValue => {
+                    if (newValue || this.reviewPage()) {
+                        // add an <hr> tag before the section to signify a new page
+                        $('#section_' + this.sectionId()).before('<hr style="height: 2rem; margin: 20px 0;">');
+                    } else {
+                        // remove the <hr> tag if it exists 
+                        $('#section_' + this.sectionId()).prev('hr').remove();
+                    }
+                })
+
+                this.reviewPage.subscribe(newValue => {
+                    if (newValue) {
+                        this.newPage(true);
+                    } else {
+                        this.newPage(false);
+                    }
+                })
+
+            }
+
+            disableIfPreviousReviewPage = function (sections, index) {
+                if (sections()[index()].reviewPage()) {
+                    return true;
+                }
+                for (var i = 0; i < index(); i++) {
+                    if (sections()[i].reviewPage()) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            disableIfReviewPageExists = function (sections, index) {
+                for (var i = 0; i < sections().length; i++) {
+                    if (sections()[i].reviewPage() && i !== index()) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            addChoice() {
+                this.choiceHeaders.push(new TabularChoiceHeader(''));
+            }
+
+            removeChoice(choice) {
+                this.choiceHeaders.remove(function (item) {
+                    return item.id() === choice.id();
+                });
+            }
+
+            addQuestion() {
+                // validate the form using the validateForm function
+                if (!documentViewModel.formViewModel.validateForm()) {
+                    return;
+                }
+                this.questions.push(new QuestionViewModel(this.sectionId(), '', this.choiceHeaders().map(choice => choice.value())));
+            }
+
+            removeQuestion(question) {
+                if (confirm('Are you sure you want to remove this question?')) {
+                    const section = documentViewModel.formViewModel.sections().find(section => section.sectionId() === this.sectionId());
+                    section.questions.remove(question);
+                }
+            }
+
+            duplicateQuestion(question) {
+                // validate previous section before adding a new one
+                if (!documentViewModel.formViewModel.validateForm()) {
+                    return;
+                }
+                //duplicate the question and add it to the section
+                const newQuestion = new QuestionViewModel(this.sectionId(), question.questionId());
+                newQuestion.title(question.title());
+                newQuestion.subtitle(question.subtitle());
+                newQuestion.helpText(question.helpText());
+                newQuestion.type(question.type());
+                newQuestion.choices(question.choices()?.map(choice => ko.observable(choice())));
+                newQuestion.minimum(question.minimum());
+                newQuestion.maximum(question.maximum());
+                newQuestion.exclusiveMinimum(question.exclusiveMinimum());
+                newQuestion.exclusiveMaximum(question.exclusiveMaximum());
+                newQuestion.multiChoice(question.multiChoice());
+                newQuestion.multiLineText(question.multiLineText());
+                newQuestion.required(question.required());
+                newQuestion.captureTime(question.captureTime());
+                newQuestion.captureLocation(question.captureLocation());
+                this.questions.push(newQuestion);
+            }
+
+            removeUnapplicableFields() {
+                if (!this.tabular()) {
+                    this.choiceHeaders.removeAll();
+                }
+            }
+
+        }
+
+        class FormViewModel {
+            constructor() {
+                this.formId = ko.observable('');
+                this.title = ko.observable('');
+                this.description = ko.observable('');
+                this.associatedEntity = ko.observable('');
+                this.sections = ko.observableArray([]);
+                this.isIdEditable = ko.observable(false);
+
+                this.title.subscribe(newValue => {
+                    if (newValue && !documentViewModel.isUploaded() && !this.isIdEditable()) {
+                        var camelCaseId = documentViewModel.toCamelCase(newValue);
+                        this.formId(camelCaseId);
+                    }
+                })
+            }
+
+            addSection() {
+                // validate previous section before adding a new one
+                if (!this.validateForm()) {
+                    return;
+                }
+                const sectionId = this.sections().length + 1;
+                this.sections.push(new SectionViewModel(sectionId));
+            }
+
+            removeSection(section) {
+                if (confirm('Are you sure you want to remove this section?')) {
+                    this.sections.remove(section);
+                }
+            }
+
+            toggleAllVisibility(bool) {
+                this.sections().forEach(section => {
+                    section.isSectionVisible(bool)
+                    section.questions().forEach(question => {
+                        question.isQuestionVisible(bool)
+                    });
+                });
+            }
+
+            duplicateSection(section) {
+                // validate previous section before adding a new one
+                if (!this.validateForm()) {
+                    return;
+                }
+                //duplicate the section and add it to the form
+                const newSection = new SectionViewModel(this.sections().length + 1);
+                newSection.title(section.title());
+                newSection.subtitle(section.subtitle());
+                newSection.repeatable(section.repeatable());
+                newSection.newPage(section.newPage());
+                newSection.helpText(section.helpText());
+                section.questions().forEach(question => {
+                    const newQuestion = new QuestionViewModel(newSection.sectionId(), question.questionId());
+                    newQuestion.title(question.title());
+                    newQuestion.subtitle(question.subtitle());
+                    newQuestion.helpText(question.helpText());
+                    newQuestion.type(question.type());
+                    newQuestion.choices(question.choices()?.map(choice => ko.observable(choice())));
+                    newQuestion.minimum(question.minimum());
+                    newQuestion.maximum(question.maximum());
+                    newQuestion.exclusiveMinimum(question.exclusiveMinimum());
+                    newQuestion.exclusiveMaximum(question.exclusiveMaximum());
+                    newQuestion.multiChoice(question.multiChoice());
+                    newQuestion.multiLineText(question.multiLineText());
+                    newQuestion.required(question.required());
+                    newQuestion.captureTime(question.captureTime());
+                    newQuestion.captureLocation(question.captureLocation());
+                    newSection.questions.push(newQuestion);
+                });
+                this.sections.push(newSection);
+            }
+
+            previewJSON() {
+                if (!this.validateForm()) {
+                    return;
+                }
+
+                const cleanedJson = this.createJsonFromViewModel(this);
+
+                // Insert JSON into the modal
+                document.getElementById('jsonPreview').textContent = JSON.stringify(cleanedJson, null, 2);
+
+                // Display the modal
+                $('#jsonModal').modal('show');
+            };
+
+            downloadJSON() {
+                if (!this.validateForm()) {
+                    return;
+                }
+
+                const cleanedJson = this.createJsonFromViewModel(this)
+
+                // Extract form title to use as filename
+                const formTitle = this.title() || 'form'; // Replace with actual form title property
+                const filename = `${formTitle}.json`;
+
+                // Create a Blob from the JSON data
+                const blob = new Blob([JSON.stringify(cleanedJson, null, 2)], { type: 'application/json' });
+
+                // Create a link element
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+
+                // Programmatically click the link to trigger the download
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            createJsonFromViewModel(viewModel) {
+                const json = ko.toJS(viewModel);
+                delete json.isIdEditable;
+
+                // Helper function to remove null, false, and empty string values
+                function cleanObject(obj) {
+                    return Object.fromEntries(
+                        Object.entries(obj).filter(([key, value]) => value !== null && value !== false && value !== '')
+                    );
+                }
+
+                // capture time will add acknowledgement question, location will add geolocation type question to the same section
+                function processCaptureOptions(section) {
+                    for (let i = 0; i < section.questions.length; i++) {
+                        const question = section.questions[i];
+
+                        if (question.captureTime) {
+                            section.questions.splice(i + 1, 0, {
+                                questionId: question.questionId + 'acknowledgement',
+                                title: 'acknowledgement for ' + question.questionId,
+                                type: 'acknowledgement',
+                                required: question.required,
+                                for: question.questionId
+                            });
+                            delete question.captureTime;
+                            i++; // Skip the newly added question
+                        }
+
+                        if (question.captureLocation) {
+                            section.questions.splice(i + 1, 0, {
+                                questionId: question.questionId + 'geolocation',
+                                title: 'geolocation for ' + question.questionId,
+                                type: 'geolocation',
+                                required: question.required,
+                                for: question.questionId
+                            });
+                            delete question.captureLocation;
+                            i++; // Skip the newly added question
+                        }
+                    }
+                }
+
+
+                json.sections = json.sections.map(section => {
+                    processCaptureOptions(section);
+                    if (!section.tabular) {
+                        delete section.questionHeader;
+                        delete section.choiceHeaders;
+                    } else {
+                        var choiceHeaders = [];
+                        var choiceHeaderDisplayText = {};
+
+                        section.choiceHeaders.forEach(choiceHeader => {
+                            choiceHeaders.push(choiceHeader.value);
+                            if (choiceHeader.displayText && choiceHeader.displayText.trim() !== '') {
+                                choiceHeaderDisplayText[choiceHeader.value] = choiceHeader.displayText;
+                            }
+                        });
+
+                        section.choiceHeaders = choiceHeaders;
+                        section.choiceHeaderDisplayText = choiceHeaderDisplayText;
+                    }
+
+                    // Clean the section itself
+                    section = cleanObject(section);
+
+
+                    section.questions = section.questions.map(question => {
+                        delete question.sectionId;
+                        delete question.isQuestionVisible;
+                        delete question.isIdEditable;
+                        delete question.isNew;
+
+                        // If question type is integer or decimal, the min/max values should be numbers
+                        if (question.type === 'integer' || question.type === 'decimal') {
+                            question.minimum = question.minimum ? Number(question.minimum) : null;
+                            question.maximum = question.maximum ? Number(question.maximum) : null;
+                        }
+
+                        // Clean the choices for non 'choice' type questions
+                        if (question.type !== 'choice') {
+                            delete question.choices;
+                            delete question.multiChoice;
+                        }
+
+                        if (question.type === 'choice') {
+                            question.choices = question.choices.map(choice => {
+                                return choice.value
+                            })
+                        }
+
+                        // Replace minimum with exclusiveMinimum
+                        if (question.exclusiveMinimum && question.minimum !== undefined) {
+                            question.exclusiveMinimum = question.minimum;
+                            delete question.minimum;
+                        }
+                        if (question.exclusiveMaximum && question.maximum !== undefined) {
+                            question.exclusiveMaximum = question.maximum;
+                            delete question.maximum;
+                        }
+
+                        // Clean the question itself
+                        return cleanObject(question);
+                    });
+
+
+                    // delete unrequired fields
+                    delete section.sectionId;
+                    delete section.isSectionVisible;
+                    delete section.tabular;
+                    return section;
+                });
+
+                // make sure questions array in a section is always on the bottom
+                json.sections = json.sections.map(section => {
+                    const { questions, ...rest } = section;
+                    return {
+                        ...rest,
+                        questions: questions
+                    };
+                });
+
+                // Generate the final JSON using the cleaned data
+                return json;
+            }
+
+            validateForm() {
+                let isValid = true;
+                let errorMessages = [];
+                let questionIds = new Set();
+                let reviewPageCount = 0;
+                let reviewPageIndex = -1;
+
+                // Validate form title
+                if (!this.title().trim()) {
+                    isValid = false;
+                    errorMessages.push('Form title is required.');
+                }
+
+                if (this.associatedEntity() === '') {
+                    isValid = false;
+                    errorMessages.push('Associated Entity is required.');
+                }
+
+                this.sections().forEach(section => {
+                    // Validate section title
+                    if (!section.title().trim()) {
+                        isValid = false;
+                        errorMessages.push(`Section ${section.sectionId()} title is required.`);
+                    }
+
+                    if (section.reviewPage()) {
+                        reviewPageCount++;
+                        reviewPageIndex = section.sectionId();
+                    }
+
+                    // validate choice headers uniqueness
+                    // validate choice headers uniqueness
+                    if (section.tabular()) {
+                        const choiceHeaderValues = section.choiceHeaders().map(choiceHeader => choiceHeader.value().trim());
+                        const choiceHeaderDisplayTexts = section.choiceHeaders().map(choiceHeader => choiceHeader.displayText().trim());
+
+                        const uniqueChoiceHeaderValues = new Set(choiceHeaderValues);
+                        const uniqueChoiceHeaderDisplayTexts = new Set(choiceHeaderDisplayTexts);
+
+                        if (uniqueChoiceHeaderValues.size !== choiceHeaderValues.length) {
+                            isValid = false;
+                            errorMessages.push(`Section ${section.sectionId()} has duplicate choice header values.`);
+                        }
+
+                        if (uniqueChoiceHeaderDisplayTexts.size !== choiceHeaderDisplayTexts.length) {
+                            isValid = false;
+                            errorMessages.push(`Section ${section.sectionId()} has duplicate choice header display texts.`);
+                        }
+                    }
+
+                    section.questions().forEach(question => {
+                        // Validate question title
+                        if (!question.title().trim()) {
+                            isValid = false;
+                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} must have a title.`);
+                        }
+
+                        if (question.type() === '') {
+                            isValid = false;
+                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} must have a question type.`);
+                        }
+
+                        // Check for duplicate questionId
+                        if (questionIds.has(question.questionId())) {
+                            isValid = false;
+                            errorMessages.push(`Duplicate questionId found: "${question.questionId()}" in section ${section.sectionId()}" Each question must have a unique questionId.`);
+                        } else {
+                            questionIds.add(question.questionId());
+                        }
+
+                        // Validate choices for 'choice' type questions
+                        if (question.type() === 'choice') {
+                            if (question.choices().length === 0) {
+                                isValid = false;
+                                errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} must have at least one choice.`);
+                            }
+
+                            // Validate unique choices
+                            const choiceValues = question.choices().map(choice => choice.value().trim());
+                            const uniqueChoices = new Set(choiceValues);
+                            if (uniqueChoices.size !== choiceValues.length) {
+                                isValid = false;
+                                errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} has duplicate choices.`);
+                            }
+
+                            // Validate multi-choice
+                            if (question.multiChoice() && question.choices().length < 2) {
+                                isValid = false;
+                                errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} must have at least two choices for multi-choice.`);
+                            }
+                        }
+
+                        // Validate numeric range
+                        if (question.minimum() !== null && question.maximum() !== null && question.minimum() >= question.maximum()) {
+                            isValid = false;
+                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} has an invalid numeric range. Minimum should be less than maximum.`);
+                        }
+
+                        // Validate exclusive minimum/maximum
+                        if (question.exclusiveMinimum() && question.minimum() === null) {
+                            isValid = false;
+                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} has exclusive minimum set but no minimum value.`);
+                        }
+                        if (question.exclusiveMaximum() && question.maximum() === null) {
+                            isValid = false;
+                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} has exclusive maximum set but no maximum value.`);
+                        }
+
+                        // validate integer vs decimal input
+                        if (question.type() === 'integer' && question.minimum() % 1 !== 0 && question.minimum() !== null && question.minimum() !== undefined) {
+                            isValid = false;
+                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} has a minimum value that is not an integer.`);
+                        }
+                        if (question.type() === 'integer' && question.maximum() % 1 !== 0 && question.maximum() !== null && question.maximum() !== undefined) {
+                            isValid = false;
+                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} has a maximum value that is not an integer.`);
+                        }
+                    });
+                });
+
+                if (reviewPageCount > 1) {
+                    isValid = false;
+                    errorMessages.push(`There must be exactly one review page.`);
+                }
+
+                // A form definition must contain no more than one section marked reviewPage=true. If there are any newPage=true or reviewPage=true on subsequent sections, the definition is invalid. Also, if there are no sections prior to the reviewPage=true, the form is invalid.
+                if (reviewPageIndex == 1) {
+                    isValid = false;
+                    errorMessage.push(`The review page must not be the first section.`);
+                }
+
+                if (errorMessages.length > 0) {
+                    alert(errorMessages.join('\n'));
+                }
+
+                return isValid;
+            }
+
+            readJSON(event) {
+
+                documentViewModel.isUploaded(true);
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const json = JSON.parse(e.target.result);
+                        this.sections.removeAll();
+                        this.formId(documentViewModel.toCamelCase(json.formId));
+                        this.title(json.title);
+                        this.description(json.description);
+                        this.associatedEntity(json.associatedEntity);
+
+                        json.sections.forEach((sectionData, index) => {
+                            const section = new SectionViewModel(index + 1);
+                            section.title(sectionData.title);
+                            section.subtitle(sectionData.subtitle);
+                            section.repeatable(sectionData.repeatable);
+                            section.newPage(sectionData.newPage);
+                            section.helpText(sectionData.helpText);
+                            section.reviewPage(sectionData.reviewPage);
+
+                            if (sectionData.choiceHeaders) {
+                                section.questionHeader(sectionData.questionHeader);
+                                section.choiceHeaders(sectionData.choiceHeaders.map(choiceHeader => new TabularChoiceHeader(choiceHeader, sectionData.choiceHeaderDisplayText[choiceHeader])));
+                                section.tabular(true);
+                            }
+
+                            sectionData.questions.forEach(questionData => {
+
+                                const question = new QuestionViewModel(index + 1, questionData.questionId, section.choiceHeaders().map(choice => choice.value()), false);
+                                question.title(questionData.title);
+                                question.subtitle(questionData.subtitle);
+                                question.helpText(questionData.helpText);
+                                question.type(questionData.type);
+                                question.choices(questionData.choices?.map(choice => new Choice(choice)));
+                                question.minimum(questionData.minimum || questionData.exclusiveMinimum);
+                                question.maximum(questionData.maximum || questionData.exclusiveMaximum);
+                                question.exclusiveMinimum(questionData.exclusiveMinimum);
+                                question.exclusiveMaximum(questionData.exclusiveMaximum);
+                                question.multiChoice(questionData.multiChoice);
+                                question.multiLineText(questionData.multiLineText);
+                                question.required(questionData.required);
+                                question.captureTime(questionData.captureTime);
+                                question.captureLocation(questionData.captureLocation);
+                                section.questions.push(question);
+                            });
+
+                            // if questionData is acknowledgement or geolocation, read the 'for' attribute, 
+                            // find the question and set captureTime or captureLocation to true for that question
+                            // and remove the annotated question from the list. 
+                            sectionData.questions.forEach(questionData => {
+
+                                if (questionData.type === 'acknowledgement' || questionData.type === 'geolocation') {
+                                    const question = section.questions().find(q => q.questionId() === questionData.for);
+                                    if (question) {
+                                        if (questionData.type === 'acknowledgement') {
+                                            question.captureTime(true);
+                                        } else {
+                                            question.captureLocation(true);
+                                        }
+                                        //remove the annotated question from the list
+                                        section.questions.remove(q => q.questionId() === questionData.questionId);
+                                    }
+                                    return;
+                                }
+                            });
+                            this.sections.push(section);
+                        });
+                    };
+                    reader.readAsText(file);
+                }
+            };
+        }
+
+        class DocumentViewModel {
+            constructor() {
+                this.formViewModel = new FormViewModel();
+                this.isUploaded = ko.observable(false);
+            }
+
+            toCamelCase = (str) => {
+                return str.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function (match, index) {
+                    return index === 0 ? match.toLowerCase() : match.toUpperCase();
+                }).replace(/\s+/g, '');
+            }
+
+        }
+
+        const documentViewModel = new DocumentViewModel();
+        ko.applyBindings({ documentViewModel });
+
+
+        // Enable sorting for questions
+        $(document).on('mouseover', '.question-list', function () {
+            $(this).sortable({
+                handle: ".drag-handle",
+                update: function (event, ui) {
+                    const sectionId = $(this).closest('.section').attr('id').split('_')[1];
+                    const section = documentViewModel.formViewModel.sections().find(s => s.sectionId() == sectionId);
+                    const sortedQuestions = $(this).children('.question').map(function () {
+                        const questionId = $(this).attr('id').split('_')[1];
+                        return section.questions().find(q => q.questionId() == questionId);
+                    }).get();
+                    section.questions(sortedQuestions);
+                }
+            });
+        });
+
+        $(document).on('mouseover', '.section-list', function () {
+            $(this).sortable({
+                handle: ".drag-handle",
+                update: function (event, ui) {
+                    const sortedSections = $(this).children('.section').map(function () {
+                        const sectionId = $(this).attr('id').split('_')[1];
+                        return documentViewModel.formViewModel.sections().find(s => s.sectionId() == sectionId);
+                    }).get();
+
+                    // Check for restrictions
+                    const reviewPageIndex = sortedSections.findIndex(s => s.reviewPage());
+                    const newPageIndex = sortedSections.findIndex(s => s.newPage());
+
+                    if (reviewPageIndex === 0) {
+                        alert("Sections with reviewPage = true cannot be at the top.");
+                        $(this).sortable('cancel');
+                        return;
+                    }
+
+                    if (newPageIndex !== -1 && reviewPageIndex !== -1 && newPageIndex > reviewPageIndex) {
+                        alert("Sections with newPage = true cannot be below a reviewPage section.");
+                        $(this).sortable('cancel');
+                        return;
+                    }
+
+                    // Update the observable array
+                    documentViewModel.formViewModel.sections(sortedSections);
+                }
+            });
+        });
+
+        document.getElementById('jsonFileInput').addEventListener('change', function (event) {
+            documentViewModel.formViewModel.readJSON(event);
+        });
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

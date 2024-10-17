@@ -1266,13 +1266,15 @@
                 })
 
                 this.newPage.subscribe(newValue => {
-                    if (newValue || this.reviewPage()) {
-                        // add an <hr> tag before the section to signify a new page
-                        $('#section_' + this.sectionId()).before('<hr style="height: 2rem; margin: 20px 0;">');
-                    } else {
-                        // remove the <hr> tag if it exists 
-                        $('#section_' + this.sectionId()).prev('hr').remove();
-                    }
+                    $(document).ready(() => {
+                        if (newValue) {
+                            // add an <hr> tag before the section to signify a new page
+                            $('#section_' + this.sectionId()).before('<hr style="height: 2rem; margin: 20px 0;">');
+                        } else {
+                            // remove the <hr> tag if it exists 
+                            $('#section_' + this.sectionId()).prev('hr').remove();
+                        }
+                    });
                 })
 
                 this.reviewPage.subscribe(newValue => {

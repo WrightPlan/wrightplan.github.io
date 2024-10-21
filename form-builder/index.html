@@ -554,8 +554,8 @@
                     </span>
                     <hr>
                 </div>
+
                 <div id="sections" class="mb-4 section-list" data-bind="foreach: sections">
-                    <pre style="display: none" data-bind="text: ko.toJSON($data.title(), null, 2)"></pre>
                     <div class="section-container">
                         <div class="card mb-4 section" data-bind="attr: { id: 'section_' + sectionId() }">
                             <div class="card-header d-flex justify-content-between align-items-center">
@@ -833,6 +833,10 @@
                                                     data-bind="attr: { for: 'exclusiveMinimum_' + questionId() }">
                                                     Exclusive Minimum
                                                 </label>
+                                                <small class="form-text text-muted">
+                                                    If checked, the value must be greater than the specified minimum
+                                                    value.
+                                                </small>
                                             </div>
                                             <div class="form-group number-field">
                                                 <label
@@ -848,6 +852,10 @@
                                                     data-bind="attr: { for: 'exclusiveMaximum_' + questionId() }">
                                                     Exclusive Maximum
                                                 </label>
+                                                <small class="form-text text-muted">
+                                                    If checked, the value must be less than the specified minimum
+                                                    value.
+                                                </small>
                                             </div>
                                             <!-- /ko -->
 
@@ -1198,7 +1206,7 @@
                 this.exclusiveMaximum = ko.observable(false);
                 this.multiChoice = ko.observable(false);
                 this.multiLineText = ko.observable(false);
-                this.required = ko.observable(false);
+                this.required = ko.observable(true);
                 this.isQuestionVisible = ko.observable(true);
                 this.captureTime = ko.observable(false);
                 this.captureLocation = ko.observable(false);
@@ -2039,7 +2047,7 @@
                 update: function (event, ui) {
                     const sectionId = $(this).closest('.section').attr('id').split('_')[1];
                     const section = documentViewModel.formViewModel.sections().find(s => s.sectionId() == sectionId);
-                    const sortedQuestions = $(this).children('.question').map(function () {
+                    let sortedQuestions = $(this).children('.question').map(function () {
                         const questionId = $(this).attr('id').split('_')[1];
                         return section.questions().find(q => q.questionId() == questionId);
                     }).get();
@@ -2056,7 +2064,7 @@
                 handle: ".drag-handle",
                 items: '.section-container',
                 update: function (event, ui) {
-                    const sortedSections = $(this).children('.section-container').map(function () {
+                    let sortedSections = $(this).children('.section-container').map(function () {
                         const sectionId = $(this).find('.section').attr('id').split('_')[1];
                         return documentViewModel.formViewModel.sections().find(s => s.sectionId() == sectionId);
                     }).get();
@@ -2067,23 +2075,22 @@
 
                     if (reviewPageIndex === 0) {
                         alert("Sections with reviewPage = true cannot be at the top.");
-                        $(this).sortable('cancel');
-                        documentViewModel.formViewModel.sections.valueHasMutated();
-                        return;
+                        // update the sortedSections instead of calling the sortable.cancel as it was fighting with the knockout observables
+                        // over the DOM elements
+                        sortedSections = documentViewModel.formViewModel.sections();
                     }
 
                     if (newPageIndex !== -1 && reviewPageIndex !== -1 && newPageIndex > reviewPageIndex) {
                         alert("Sections with newPage = true cannot be below a reviewPage section.");
-                        $(this).sortable('cancel');
-                        documentViewModel.formViewModel.sections.valueHasMutated();
-                        return;
+                        // update the sortedSections instead of calling the sortable.cancel as it was fighting with the knockout observables
+                        // over the DOM elements
+                        sortedSections = documentViewModel.formViewModel.sections();
                     }
 
-                    // Update the observable array
+                    // Force update the observable array by clearing it first
                     documentViewModel.formViewModel.sections([]);
                     documentViewModel.formViewModel.sections(sortedSections);
                     documentViewModel.formViewModel.toggleAllVisibility();
-                    documentViewModel.formViewModel.sections.valueHasMutated();
                     updateHrTags();
 
                 },

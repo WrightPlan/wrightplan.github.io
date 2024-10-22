@@ -1149,6 +1149,8 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-bind="click: previewJSON">Preview JSON</button>
                     <button type="button" class="btn btn-success" data-bind="click: downloadJSON">Download JSON</button>
+                    <button type="button" class="btn btn-success" data-bind="click: submitForm">Import
+                        Form</button>
                 </div>
             </div>
         </div>
@@ -1319,7 +1321,7 @@
 
             }
 
-            disableIfPreviousReviewPage = function (sections, index) {
+            disableIfPreviousReviewPage(sections, index) {
                 if (sections()[index()]?.reviewPage()) {
                     return true;
                 }
@@ -1331,7 +1333,7 @@
                 return false;
             };
 
-            disableIfReviewPageExists = function (sections, index) {
+            disableIfReviewPageExists(sections, index) {
                 for (var i = 0; i < sections().length; i++) {
                     if (sections()[i]?.reviewPage() && i !== index()) {
                         return true;
@@ -1582,6 +1584,10 @@
 
                         section.choiceHeaders = choiceHeaders;
                         section.choiceHeaderDisplayText = choiceHeaderDisplayText;
+                    }
+
+                    if (section.reviewPage) {
+                        delete section.newPage;
                     }
 
                     // Clean the section itself
@@ -1861,6 +1867,28 @@
                     reader.readAsText(file);
                 }
             };
+
+            submitForm() {
+                const cleanedJson = this.createJsonFromViewModel(this);
+                const parentUrl = document.referrer;
+
+                // Check if the form builder is opened in its own window
+                if (parentUrl === document.URL) {
+                    alert('Unable to submit the form. Please open the form builder from WrightPlan to submit the form.');
+                    return;
+                }
+
+                try {
+                    // Extract the origin from the parent URL
+                    const parentOrigin = new URL(parentUrl).origin;
+                    const postData = JSON.stringify(cleanedJson, null, 2);
+
+                    // Post message to the parent window using the extracted origin
+                    window.parent.postMessage(postData, parentOrigin);
+                } catch (error) {
+                    console.error('Unable to submit the form.', error);
+                }
+            }
         }
 
         class DocumentViewModel {

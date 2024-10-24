@@ -271,6 +271,217 @@
             background-color: #e6e6e6;
             border-color: #adadad;
         }
+
+        /* The device with borders */
+        .smartphone {
+            position: relative;
+            width: 360px;
+            height: 640px;
+            margin: auto;
+            border: 16px black solid;
+            border-top-width: 60px;
+            border-bottom-width: 60px;
+            border-radius: 36px;
+        }
+
+        /* The horizontal line on the top of the device */
+        .smartphone:before {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 5px;
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #333;
+            border-radius: 10px;
+        }
+
+        /* The circle on the bottom of the device */
+        .smartphone:after {
+            content: '';
+            display: block;
+            width: 35px;
+            height: 35px;
+            position: absolute;
+            left: 50%;
+            bottom: -65px;
+            transform: translate(-50%, -50%);
+            background: #333;
+            border-radius: 50%;
+        }
+
+        /* The screen (or content) of the device */
+        .smartphone .content {
+            width: 100%;
+            height: 100%;
+            background: white;
+        }
+
+        .form-preview-container {
+            overflow-y: scroll;
+            height: 100%;
+            font-size: smaller;
+        }
+
+        .form-preview-container h5 {
+            font-size: larger;
+        }
+
+        .form-preview-title {
+            font-size: larger !important;
+            display: block;
+        }
+
+        .form-preview-description {
+            font-size: smaller !important;
+            display: block;
+            padding-bottom: 0.5rem;
+        }
+
+        .form-preview-date {
+            font-size: small !important;
+            display: block;
+        }
+
+        .form-preview-container span {
+            font-size: smaller;
+        }
+
+        .acknowledgement-question-container {
+            display: flex;
+            align-items: baseline;
+        }
+
+        .acknowledgement-checkbox-container {
+            margin-right: 10px;
+        }
+
+        code {
+            background-color: #d9dcdf;
+            padding-top: 0.15rem;
+            color: black;
+        }
+
+        .form-preview-header {
+            position: sticky;
+            top: 0;
+            color: white;
+            z-index: 1;
+            background-color: #304f87;
+            padding: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-preview-body {
+            padding: 0.5rem;
+        }
+
+        .signature-container {
+            width: 98%;
+            height: 70px;
+            border: 1px solid #ced4da;
+            border-radius: 2%
+        }
+
+        .form-preview-button {
+            border-radius: 5px;
+            cursor: pointer;
+            border: 2px solid #304f87;
+            color: #304f87;
+            background-color: white;
+            transition: background-color 0.3s, color 0.3s;
+            flex: 1;
+            margin-right: 1%;
+        }
+
+        .form-preview-button-2 {
+            background-color: #304f87;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            border: 2px solid #304f87;
+            flex: 1;
+            margin-right: 1%;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+
+        .line-input {
+            border: none;
+            border-bottom: 1px solid rgb(46, 45, 45);
+            width: 100%;
+            padding: 5px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .line-input:focus,
+        textarea:active {
+            border-bottom: 2px solid #304f87;
+            /* Optional: thicker border on focus */
+        }
+
+        .tabular-section-preview-header {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+
+        .tabular-input-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.5rem;
+            justify-content: end;
+        }
+
+        /* Custom scrollbar styles */
+        .form-preview-container::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+            transition: width 0.3s ease, height 0.3s ease;
+        }
+
+        .form-preview-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .form-preview-container::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            transition: background 0.3s ease, width 0.3s ease, height 0.3s ease;
+        }
+
+        .form-preview-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.6);
+            width: 12px;
+            height: 12px;
+        }
+
+        .form-preview-container::-webkit-scrollbar-thumb:active {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        /* For Firefox */
+        .form-preview-container {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 0, 0, 0.4) rgba(0, 0, 0, 0.1);
+            transition: scrollbar-color 0.3s ease;
+        }
+
+        .form-preview-container:hover {
+            scrollbar-color: rgba(0, 0, 0, 0.6) rgba(0, 0, 0, 0.1);
+        }
+
+        #json-modal {
+            z-index: 99999999;
+        }
     </style>
 </head>
 
@@ -343,314 +554,338 @@
                     </span>
                     <hr>
                 </div>
+
                 <div id="sections" class="mb-4 section-list" data-bind="foreach: sections">
-                    <!-- if the next section is a newPage or a reviewPage, show a separator tro indicate -->
+                    <div class="section-container">
+                        <div class="card mb-4 section" data-bind="attr: { id: 'section_' + sectionId() }">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <!-- ko  if: !reviewPage() -->
+                                    <span class="drag-handle">&#x2630; </span>
+                                    <!-- /ko -->
+                                    <i class="fa-solid toggleVisibility"
+                                        data-bind="click: function(){isSectionVisible(!isSectionVisible())}, css: { 'fa-chevron-right': !isSectionVisible(), 'fa-chevron-down': isSectionVisible() }"></i>
+                                </div>
+                                <h4 style="display:inline" data-bind="text: 'Section: ' + sectionId()"></h4>
+                                <div class="action-buttons">
+                                    <!-- ko if: reviewPage() -->
+                                    <span class="badge badge-primary badge-pill p-2"
+                                        style="font-size: 0.75rem; background-color: #337ab7;">Review
+                                        Page</span> <!-- /ko -->
+                                    <span type="button" class="duplicate-button"
+                                        data-bind="click: $parent.duplicateSection.bind($parent)">
+                                        <i class="fa-solid fa-copy"></i>
+                                    </span>
+                                    <span type="button" class="remove-button"
+                                        data-bind="click: $parent.removeSection.bind($parent)"><i
+                                            class="fa fa-trash-can"></i></span>
+                                </div>
+                            </div>
+                            <div data-bind="visible: isSectionVisible()" class="card-body">
+                                <div class="form-group">
+                                    <label class="required"
+                                        data-bind="attr: { for: 'sectionTitle_' + sectionId() }">Section
+                                        Title</label>
+                                    <input type="text" class="form-control"
+                                        data-bind="attr: { id: 'sectionTitle_' + sectionId() }, value: title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label data-bind="attr: { for: 'sectionSubtitle_' + sectionId() }">Section
+                                        Subtitle</label>
+                                    <input type="text" class="form-control"
+                                        data-bind="attr: { id: 'sectionSubtitle_' + sectionId() }, value: subtitle">
+                                </div>
+                                <div class="form-group">
+                                    <label data-bind="attr: { for: 'helpText_' + sectionId() }">Section
+                                        Help Text</label>
+                                    <input type="text" class="form-control"
+                                        data-bind="attr: { id: 'helpText_' + sectionId() }, value: helpText">
+                                </div>
+                                <div class="form-group form-check d-inline-block">
+                                    <input type="checkbox" class="form-check-input"
+                                        data-bind="attr: { id: 'repeatable_' + sectionId() }, checked: repeatable">
+                                    <label class="form-check-label"
+                                        data-bind="attr: { for: 'repeatable_' + sectionId() }">
+                                        Repeatable
+                                    </label>
+                                </div>
 
-                    <div class="card mb-4 section" data-bind="attr: { id: 'section_' + sectionId() }">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <div>
-                                <!-- ko  if: !reviewPage() -->
-                                <span class="drag-handle">&#x2630; </span>
+                                <div class="form-group form-check d-inline-block">
+                                    <input type="checkbox" class="form-check-input"
+                                        data-bind="attr: { id: 'tabular_' + sectionId() }, checked: tabular">
+                                    <label class="form-check-label" data-bind="attr: { for: 'tabular_' + sectionId() }">
+                                        Tabular Section
+                                    </label>
+                                </div>
+
+                                <!-- ko if: ko.utils.arrayIndexOf($parent.sections(), $data) > 0 -->
+                                <div class="form-group form-check d-inline-block"
+                                    class="form-group form-check d-inline-block">
+                                    <input type="checkbox" class="form-check-input"
+                                        data-bind="attr: { id: 'reviewPage_' + sectionId() }, checked: reviewPage, disable: disableIfReviewPageExists($parent.sections, $index)">
+                                    <label class="form-check-label"
+                                        data-bind="attr: { for: 'reviewPage_' + sectionId() }">
+                                        Review Page
+                                    </label>
+                                </div>
                                 <!-- /ko -->
-                                <i class="fa-solid toggleVisibility"
-                                    data-bind="click: function(){isSectionVisible(!isSectionVisible())}, css: { 'fa-chevron-right': !isSectionVisible(), 'fa-chevron-down': isSectionVisible() }"></i>
-                            </div>
-                            <h4 style="display:inline" data-bind="text: 'Section: ' + sectionId()"></h4>
-                            <div class="action-buttons">
-                                <!-- ko if: reviewPage() -->
-                                <span class="badge badge-primary badge-pill p-2"
-                                    style="font-size: 0.75rem; background-color: #337ab7;">Review
-                                    Page</span> <!-- /ko -->
-                                <span type="button" class="duplicate-button"
-                                    data-bind="click: $parent.duplicateSection.bind($parent)">
-                                    <i class="fa-solid fa-copy"></i>
-                                </span>
-                                <span type="button" class="remove-button"
-                                    data-bind="click: $parent.removeSection.bind($parent)"><i
-                                        class="fa fa-trash-can"></i></span>
-                            </div>
-                        </div>
-                        <div data-bind="visible: isSectionVisible()" class="card-body">
-                            <div class="form-group">
-                                <label class="required" data-bind="attr: { for: 'sectionTitle_' + sectionId() }">Section
-                                    Title</label>
-                                <input type="text" class="form-control"
-                                    data-bind="attr: { id: 'sectionTitle_' + sectionId() }, value: title" required>
-                            </div>
-                            <div class="form-group">
-                                <label data-bind="attr: { for: 'sectionSubtitle_' + sectionId() }">Section
-                                    Subtitle</label>
-                                <input type="text" class="form-control"
-                                    data-bind="attr: { id: 'sectionSubtitle_' + sectionId() }, value: subtitle">
-                            </div>
-                            <div class="form-group">
-                                <label data-bind="attr: { for: 'helpText_' + sectionId() }">Section
-                                    Help Text</label>
-                                <input type="text" class="form-control"
-                                    data-bind="attr: { id: 'helpText_' + sectionId() }, value: helpText">
-                            </div>
-                            <div class="form-group form-check d-inline-block">
-                                <input type="checkbox" class="form-check-input"
-                                    data-bind="attr: { id: 'repeatable_' + sectionId() }, checked: repeatable">
-                                <label class="form-check-label" data-bind="attr: { for: 'repeatable_' + sectionId() }">
-                                    Repeatable
-                                </label>
-                            </div>
 
-                            <div class="form-group form-check d-inline-block">
-                                <input type="checkbox" class="form-check-input"
-                                    data-bind="attr: { id: 'tabular_' + sectionId() }, checked: tabular">
-                                <label class="form-check-label" data-bind="attr: { for: 'tabular_' + sectionId() }">
-                                    Tabular Section
-                                </label>
-                            </div>
-
-                            <!-- ko if: ko.utils.arrayIndexOf($parent.sections(), $data) > 0 -->
-                            <div class="form-group form-check d-inline-block"
-                                class="form-group form-check d-inline-block">
-                                <input type="checkbox" class="form-check-input"
-                                    data-bind="attr: { id: 'reviewPage_' + sectionId() }, checked: reviewPage, disable: disableIfReviewPageExists($parent.sections, $index)">
-                                <label class="form-check-label" data-bind="attr: { for: 'reviewPage_' + sectionId() }">
-                                    Review Page
-                                </label>
-                            </div>
-                            <!-- /ko -->
-
-                            <div class="form-group form-check d-inline-block">
-                                <input type="checkbox" class="form-check-input"
-                                    data-bind="attr: { id: 'newPage_' + sectionId() }, checked: reviewPage() ? true : newPage, disable: disableIfPreviousReviewPage($parent.sections, $index)">
-                                <label class="form-check-label" data-bind="attr: { for: 'newPage_' + sectionId() }">
-                                    New Page
-                                </label>
-                            </div>
-
-                            <!-- ko if: tabular() -->
-                            <div class="form-group">
-                                <label class="required"
-                                    data-bind="attr: { for: 'questionHeader_' + sectionId() }">Question
-                                    Header</label>
-                                <input type="text" class="form-control"
-                                    data-bind="attr: { id: 'questionHeader_' + sectionId() }, value: questionHeader"
-                                    required>
-                            </div>
-
-                            <div class="form-group choices-field">
-                                <label style="width: 40%" class="required d-inline-block"
-                                    data-bind="attr: { for: 'choices_' + sectionId() }">Choice
-                                    Headers</label>
-                                <label class="d-inline-block"
-                                    data-bind="attr: { for: 'choices_' + sectionId() }">Display
-                                    Text</label>
-                                <div class="choices-container" data-bind="foreach: choiceHeaders">
-                                    <div class="choice-item mb-2">
-                                        <input style="padding-top: 0; width: 40%" type="text"
-                                            class="form-control d-inline-block" data-bind="textInput: $data.value"
-                                            required>
-                                        <input style="padding-top: 0; width: 40%" type="text"
-                                            class="form-control d-inline-block" placeholder="Display Text"
-                                            data-bind="value: $data.displayText, valueUpdate: 'input'">
-
-                                        <button type="button" class="btn btn-danger d-inline-block w-20"
-                                            data-bind="click: $parent.removeChoice.bind($parent)">
-                                            <i class="fa fa-trash-can"></i>
-                                        </button>
-                                    </div>
+                                <div class="form-group form-check d-inline-block">
+                                    <input type="checkbox" class="form-check-input"
+                                        data-bind="attr: { id: 'newPage_' + sectionId() }, checked: reviewPage() ? true : newPage, disable: disableIfPreviousReviewPage($parent.sections, $index)">
+                                    <label class="form-check-label" data-bind="attr: { for: 'newPage_' + sectionId() }">
+                                        New Page
+                                    </label>
                                 </div>
-                                <button type="button" class="btn btn-primary add-choice"
-                                    data-bind="click: addChoice.bind($data)">+ Add Choice</button>
-                            </div>
-                            <!-- /ko -->
 
-                            <div class="question-list" data-bind="foreach: questions">
-                                <div class="card mb-3 question" data-bind="attr: { id: 'question_' + questionId() }">
-                                    <div class="card-header d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <span class="drag-handle">&#x2630; </span>
-                                            <i class="fa-solid toggleVisibility"
-                                                data-bind="click: function(){isQuestionVisible(!isQuestionVisible())}, css: { 'fa-chevron-right': !isQuestionVisible(), 'fa-chevron-down': isQuestionVisible() }"></i>
-                                        </div>
-                                        <h5 style="display: inline" data-bind="text: 'Question: ' + questionId()">
-                                        </h5>
-                                        <div>
-                                            <span type="button" class="duplicate-button"
-                                                data-bind="click: $parent.duplicateQuestion.bind($parent)">
-                                                <i class="fa-solid fa-copy"></i>
-                                            </span>
-                                            <span type="button" class="remove-button"
-                                                data-bind="click: $parent.removeQuestion.bind($parent)"><i
-                                                    class="fa fa-trash-can"></i></span>
+                                <!-- ko if: tabular() -->
+                                <div class="form-group">
+                                    <label class="required"
+                                        data-bind="attr: { for: 'questionHeader_' + sectionId() }">Question
+                                        Header</label>
+                                    <input type="text" class="form-control"
+                                        data-bind="attr: { id: 'questionHeader_' + sectionId() }, value: questionHeader"
+                                        required>
+                                </div>
+
+                                <div class="form-group choices-field">
+                                    <label style="width: 40%" class="required d-inline-block"
+                                        data-bind="attr: { for: 'choices_' + sectionId() }">Choice
+                                        Headers</label>
+                                    <label class="d-inline-block"
+                                        data-bind="attr: { for: 'choices_' + sectionId() }">Display
+                                        Text</label>
+                                    <div class="choices-container" data-bind="foreach: choiceHeaders">
+                                        <div class="choice-item mb-2">
+                                            <input style="padding-top: 0; width: 40%" type="text"
+                                                class="form-control d-inline-block" data-bind="textInput: $data.value"
+                                                required>
+                                            <input style="padding-top: 0; width: 40%" type="text"
+                                                class="form-control d-inline-block" placeholder="Display Text"
+                                                data-bind="value: $data.displayText, valueUpdate: 'input'">
+
+                                            <button type="button" class="btn btn-danger d-inline-block w-20"
+                                                data-bind="click: $parent.removeChoice.bind($parent)">
+                                                <i class="fa fa-trash-can"></i>
+                                            </button>
                                         </div>
                                     </div>
-                                    <div data-bind="visible: isQuestionVisible()" class="card-body">
-                                        <div class="form-group">
-                                            <label class="required"
-                                                data-bind="attr: { for: 'questionTitle_' + questionId() }">Question
-                                                Title</label>
-                                            <input type="text" class="form-control"
-                                                data-bind="attr: { id: 'questionTitle_' + questionId() }, value: title"
-                                                required>
+                                    <button type="button" class="btn btn-primary add-choice"
+                                        data-bind="click: addChoice.bind($data)">+ Add Choice</button>
+                                </div>
+                                <!-- /ko -->
+
+                                <div class="question-list" data-bind="foreach: questions">
+                                    <div class="card mb-3 question"
+                                        data-bind="attr: { id: 'question_' + questionId() }">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <span class="drag-handle">&#x2630; </span>
+                                                <i class="fa-solid toggleVisibility"
+                                                    data-bind="click: function(){isQuestionVisible(!isQuestionVisible())}, css: { 'fa-chevron-right': !isQuestionVisible(), 'fa-chevron-down': isQuestionVisible() }"></i>
+                                            </div>
+                                            <h5 style="display: inline" data-bind="text: 'Question: ' + questionId()">
+                                            </h5>
+                                            <div>
+                                                <span type="button" class="duplicate-button"
+                                                    data-bind="click: $parent.duplicateQuestion.bind($parent)">
+                                                    <i class="fa-solid fa-copy"></i>
+                                                </span>
+                                                <span type="button" class="remove-button"
+                                                    data-bind="click: $parent.removeQuestion.bind($parent)"><i
+                                                        class="fa fa-trash-can"></i></span>
+                                            </div>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="required"
-                                                data-bind="attr: { for: 'questionId_' + questionId() }">Question
-                                                ID</label>
-                                            <div class="input-group">
+                                        <div data-bind="visible: isQuestionVisible()" class="card-body">
+                                            <div class="form-group">
+                                                <label class="required"
+                                                    data-bind="attr: { for: 'questionTitle_' + questionId() }">Question
+                                                    Title</label>
                                                 <input type="text" class="form-control"
-                                                    data-bind="attr: { id: 'questionId_' + questionId() }, value: questionId, disable: documentViewModel.isUploaded() || !isIdEditable()"
+                                                    data-bind="attr: { id: 'questionTitle_' + questionId() }, value: title"
                                                     required>
-                                                <div class="input-group-append"
-                                                    data-bind="if: !$root.documentViewModel.isUploaded()">
-                                                    <span class="input-group-text"
-                                                        data-bind="click: function() { isIdEditable(true)}">
-                                                        <i class="fa fa-pencil"></i>
-                                                    </span>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="required"
+                                                    data-bind="attr: { for: 'questionId_' + questionId() }">Question
+                                                    ID</label>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control"
+                                                        data-bind="attr: { id: 'questionId_' + questionId() }, value: questionId, disable: documentViewModel.isUploaded() || !isIdEditable()"
+                                                        required>
+                                                    <div class="input-group-append"
+                                                        data-bind="if: !$root.documentViewModel.isUploaded()">
+                                                        <span class="input-group-text"
+                                                            data-bind="click: function() { isIdEditable(true)}">
+                                                            <i class="fa fa-pencil"></i>
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label
-                                                data-bind="attr: { for: 'questionSubtitle_' + questionId() }">Question
-                                                Subtitle</label>
-                                            <input type="text" class="form-control"
-                                                data-bind="attr: { id: 'questionSubtitle_' + questionId() }, value: subtitle">
-                                        </div>
-                                        <div class="form-group">
-                                            <label data-bind="attr: { for: 'helpText_' + questionId() }">Question
-                                                Help Text</label>
-                                            <input type="text" class="form-control"
-                                                data-bind="attr: { id: 'helpText_' + questionId() }, value: helpText">
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="required"
-                                                data-bind="attr: { for: 'questionType_' + questionId() }">Question
-                                                Type</label>
-                                            <select class="form-control"
-                                                data-bind="attr: { id: 'questionType_' + questionId() }, value: type, event: { change: $parent.toggleQuestionFields }"
-                                                required>
-                                                <option style="color:#545b62" value="" disabled selected>Select
-                                                    a
-                                                    question type...</option>
-                                                <option value="acknowledgement">Acknowledgement</option>
-                                                <option value="boolean">Boolean</option>
-                                                <option value="choice">Choice</option>
-                                                <option value="date">Date</option>
-                                                <option value="decimal">Decimal</option>
-                                                <option value="dispatch-job">Dispatch Job (ID)</option>
-                                                <option value="employee">Employee (ID)</option>
-                                                <option value="equipment">Equipment (ID)</option>
-                                                <!-- <option value="geolocation">Geolocation</option> -->
-                                                <option value="initials">Initials</option>
-                                                <option value="integer">Integer</option>
-                                                <option value="signature">Signature</option>
-                                                <option value="text">Text</option>
-                                                <option value="time">Time</option>
-                                            </select>
-                                        </div>
-
-                                        <div class="form-group form-check d-inline-block">
-                                            <input class="form-check-input" type="checkbox"
-                                                data-bind="checked: required">
-                                            <label class="form-check-label">
-                                                Required
-                                            </label>
-                                        </div>
-
-                                        <!-- ko if: type() === 'text' -->
-                                        <div class="form-group form-check d-inline-block">
-                                            <input class="form-check-input" type="checkbox"
-                                                data-bind="checked: multiLineText">
-                                            <label class="form-check-label">
-                                                Multi-Line Text
-                                            </label>
-                                        </div>
-                                        <!-- /ko -->
-
-                                        <!-- ko if: type() === 'choice' -->
-                                        <div class="form-group form-check multiChoice-field d-inline-block"
-                                            data-bind="if: type() === 'choice'">
-                                            <input type="checkbox" class="form-check-input"
-                                                data-bind="attr: { id: 'multiChoice_' + questionId() }, checked: multiChoice">
-                                            <label class="form-check-label"
-                                                data-bind="attr: { for: 'multiChoice_' + questionId() }">Multi
-                                                Choice
-                                            </label>
-                                        </div>
-                                        <div class="form-group choices-field">
-                                            <label class="required"
-                                                data-bind="attr: { for: 'choices_' + questionId() }">Choices</label>
-                                            <div class="choices-container" data-bind="foreach: choices">
-                                                <div class="choice-item mb-2">
-                                                    <input style="padding-top: 0" type="text"
-                                                        class="form-control d-inline-block w-75"
-                                                        data-bind="textInput: $data.value, required">
-                                                    <button type="button" class="btn btn-danger d-inline-block w-20"
-                                                        data-bind="click: $parent.removeChoice.bind($parent)">
-                                                        <i class="fa fa-trash-can"></i>
-                                                    </button>
-                                                </div>
+                                            <div class="form-group">
+                                                <label
+                                                    data-bind="attr: { for: 'questionSubtitle_' + questionId() }">Question
+                                                    Subtitle</label>
+                                                <input type="text" class="form-control"
+                                                    data-bind="attr: { id: 'questionSubtitle_' + questionId() }, value: subtitle">
                                             </div>
-                                            <button type="button" class="btn btn-primary add-choice"
-                                                data-bind="click: addChoice">+ Add Choice</button>
-                                        </div>
+                                            <div class="form-group">
+                                                <label data-bind="attr: { for: 'helpText_' + questionId() }">Question
+                                                    Help Text</label>
+                                                <input type="text" class="form-control"
+                                                    data-bind="attr: { id: 'helpText_' + questionId() }, value: helpText">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="required"
+                                                    data-bind="attr: { for: 'questionType_' + questionId() }">Question
+                                                    Type</label>
+                                                <select class="form-control"
+                                                    data-bind="attr: { id: 'questionType_' + questionId() }, value: type, event: { change: $parent.toggleQuestionFields }"
+                                                    required>
+                                                    <option style="color:#545b62" value="" disabled selected>Select
+                                                        a
+                                                        question type...</option>
+                                                    <option value="acknowledgement">Acknowledgement</option>
+                                                    <option value="boolean">Boolean</option>
+                                                    <option value="choice">Choice</option>
+                                                    <option value="date">Date</option>
+                                                    <option value="decimal">Decimal</option>
+                                                    <option value="dispatch-job">Dispatch Job (ID)</option>
+                                                    <option value="employee">Employee (ID)</option>
+                                                    <option value="equipment">Equipment (ID)</option>
+                                                    <!-- <option value="geolocation">Geolocation</option> -->
+                                                    <option value="initials">Initials</option>
+                                                    <option value="integer">Integer</option>
+                                                    <option value="signature">Signature</option>
+                                                    <option value="text">Text</option>
+                                                    <option value="time">Time</option>
+                                                </select>
+                                            </div>
 
-                                        <!-- /ko -->
+                                            <!-- ko if: (type() === 'time' || type() === 'date') && required() !== true -->
+                                            <span class="small d-block"
+                                                style="color: gray; padding-bottom: 0.5rem;"><b>Note:</b>
+                                                Even if this question is not 'required', this question will be
+                                                pre-filled with a default value in the actual form.</span>
+                                            <!-- /ko -->
 
-                                        <!-- ko if: type() === 'integer' || type() === 'decimal' -->
-                                        <div class="form-group number-field">
-                                            <label data-bind="attr: { for: 'minimum_' + questionId() }">Minimum</label>
-                                            <input type="number" class="form-control"
-                                                data-bind="attr: { id: 'minimum_' + questionId() }, value: minimum">
-                                        </div>
-                                        <div class="form-group form-check d-inline-blocknumber-field">
-                                            <input type="checkbox" class="form-check-input"
-                                                data-bind="attr: { id: 'exclusiveMinimum_' + questionId() }, checked: exclusiveMinimum">
-                                            <label class="form-check-label"
-                                                data-bind="attr: { for: 'exclusiveMinimum_' + questionId() }">
-                                                Exclusive Minimum
-                                            </label>
-                                        </div>
-                                        <div class="form-group number-field">
-                                            <label data-bind="attr: { for: 'maximum_' + questionId() }">Maximum</label>
-                                            <input type="number" class="form-control"
-                                                data-bind="attr: { id: 'maximum_' + questionId() }, value: maximum">
-                                        </div>
-                                        <div class="form-group form-check d-inline-blocknumber-field"
-                                            data-bind="if: type() === 'integer' || type() === 'decimal'">
-                                            <input type="checkbox" class="form-check-input"
-                                                data-bind="attr: { id: 'exclusiveMaximum_' + questionId() }, checked: exclusiveMaximum">
-                                            <label class="form-check-label"
-                                                data-bind="attr: { for: 'exclusiveMaximum_' + questionId() }">
-                                                Exclusive Maximum
-                                            </label>
-                                        </div>
-                                        <!-- /ko -->
+                                            <div class="form-group form-check d-inline-block">
+                                                <input class="form-check-input" type="checkbox"
+                                                    data-bind="checked: required, attr: { id: 'required_' + questionId() }">
+                                                <label class="form-check-label"
+                                                    data-bind="attr: { for: 'required_' + questionId() }">
+                                                    Required
+                                                </label>
+                                            </div>
 
-                                        <!-- ko if: type() === 'initials' || type() === 'signature' -->
-                                        <div class="form-group form-check captureTime-field d-inline-block">
-                                            <input class="form-check-input" type="checkbox" class="form-check-input"
-                                                data-bind="attr: { id: 'captureTime' + questionId() }, checked: captureTime">
-                                            <label class="form-check-label"
-                                                data-bind="attr: { for: 'captureTime' + questionId() }">Capture
-                                                Time</label>
-                                        </div>
-                                        <!-- /ko -->
+                                            <!-- ko if: type() === 'text' -->
+                                            <div class="form-group form-check d-inline-block">
+                                                <input class="form-check-input" type="checkbox"
+                                                    data-bind="checked: multiLineText, attr: { id: 'multiLine_' + questionId() }">
+                                                <label class="form-check-label"
+                                                    data-bind="attr: { for: 'multiLine_' + questionId() }">
+                                                    Multi-Line Text
+                                                </label>
+                                            </div>
+                                            <!-- /ko -->
 
-                                        <!-- ko if: type() === 'acknowledgement' || type() === 'initials' || type() === 'signature' -->
-                                        <div class="form-group form-check captureLocation-field d-inline-block">
-                                            <input class="form-check-input" type="checkbox" class="form-check-input"
-                                                data-bind="attr: { id: 'captureLocation' + questionId() }, checked: captureLocation">
-                                            <label class="form-check-label"
-                                                data-bind="attr: { for: 'captureLocation' + questionId() }">Capture
-                                                Location
-                                            </label>
+                                            <!-- ko if: type() === 'choice' -->
+                                            <div class="form-group form-check multiChoice-field d-inline-block"
+                                                data-bind="if: type() === 'choice'">
+                                                <input type="checkbox" class="form-check-input"
+                                                    data-bind="attr: { id: 'multiChoice_' + questionId() }, checked: multiChoice">
+                                                <label class="form-check-label"
+                                                    data-bind="attr: { for: 'multiChoice_' + questionId() }">Multi
+                                                    Choice
+                                                </label>
+                                            </div>
+                                            <div class="form-group choices-field">
+                                                <label class="required"
+                                                    data-bind="attr: { for: 'choices_' + questionId() }">Choices</label>
+                                                <div class="choices-container" data-bind="foreach: choices">
+                                                    <div class="choice-item mb-2">
+                                                        <input style="padding-top: 0" type="text"
+                                                            class="form-control d-inline-block w-75"
+                                                            data-bind="textInput: $data.value, required">
+                                                        <button type="button" class="btn btn-danger d-inline-block w-20"
+                                                            data-bind="click: $parent.removeChoice.bind($parent)">
+                                                            <i class="fa fa-trash-can"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <button type="button" class="btn btn-primary add-choice"
+                                                    data-bind="click: addChoice">+ Add Choice</button>
+                                            </div>
+
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type() === 'integer' || type() === 'decimal' -->
+                                            <div class="form-group number-field">
+                                                <label
+                                                    data-bind="attr: { for: 'minimum_' + questionId() }">Minimum</label>
+                                                <input type="number" class="form-control"
+                                                    data-bind="attr: { id: 'minimum_' + questionId() }, value: minimum">
+                                            </div>
+                                            <div class="form-group form-check d-inline-blocknumber-field">
+                                                <input type="checkbox" class="form-check-input"
+                                                    data-bind="attr: { id: 'exclusiveMinimum_' + questionId() }, checked: exclusiveMinimum">
+                                                <label class="form-check-label"
+                                                    data-bind="attr: { for: 'exclusiveMinimum_' + questionId() }">
+                                                    Exclusive Minimum
+                                                </label>
+                                                <small class="form-text text-muted">
+                                                    If checked, the value must be greater than the specified minimum
+                                                    value.
+                                                </small>
+                                            </div>
+                                            <div class="form-group number-field">
+                                                <label
+                                                    data-bind="attr: { for: 'maximum_' + questionId() }">Maximum</label>
+                                                <input type="number" class="form-control"
+                                                    data-bind="attr: { id: 'maximum_' + questionId() }, value: maximum">
+                                            </div>
+                                            <div class="form-group form-check d-inline-blocknumber-field"
+                                                data-bind="if: type() === 'integer' || type() === 'decimal'">
+                                                <input type="checkbox" class="form-check-input"
+                                                    data-bind="attr: { id: 'exclusiveMaximum_' + questionId() }, checked: exclusiveMaximum">
+                                                <label class="form-check-label"
+                                                    data-bind="attr: { for: 'exclusiveMaximum_' + questionId() }">
+                                                    Exclusive Maximum
+                                                </label>
+                                                <small class="form-text text-muted">
+                                                    If checked, the value must be less than the specified minimum
+                                                    value.
+                                                </small>
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type() === 'initials' || type() === 'signature' -->
+                                            <div class="form-group form-check captureTime-field d-inline-block">
+                                                <input class="form-check-input" type="checkbox" class="form-check-input"
+                                                    data-bind="attr: { id: 'captureTime' + questionId() }, checked: captureTime">
+                                                <label class="form-check-label"
+                                                    data-bind="attr: { for: 'captureTime' + questionId() }">Capture
+                                                    Time</label>
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type() === 'acknowledgement' || type() === 'initials' || type() === 'signature' -->
+                                            <div class="form-group form-check captureLocation-field d-inline-block">
+                                                <input class="form-check-input" type="checkbox" class="form-check-input"
+                                                    data-bind="attr: { id: 'captureLocation' + questionId() }, checked: captureLocation">
+                                                <label class="form-check-label"
+                                                    data-bind="attr: { for: 'captureLocation' + questionId() }">Capture
+                                                    Location
+                                                </label>
+                                            </div>
+                                            <!-- /ko -->
                                         </div>
-                                        <!-- /ko -->
                                     </div>
                                 </div>
-                            </div>
 
-                            <button type="button" class="btn btn-primary add-section"
-                                data-bind="click: addQuestion.bind($data)">+ Add Question</button>
+                                <button type="button" class="btn btn-primary add-section"
+                                    data-bind="click: addQuestion.bind($data)">+ Add Question</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -660,12 +895,262 @@
                         Section</button>
 
                     <div class="sticky-footer">
-                        <button type="button" class="btn btn-primary mt-3" data-bind="click: previewJSON">Preview
-                            JSON</button>
-                        <button type="submit" class="btn btn-success mt-3">Download JSON</button>
+                        <button type="button" class="btn btn-primary mt-3" data-bind="click: previewForm">Preview
+                            Form</button>
+                    </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- form preview modal to show when user clicks on preview form button. -->
+    <div class="modal" id="previewModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Form Preview</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div><span class="required"></span><small>This is just a preview. The actual form can be accessed on
+                        the Field Solutions App after the form is uploaded.</small></div>
+
+                <div class="modal-body
+                    d-flex justify-content-center align-items-center">
+
+                    <div class="smartphone">
+                        <div class="content">
+                            <div class="form-preview-container" data-bind="with: formPreviewViewModel">
+                                <div class="form-preview-header">
+                                    <span class="form-preview-title" data-bind=" text: title">
+                                    </span>
+                                    <span class="form-preview-description" data-bind="text: description"></span>
+                                    <span class="form-preview-date"
+                                        data-bind="text: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })">
+                                    </span>
+                                </div>
+                                <div class="form-preview-body">
+                                    <br>
+                                    <div class="section-preview-header" data-bind="if: reviewMode">
+                                        <h5 data-bind="text: reviewSectionTitle">
+                                        </h5>
+                                        <span data-bind="text: reviewSectionSubTitle"></span><br>
+                                        <span class="d-inline" data-bind="html: reviewSectionHelpText"> </span>
+                                        <br>
+                                    </div>
+                                    <!-- ko foreach: sections -->
+                                    <div
+                                        data-bind="visible: $parent.isCurrentSection($index()) || !$data.newPage || $parent.reviewMode()">
+
+                                        <div class="section-preview-header" data-bind="ifnot: reviewPage">
+                                            <h5 data-bind="text: title">
+                                            </h5>
+                                            <span data-bind="text: subtitle"></span><br>
+                                            <span class="d-inline" data-bind="html: helpText"> </span>
+                                            <br>
+                                        </div>
+
+                                        <div style="margin-right: 0.5rem;" class="tabular-section-preview-header"
+                                            data-bind="if: tabular">
+                                            <div>
+                                                <span style="font-size: small" data-bind="text: questionHeader"></span>
+                                            </div>
+                                            <div data-bind="foreach: choiceHeaders">
+                                                <span data-bind="text: $data"></span>&nbsp;
+                                            </div>
+                                        </div>
+
+                                        <!-- ko foreach: questions -->
+                                        <div style="width: 98%">
+                                            <div data-bind="visible: $parent.tabular">
+                                                <hr style="margin: 0;">
+                                            </div>
+                                            <!-- ko if: type !== 'acknowledgement' && ((!$parent.tabular) || (type !== 'choice' && $parent.tabular))  -->
+                                            <span style="margin-bottom: 0; font-size: small"
+                                                data-bind="text: title, css: {'required': required }"></span>
+                                            <!-- ko if: subtitle -->
+                                            <i class="d-block">
+                                                <span data-bind="text: subtitle"></span>
+                                            </i>
+                                            <!-- /ko -->
+                                            <!-- ko if: helpText -->
+                                            <span class="d-inline-block" data-bind="html: helpText"> </span>
+                                            <span data-bind="if: helpTextContainsLink">
+                                                <i style="font-size: smaller" class="fa-solid fa-link"></i>
+                                            </span>
+                                            <!-- /ko -->
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type === 'text' || type === 'integer' || type ==='decimal'-->
+                                            <div>
+                                                <!-- ko if: !multiLineText -->
+                                                <input disabled type="text" class="line-input"> <!-- /ko -->
+                                                <!-- ko if: multiLineText === true  -->
+                                                <textarea disabled style="width: 98%"></textarea>
+                                                <!-- /ko -->
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type === 'employee' -->
+                                            <div>
+                                                <select disabled style="width: 98%">
+                                                    <option value="1">Select an employee...</option>
+                                                </select>
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type === 'equipment' -->
+                                            <div>
+                                                <select disabled style="width: 98%">
+                                                    <option value="1">Select an equipment...</option>
+                                                </select>
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type === 'date' -->
+                                            <div>
+                                                <input disabled style="border: 0;" type="date">
+                                                <hr style="margin-top: 0">
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type === 'time' -->
+                                            <div>
+                                                <input style="border: 0;" type="time">
+                                                <hr style="margin-top: 0">
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type === 'acknowledgement' -->
+                                            <div class="acknowledgement-question-container">
+                                                <div class="acknowledgement-checkbox-container">
+                                                    <input disabled type="checkbox">
+                                                </div>
+                                                <div class="question-title">
+                                                    <span data-bind="text: title"></span>
+                                                    <!-- ko if: subtitle -->
+                                                    <div>
+                                                        <i>
+                                                            <span data-bind="text: subtitle"></span>
+                                                        </i>
+                                                    </div>
+                                                    <!-- /ko -->
+                                                </div>
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type === 'initials' || type === 'signature' -->
+                                            <div>
+                                                <div class="signature-container">
+                                                    <i style="font-size: x-small; color: grey">
+                                                        &nbsp;&nbsp;Click to Initials/Signature...</i>
+                                                </div>
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type === 'boolean' -->
+                                            <div>
+                                                <span class="d-block"><input disabled style="vertical-align: middle;"
+                                                        type="radio" name="yesNo"> &nbsp;Yes </span>
+                                                <span class="d-block"><input disabled style="vertical-align: middle;"
+                                                        type="radio" name="yesNo"> &nbsp;No </span>
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type === 'choice' && !$parent.tabular -->
+                                            <div>
+                                                <div class="choices-container">
+                                                    <!-- ko foreach: choices -->
+                                                    <div class="choice-item">
+                                                        <input disabled
+                                                            data-bind="attr: {name: $parent.title, type: $parent.multiChoice ? 'checkbox' : 'radio'}">
+                                                        <span data-bind="text: $data"></span>
+                                                    </div>
+                                                    <!-- /ko -->
+                                                </div>
+                                            </div>
+                                            <!-- /ko -->
+
+                                            <!-- ko if: type === 'choice' && $parent.tabular -->
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td style="margin-bottom: 0; font-size: small"
+                                                        data-bind="text: title"></td>
+                                                    <!-- ko if: hasOnlyTabularChoices -->
+                                                    <td style="padding-right: 0.5rem" rowspan="3">
+                                                        <div class="tabular-input-container"
+                                                            data-bind="foreach: sectionHeaderChoices">
+                                                            <input
+                                                                data-bind="attr: {name: $parent.title, type: $parent.multiChoice ? 'checkbox': 'radio', disabled: !$parents[2].isHeaderChoiceInQuestionChoice($data, $parent.choices)}" />
+                                                        </div>
+                                                    </td>
+                                                    <!-- /ko -->
+                                                </tr>
+                                                <!-- ko if: subtitle -->
+                                                <tr>
+                                                    <td>
+                                                        <i class="d-block">
+                                                            <span data-bind="text: subtitle"></span>
+                                                        </i>
+                                                    </td>
+                                                </tr>
+                                                <!-- /ko -->
+                                                <tr>
+                                                    <td>
+                                                        <!-- ko if: helpText -->
+                                                        <span class="d-inline-block" data-bind="html: helpText"></span>
+                                                        <span data-bind="if: helpTextContainsLink">
+                                                            <i style="font-size: smaller" class="fa-solid fa-link"></i>
+                                                        </span>
+                                                        <!-- /ko -->
+
+                                                        <!-- ko if: !hasOnlyTabularChoices -->
+                                                        <!-- ko foreach: choices -->
+                                                        <div>
+                                                            <input disabled
+                                                                data-bind="attr: {name: $parent.title, type: $parent.multiChoice ? 'checkbox': 'radio'}" />
+                                                            <span data-bind="text: $data"></span>
+                                                        </div>
+                                                        <!-- /ko -->
+                                                        <!-- /ko -->
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            <!-- /ko -->
+                                            <br>
+                                        </div>
+                                        <!-- /ko -->
+                                    </div>
+                                    <!-- /ko -->
+                                    <div class="button-container">
+                                        <!-- ko if: currentSectionIndex() > 0 -->
+                                        <button class="form-preview-button btn-sm"
+                                            data-bind="click: previousSection">Back</button>
+                                        <!-- /ko -->
+                                        <!-- ko if: hasNextSectionNewPage() -->
+                                        <button class="form-preview-button-2 btn-sm"
+                                            data-bind="click: nextSection">Next</button>
+                                        <!-- /ko -->
+                                        <!-- ko if: sections()[currentSectionIndex()+1] && sections()[currentSectionIndex()+1].reviewPage && !reviewMode() -->
+                                        <button class="form-preview-button-2 btn-sm"
+                                            data-bind="click: showReviewPage">Review</button>
+                                        <!-- /ko -->
+                                        <!-- ko if: reviewMode() -->
+                                        <button class="form-preview-button-2 btn-sm">Submit</button>
+                                        <!-- /ko -->
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-            </form>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bind="click: previewJSON">Preview JSON</button>
+                    <button type="button" class="btn btn-success" data-bind="click: downloadJSON">Download JSON</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -688,7 +1173,6 @@
             </div>
         </div>
     </div>
-
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
@@ -726,12 +1210,16 @@
                 this.exclusiveMaximum = ko.observable(false);
                 this.multiChoice = ko.observable(false);
                 this.multiLineText = ko.observable(false);
-                this.required = ko.observable(false);
+                this.required = ko.observable(true);
                 this.isQuestionVisible = ko.observable(true);
                 this.captureTime = ko.observable(false);
                 this.captureLocation = ko.observable(false);
                 this.isIdEditable = ko.observable(false);
                 this.isNew = ko.observable(isNew); // Add a flag to indicate if the question is new
+
+                if (documentViewModel.formViewModel.sections().find(section => section.sectionId() === sectionId)?.tabular()) {
+                    this.type('choice');
+                }
 
 
                 this.type.subscribe(newValue => {
@@ -810,17 +1298,19 @@
                 })
 
                 this.newPage.subscribe(newValue => {
-                    if (newValue || this.reviewPage()) {
-                        // add an <hr> tag before the section to signify a new page
-                        $('#section_' + this.sectionId()).before('<hr style="height: 2rem; margin: 20px 0;">');
-                    } else {
-                        // remove the <hr> tag if it exists 
-                        $('#section_' + this.sectionId()).prev('hr').remove();
-                    }
+                    $(document).ready(() => {
+                        if (newValue) {
+                            // add an <hr> tag before the section to signify a new page
+                            $('#section_' + this.sectionId()).before('<hr style="height: 2rem; margin: 20px 0;">');
+                        } else {
+                            // remove the <hr> tag if it exists 
+                            $('#section_' + this.sectionId()).prev('hr').remove();
+                        }
+                    });
                 })
 
                 this.reviewPage.subscribe(newValue => {
-                    if (newValue) {
+                    if (newValue || this.newPage()) {
                         this.newPage(true);
                     } else {
                         this.newPage(false);
@@ -830,11 +1320,11 @@
             }
 
             disableIfPreviousReviewPage = function (sections, index) {
-                if (sections()[index()].reviewPage()) {
+                if (sections()[index()]?.reviewPage()) {
                     return true;
                 }
                 for (var i = 0; i < index(); i++) {
-                    if (sections()[i].reviewPage()) {
+                    if (sections()[i]?.reviewPage()) {
                         return true;
                     }
                 }
@@ -843,7 +1333,7 @@
 
             disableIfReviewPageExists = function (sections, index) {
                 for (var i = 0; i < sections().length; i++) {
-                    if (sections()[i].reviewPage() && i !== index()) {
+                    if (sections()[i]?.reviewPage() && i !== index()) {
                         return true;
                     }
                 }
@@ -872,6 +1362,7 @@
                 if (confirm('Are you sure you want to remove this question?')) {
                     const section = documentViewModel.formViewModel.sections().find(section => section.sectionId() === this.sectionId());
                     section.questions.remove(question);
+                    section.questions.valueHasMutated();
                 }
             }
 
@@ -935,7 +1426,8 @@
 
             removeSection(section) {
                 if (confirm('Are you sure you want to remove this section?')) {
-                    this.sections.remove(section);
+                    const sectionIdToRemove = section.sectionId();
+                    this.sections.remove(s => s.sectionId() == sectionIdToRemove);
                 }
             }
 
@@ -955,7 +1447,7 @@
                 }
                 //duplicate the section and add it to the form
                 const newSection = new SectionViewModel(this.sections().length + 1);
-                newSection.title(section.title());
+                newSection.title(section.title() + '-copy');
                 newSection.subtitle(section.subtitle());
                 newSection.repeatable(section.repeatable());
                 newSection.newPage(section.newPage());
@@ -994,6 +1486,15 @@
                 // Display the modal
                 $('#jsonModal').modal('show');
             };
+
+            previewForm() {
+                if (!this.validateForm()) {
+                    return;
+                }
+
+                // Display the modal
+                $('#previewModal').modal('show');
+            }
 
             downloadJSON() {
                 if (!this.validateForm()) {
@@ -1180,7 +1681,9 @@
                     // validate choice headers uniqueness
                     if (section.tabular()) {
                         const choiceHeaderValues = section.choiceHeaders().map(choiceHeader => choiceHeader.value().trim());
-                        const choiceHeaderDisplayTexts = section.choiceHeaders().map(choiceHeader => choiceHeader.displayText().trim());
+                        const choiceHeaderDisplayTexts = section.choiceHeaders()
+                            .map(choiceHeader => choiceHeader.displayText().trim())
+                            .filter(displayText => displayText !== ""); // Filter out empty strings
 
                         const uniqueChoiceHeaderValues = new Set(choiceHeaderValues);
                         const uniqueChoiceHeaderDisplayTexts = new Set(choiceHeaderDisplayTexts);
@@ -1374,8 +1877,171 @@
 
         }
 
+        class FormPreviewViewModel {
+            constructor() {
+                this.title = ko.computed(() => documentViewModel.formViewModel.title());
+                this.description = ko.computed(() => documentViewModel.formViewModel.description());
+                this.sections = ko.computed(() => {
+                    return documentViewModel.formViewModel.sections().map(section => {
+                        var helpTextContainsLink = false;
+                        var helpTextParsed = this.parseMarkdown(section.helpText());
+                        return {
+                            title: section.title(),
+                            subtitle: section.subtitle(),
+                            helpText: helpTextParsed,
+                            helpTextContainsLink: helpTextContainsLink,
+                            choiceHeaders: section.choiceHeaders().map(choiceHeader => {
+                                // if the choiceHeaders has a displayText property, use it, otherwise use the choiceHeader
+                                if (choiceHeader.displayText() && choiceHeader.displayText().trim() !== '') {
+                                    return choiceHeader.displayText();
+                                }
+                                return choiceHeader.value();
+                            }),
+                            questionHeader: section.questionHeader(),
+                            choiceHeaderDisplayText: section.choiceHeaderDisplayText(),
+                            newPage: ko.observable(section.newPage()),
+                            reviewPage: section.reviewPage(),
+                            tabular: section.tabular(),
+                            questions: section.questions().map(question => {
+                                var helpTextContainsLink = false;
+                                var helpTextParsed = this.parseMarkdown(question.helpText());
+                                var hasOnlyTabularChoices = question.type() === 'choice' && question.choices().length > 0 && question.choices().every(choice => {
+                                    const unwrappedChoice = ko.unwrap(choice.value).toLowerCase();
+                                    const unwrappedChoiceHeaders = section.choiceHeaders().map(header => ko.unwrap(header.value).toLowerCase());
+                                    return unwrappedChoiceHeaders.includes(unwrappedChoice);
+                                });
+
+                                var choices = question.choices()?.map(choice => {
+                                    if (section.choiceHeaderDisplayText()) {
+                                        return section.choiceHeaderDisplayText()[choice()] || choice();
+                                    }
+                                    return choice.value();
+                                })
+
+                                return {
+                                    title: question.title(),
+                                    subtitle: question.subtitle(),
+                                    helpText: helpTextParsed,
+                                    helpTextContainsLink: helpTextContainsLink,
+                                    type: question.type(),
+                                    choices: hasOnlyTabularChoices ? choices : question.choices()?.map(choice => choice.value()),
+                                    minimum: question.minimum(),
+                                    maximum: question.maximum(),
+                                    exclusiveMinimum: question.exclusiveMinimum(),
+                                    exclusiveMaximum: question.exclusiveMaximum(),
+                                    multiChoice: question.multiChoice(),
+                                    multiLineText: question.multiLineText(),
+                                    required: question.required(),
+                                    captureTime: question.captureTime(),
+                                    captureLocation: question.captureLocation(),
+                                    hasOnlyTabularChoices: hasOnlyTabularChoices,
+                                    sectionHeaderChoices: section.choiceHeaders().map(choiceHeader => {
+                                        // if the choiceHeaderDisplayText object has the key, use it, otherwise use the choiceHeader
+                                        if (section.choiceHeaderDisplayText()) {
+                                            return section.choiceHeaderDisplayText()[choiceHeader()] || choiceHeader();
+                                        }
+                                        return choiceHeader.value();
+                                    })
+                                }
+                            })
+                        };
+                    });
+                });
+
+                this.currentSectionIndex = ko.observable(0);
+                this.reviewMode = ko.observable(false);
+                this.reviewSectionTitle = ko.observable(null);
+                this.reviewSectionSubTitle = ko.observable(null);
+                this.reviewSectionHelpText = ko.observable(null);
+
+                ko.computed(() => {
+                    var reviewSection = this.sections().find(section => section.reviewPage);
+                    if (reviewSection) {
+                        this.reviewSectionTitle(reviewSection.title);
+                        this.reviewSectionSubTitle(reviewSection.subtitle);
+                        this.reviewSectionHelpText(reviewSection.helpText);
+                    }
+                });
+            }
+
+            nextSection() {
+                var currentIndex = this.currentSectionIndex();
+                if (currentIndex < this.sections().length - 1) {
+                    if (this.sections()[currentIndex + 1].reviewPage) {
+                        this.reviewMode(true);
+                    } else if (this.sections()[currentIndex + 1].newPage) {
+                        this.currentSectionIndex(currentIndex + 1);
+                    } else {
+                        this.sections()[currentIndex].visible(false);
+                        this.sections()[currentIndex + 1].newPage(false);
+                        this.currentSectionIndex(currentIndex + 1);
+                    }
+                    this.scrollToTop();
+                }
+            }
+
+            previousSection() {
+                var currentIndex = this.currentSectionIndex();
+                if (this.reviewMode()) {
+                    // Exit review mode and go to the section before the review page
+                    this.reviewMode(false);
+                } else if (currentIndex > 0) {
+                    this.currentSectionIndex(currentIndex - 1);
+                }
+                this.scrollToTop();
+            }
+
+            isCurrentSection(index) {
+                return this.currentSectionIndex() === index;
+            };
+
+            hasNextSectionNewPage() {
+                var currentIndex = this.currentSectionIndex();
+                if (currentIndex < this.sections().length - 1) {
+
+                    return this.sections()[currentIndex + 1].reviewPage == true ? false : this.sections()[currentIndex + 1].newPage();
+                }
+                return false;
+            };
+
+            showReviewPage() {
+                this.reviewMode(true);
+                this.scrollToTop();
+            }
+
+            scrollToTop() {
+                const formPreviewContainer = document.querySelector('.form-preview-body');
+                if (formPreviewContainer) {
+                    formPreviewContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+
+            parseMarkdown(text) {
+                if (text) {
+                    // Replace ***text*** with <b><i>text</i></b>
+                    text = text.replace(/\*\*\*(.*?)\*\*\*/g, '<b><i>$1</i></b>');
+                    // Replace __text__ with <b>text</b>
+                    text = text.replace(/__(.*?)__/g, '<b>$1</b>');
+                    // Replace *text* with <i>text</i>
+                    text = text.replace(/\*(.*?)\*/g, '<i>$1</i>');
+                    // Replace [text](url) with <a href="url">text</a>
+                    text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2"> $1 <i style="font-size: smaller" class="fa-solid fa-up-right-from-square"></i></a>');
+                    // replace `code` with <code>code</code>
+                    text = text.replace(/`(.*?)`/g, '<code>$1</code>');
+                }
+                return text;
+            }
+
+
+            isHeaderChoiceInQuestionChoice(headerChoice, questionChoices) {
+                return questionChoices.some(choice => choice.toLowerCase() === headerChoice.toLowerCase());
+            }
+        }
+
+
         const documentViewModel = new DocumentViewModel();
-        ko.applyBindings({ documentViewModel });
+        const formPreviewViewModel = new FormPreviewViewModel();
+        ko.applyBindings({ documentViewModel, formPreviewViewModel });
 
 
         // Enable sorting for questions
@@ -1385,11 +2051,14 @@
                 update: function (event, ui) {
                     const sectionId = $(this).closest('.section').attr('id').split('_')[1];
                     const section = documentViewModel.formViewModel.sections().find(s => s.sectionId() == sectionId);
-                    const sortedQuestions = $(this).children('.question').map(function () {
+                    let sortedQuestions = $(this).children('.question').map(function () {
                         const questionId = $(this).attr('id').split('_')[1];
                         return section.questions().find(q => q.questionId() == questionId);
                     }).get();
+
+                    section.questions([]);
                     section.questions(sortedQuestions);
+                    section.questions.valueHasMutated();
                 }
             });
         });
@@ -1397,9 +2066,10 @@
         $(document).on('mouseover', '.section-list', function () {
             $(this).sortable({
                 handle: ".drag-handle",
+                items: '.section-container',
                 update: function (event, ui) {
-                    const sortedSections = $(this).children('.section').map(function () {
-                        const sectionId = $(this).attr('id').split('_')[1];
+                    let sortedSections = $(this).children('.section-container').map(function () {
+                        const sectionId = $(this).find('.section').attr('id').split('_')[1];
                         return documentViewModel.formViewModel.sections().find(s => s.sectionId() == sectionId);
                     }).get();
 
@@ -1409,21 +2079,43 @@
 
                     if (reviewPageIndex === 0) {
                         alert("Sections with reviewPage = true cannot be at the top.");
-                        $(this).sortable('cancel');
-                        return;
+                        // update the sortedSections instead of calling the sortable.cancel as it was fighting with the knockout observables
+                        // over the DOM elements
+                        sortedSections = documentViewModel.formViewModel.sections();
                     }
 
                     if (newPageIndex !== -1 && reviewPageIndex !== -1 && newPageIndex > reviewPageIndex) {
                         alert("Sections with newPage = true cannot be below a reviewPage section.");
-                        $(this).sortable('cancel');
-                        return;
+                        // update the sortedSections instead of calling the sortable.cancel as it was fighting with the knockout observables
+                        // over the DOM elements
+                        sortedSections = documentViewModel.formViewModel.sections();
                     }
 
-                    // Update the observable array
+                    // Force update the observable array by clearing it first
+                    documentViewModel.formViewModel.sections([]);
                     documentViewModel.formViewModel.sections(sortedSections);
-                }
+                    documentViewModel.formViewModel.toggleAllVisibility();
+                    updateHrTags();
+
+                },
+
             });
         });
+
+        function updateHrTags() {
+            $('.section-container').each(function () {
+                const sectionId = $(this).find('.section').attr('id').split('_')[1];
+                const section = documentViewModel.formViewModel.sections().find(s => s.sectionId() == sectionId);
+
+                // Remove existing <hr> tags
+                $(this).find('hr').remove();
+
+                // Add <hr> tag if newPage is true
+                if (section && section.newPage()) {
+                    $(this).before('<hr style="height: 2rem; margin: 20px 0;">');
+                }
+            });
+        }
 
         document.getElementById('jsonFileInput').addEventListener('change', function (event) {
             documentViewModel.formViewModel.readJSON(event);

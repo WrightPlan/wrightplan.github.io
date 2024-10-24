@@ -2154,11 +2154,12 @@
         })
 
         const parentUrl = document.referrer;
-        const parentOrigin = new URL(parentUrl).origin;
+        if (parentUrl) {
+            const parentOrigin = new URL(parentUrl).origin;
 
-        // once loaded, send a message to the parent window to indicate that the form builder is ready
-        window.parent.postMessage('ready', parentOrigin);
-
+            // once loaded, send a message to the parent window to indicate that the form builder is ready
+            window.parent.postMessage('ready', parentOrigin);
+        }
         document.getElementById('jsonFileInput').addEventListener('change', function (event) {
             documentViewModel.formViewModel.readJSON(event);
         });

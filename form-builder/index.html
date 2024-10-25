@@ -566,7 +566,7 @@
                                     <i class="fa-solid toggleVisibility"
                                         data-bind="click: function(){isSectionVisible(!isSectionVisible())}, css: { 'fa-chevron-right': !isSectionVisible(), 'fa-chevron-down': isSectionVisible() }"></i>
                                 </div>
-                                <h4 style="display:inline" data-bind="text: 'Section: ' + sectionId()"></h4>
+                                <h4 style="display:inline" data-bind="text: 'Section: ' + title()"></h4>
                                 <div class="action-buttons">
                                     <!-- ko if: reviewPage() -->
                                     <span class="badge badge-primary badge-pill p-2"
@@ -684,7 +684,7 @@
                                                 <i class="fa-solid toggleVisibility"
                                                     data-bind="click: function(){isQuestionVisible(!isQuestionVisible())}, css: { 'fa-chevron-right': !isQuestionVisible(), 'fa-chevron-down': isQuestionVisible() }"></i>
                                             </div>
-                                            <h5 style="display: inline" data-bind="text: 'Question: ' + questionId()">
+                                            <h5 style="display: inline" data-bind="text: 'Question: ' + title()">
                                             </h5>
                                             <div>
                                                 <span type="button" class="duplicate-button"
@@ -704,23 +704,6 @@
                                                 <input type="text" class="form-control"
                                                     data-bind="attr: { id: 'questionTitle_' + questionId() }, value: title"
                                                     required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="required"
-                                                    data-bind="attr: { for: 'questionId_' + questionId() }">Question
-                                                    ID</label>
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control"
-                                                        data-bind="attr: { id: 'questionId_' + questionId() }, value: questionId, disable: documentViewModel.isUploaded() || !isIdEditable()"
-                                                        required>
-                                                    <div class="input-group-append"
-                                                        data-bind="if: !$root.documentViewModel.isUploaded()">
-                                                        <span class="input-group-text"
-                                                            data-bind="click: function() { isIdEditable(true)}">
-                                                            <i class="fa fa-pencil"></i>
-                                                        </span>
-                                                    </div>
-                                                </div>
                                             </div>
                                             <div class="form-group">
                                                 <label
@@ -988,7 +971,7 @@
                                                 <!-- ko if: !multiLineText -->
                                                 <input disabled type="text" class="line-input"> <!-- /ko -->
                                                 <!-- ko if: multiLineText === true  -->
-                                                <textarea disabled style="width: 98%"></textarea>
+                                                <textarea disabled style="width: 98%; resize: none"></textarea>
                                                 <!-- /ko -->
                                             </div>
                                             <!-- /ko -->
@@ -1222,7 +1205,6 @@
                 this.isQuestionVisible = ko.observable(true);
                 this.captureTime = ko.observable(false);
                 this.captureLocation = ko.observable(false);
-                this.isIdEditable = ko.observable(false);
                 this.isNew = ko.observable(isNew); // Add a flag to indicate if the question is new
 
                 if (documentViewModel.formViewModel.sections().find(section => section.sectionId() === sectionId)?.tabular()) {
@@ -1235,9 +1217,9 @@
                 });
 
                 this.title.subscribe(newValue => {
-                    if (newValue && !this.isIdEditable() && this.isNew()) {
-                        var camelCaseId = documentViewModel.toCamelCase(newValue);
-                        this.questionId(camelCaseId);
+                    if (newValue && this.isNew()) {
+                        const guid = documentViewModel.generateGuid();
+                        this.questionId(guid);
                     }
                 })
             }
@@ -1301,8 +1283,8 @@
 
 
                 this.title.subscribe(newValue => {
-                    var camelCaseId = documentViewModel.toCamelCase(newValue);
-                    this.sectionId(camelCaseId);
+                    const guid = documentViewModel.generateGuid();
+                    this.sectionId(guid);
                 })
 
                 this.newPage.subscribe(newValue => {
@@ -1603,7 +1585,6 @@
                     section.questions = section.questions.map(question => {
                         delete question.sectionId;
                         delete question.isQuestionVisible;
-                        delete question.isIdEditable;
                         delete question.isNew;
 
                         // If question type is integer or decimal, the min/max values should be numbers
@@ -1907,6 +1888,14 @@
                 return str?.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function (match, index) {
                     return index === 0 ? match.toLowerCase() : match.toUpperCase();
                 }).replace(/\s+/g, '');
+            }
+
+            generateGuid = () => {
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                    var r = Math.random() * 16 | 0,
+                        v = c == 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
             }
 
         }

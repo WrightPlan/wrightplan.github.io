@@ -923,8 +923,8 @@
                                     </div>
                                     <!-- ko foreach: sections -->
                                     <div
-                                        data-bind="visible: $parent.isCurrentSection($index()) || !$data.newPage || $parent.reviewMode()">
-                                        <div class="section-preview-header" data-bind="ifnot: reviewPage">
+                                        data-bind="visible: pgNumber == $parent.currentSectionIndex() || $parent.reviewMode()">
+                                        <div class="section-preview-header" data-bind="ifnot: reviewPage()">
                                             <h5 data-bind="text: title"></h5>
                                             <!-- ko if: subtitle -->
                                             <span data-bind="text: subtitle"></span><br>
@@ -946,9 +946,9 @@
                                         </div>
 
                                         <!-- ko foreach: questions -->
-                                        <div style="width: 98%">
+                                        <div style="width: 98%; padding-bottom:0.5rem">
                                             <div data-bind="visible: $parent.tabular">
-                                                <hr style="margin: 0;">
+                                                <hr style="margin: 0; padding: 0.25rem">
                                             </div>
                                             <!-- ko if: type !== 'acknowledgement' && ((!$parent.tabular) || (type !== 'choice' && $parent.tabular)) -->
                                             <span style="margin-bottom: 0; font-size: small"
@@ -1106,7 +1106,6 @@
                                                 </tr>
                                             </table>
                                             <!-- /ko -->
-                                            <br>
                                         </div>
                                         <!-- /ko -->
                                     </div>
@@ -1120,7 +1119,7 @@
                                         <button class="form-preview-button-2 btn-sm"
                                             data-bind="click: nextSection">Next</button>
                                         <!-- /ko -->
-                                        <!-- ko if: sections()[currentSectionIndex()+1] && sections()[currentSectionIndex()+1].reviewPage && !reviewMode() -->
+                                        <!-- ko if: sections()[currentSectionIndex()+1] && sections()[currentSectionIndex()+1].reviewPage() && !reviewMode() -->
                                         <button class="form-preview-button-2 btn-sm"
                                             data-bind="click: showReviewPage">Review</button>
                                         <!-- /ko -->
@@ -1923,7 +1922,7 @@
                             questionHeader: section.questionHeader(),
                             choiceHeaderDisplayText: section.choiceHeaderDisplayText(),
                             newPage: ko.observable(section.newPage()),
-                            reviewPage: section.reviewPage(),
+                            reviewPage: ko.observable(section.reviewPage()),
                             tabular: section.tabular(),
                             questions: section.questions().map(question => {
                                 var helpTextContainsLink = false;
@@ -1971,6 +1970,22 @@
                     });
                 });
 
+                ko.computed(() => {
+                    var sections = this.sections();
+                    var pageNumber = 0;
+                    sections.forEach((section, index) => {
+                        if (index !== 0) {
+                            if (section.newPage() || section.reviewPage()) {
+                                pageNumber += 1;
+                            }
+                            section.pgNumber = pageNumber;
+                        } else {
+                            section.pgNumber = pageNumber;
+                        }
+                    });
+
+                });
+
                 this.currentSectionIndex = ko.observable(0);
                 this.reviewMode = ko.observable(false);
                 this.reviewSectionTitle = ko.observable(null);
@@ -1978,7 +1993,7 @@
                 this.reviewSectionHelpText = ko.observable(null);
 
                 ko.computed(() => {
-                    var reviewSection = this.sections().find(section => section.reviewPage);
+                    var reviewSection = this.sections().find(section => section.reviewPage());
                     if (reviewSection) {
                         this.reviewSectionTitle(reviewSection.title);
                         this.reviewSectionSubTitle(reviewSection.subtitle);
@@ -1990,7 +2005,7 @@
             nextSection() {
                 var currentIndex = this.currentSectionIndex();
                 if (currentIndex < this.sections().length - 1) {
-                    if (this.sections()[currentIndex + 1].reviewPage) {
+                    if (this.sections()[currentIndex + 1].reviewPage()) {
                         this.reviewMode(true);
                     } else if (this.sections()[currentIndex + 1].newPage) {
                         this.currentSectionIndex(currentIndex + 1);
@@ -2022,7 +2037,7 @@
                 var currentIndex = this.currentSectionIndex();
                 if (currentIndex < this.sections().length - 1) {
 
-                    return this.sections()[currentIndex + 1].reviewPage == true ? false : this.sections()[currentIndex + 1].newPage();
+                    return this.sections()[currentIndex + 1].reviewPage() == true ? false : this.sections()[currentIndex + 1].newPage();
                 }
                 return false;
             };
@@ -2054,7 +2069,6 @@
                 }
                 return text;
             }
-
 
             isHeaderChoiceInQuestionChoice(headerChoice, questionChoices) {
                 return questionChoices.some(choice => choice.toLowerCase() === headerChoice.toLowerCase());

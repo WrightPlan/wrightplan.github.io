@@ -946,7 +946,7 @@
                                         </div>
 
                                         <!-- ko foreach: questions -->
-                                        <div style="width: 98%; padding-bottom:0.5rem">
+                                        <div style="width: 98%; padding-bottom:0.25rem">
                                             <div data-bind="visible: $parent.tabular">
                                                 <hr style="margin: 0; padding: 0.25rem">
                                             </div>
@@ -1217,8 +1217,9 @@
 
                 this.title.subscribe(newValue => {
                     if (newValue && this.isNew()) {
-                        const guid = documentViewModel.generateGuid();
-                        this.questionId(guid);
+                        const camelCaseTitle = documentViewModel.toCamelCase(newValue).slice(0, 58);
+                        const guid = documentViewModel.generateGuid().slice(-4);
+                        this.questionId(camelCaseTitle + guid);
                     }
                 })
             }
@@ -1282,8 +1283,9 @@
 
 
                 this.title.subscribe(newValue => {
-                    const guid = documentViewModel.generateGuid();
-                    this.sectionId(guid);
+                    const camelCaseTitle = documentViewModel.toCamelCase(newValue).slice(0, 58);
+                    const guid = documentViewModel.generateGuid().slice(-4);
+                    this.sectionId(camelCaseTitle + guid);
                 })
 
                 this.newPage.subscribe(newValue => {

@@ -922,7 +922,7 @@
                                         <br>
                                     </div>
                                     <!-- ko foreach: sections -->
-                                    <div
+                                    <div class="pb-2"
                                         data-bind="visible: pgNumber == $parent.currentSectionIndex() || $parent.reviewMode()">
                                         <div class="section-preview-header" data-bind="ifnot: reviewPage()">
                                             <h5 data-bind="text: title"></h5>
@@ -1123,7 +1123,7 @@
                                         <button class="form-preview-button-2 btn-sm"
                                             data-bind="click: showReviewPage">Review</button>
                                         <!-- /ko -->
-                                        <!-- ko if: reviewMode() || currentSectionIndex() === $parent.sections().length - 1 -->
+                                        <!-- ko if: reviewMode() || currentSectionIndex() === lastPageNumber() -->
                                         <button class="form-preview-button-2 btn-sm">Submit</button>
                                         <!-- /ko -->
                                     </div>
@@ -1219,7 +1219,7 @@
                     if (newValue && this.isNew()) {
                         const camelCaseTitle = documentViewModel.toCamelCase(newValue).slice(0, 58);
                         const guid = documentViewModel.generateGuid().slice(-4);
-                        this.questionId(camelCaseTitle + guid);
+                        this.questionId(guid + camelCaseTitle);
                     }
                 })
             }
@@ -1285,7 +1285,7 @@
                 this.title.subscribe(newValue => {
                     const camelCaseTitle = documentViewModel.toCamelCase(newValue).slice(0, 58);
                     const guid = documentViewModel.generateGuid().slice(-4);
-                    this.sectionId(camelCaseTitle + guid);
+                    this.sectionId(guid + camelCaseTitle);
                 })
 
                 this.newPage.subscribe(newValue => {
@@ -1985,9 +1985,14 @@
                             section.pgNumber = pageNumber;
                         }
                     });
-
                 });
 
+                this.lastPageNumber = ko.computed(() => {
+
+                    var sections = this.sections();
+                    var lastSection = sections.length > 0 ? sections[sections.length - 1] : 0;
+                    return lastSection.pgNumber;
+                })
                 this.currentSectionIndex = ko.observable(0);
                 this.reviewMode = ko.observable(false);
                 this.reviewSectionTitle = ko.observable(null);

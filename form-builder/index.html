@@ -370,7 +370,7 @@
             color: white;
             z-index: 1;
             background-color: #304f87;
-            padding: 5px;
+            padding: 0.5rem;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
@@ -566,7 +566,7 @@
                                     <i class="fa-solid toggleVisibility"
                                         data-bind="click: function(){isSectionVisible(!isSectionVisible())}, css: { 'fa-chevron-right': !isSectionVisible(), 'fa-chevron-down': isSectionVisible() }"></i>
                                 </div>
-                                <h4 style="display:inline" data-bind="text: 'Section: ' + sectionId()"></h4>
+                                <h4 style="display:inline" data-bind="text: 'Section: ' + title()"></h4>
                                 <div class="action-buttons">
                                     <!-- ko if: reviewPage() -->
                                     <span class="badge badge-primary badge-pill p-2"
@@ -684,7 +684,7 @@
                                                 <i class="fa-solid toggleVisibility"
                                                     data-bind="click: function(){isQuestionVisible(!isQuestionVisible())}, css: { 'fa-chevron-right': !isQuestionVisible(), 'fa-chevron-down': isQuestionVisible() }"></i>
                                             </div>
-                                            <h5 style="display: inline" data-bind="text: 'Question: ' + questionId()">
+                                            <h5 style="display: inline" data-bind="text: 'Question: ' + title()">
                                             </h5>
                                             <div>
                                                 <span type="button" class="duplicate-button"
@@ -704,23 +704,6 @@
                                                 <input type="text" class="form-control"
                                                     data-bind="attr: { id: 'questionTitle_' + questionId() }, value: title"
                                                     required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="required"
-                                                    data-bind="attr: { for: 'questionId_' + questionId() }">Question
-                                                    ID</label>
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control"
-                                                        data-bind="attr: { id: 'questionId_' + questionId() }, value: questionId, disable: documentViewModel.isUploaded() || !isIdEditable()"
-                                                        required>
-                                                    <div class="input-group-append"
-                                                        data-bind="if: !$root.documentViewModel.isUploaded()">
-                                                        <span class="input-group-text"
-                                                            data-bind="click: function() { isIdEditable(true)}">
-                                                            <i class="fa fa-pencil"></i>
-                                                        </span>
-                                                    </div>
-                                                </div>
                                             </div>
                                             <div class="form-group">
                                                 <label
@@ -912,8 +895,10 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div><span class="required"></span><small>This is just a preview. The actual form can be accessed on
-                        the Field Solutions App after the form is uploaded.</small></div>
+                <div class="alert alert-warning"><span class="required"></span>
+                    <small>This is just a preview. The actual form can be accessed on
+                        the Field Solutions App after the form is uploaded.</small>
+                </div>
 
                 <div class="modal-body
                     d-flex justify-content-center align-items-center">
@@ -922,50 +907,50 @@
                         <div class="content">
                             <div class="form-preview-container" data-bind="with: formPreviewViewModel">
                                 <div class="form-preview-header">
-                                    <span class="form-preview-title" data-bind=" text: title">
+                                    <span class="form-preview-title" data-bind="text: title">
                                     </span>
                                     <span class="form-preview-description" data-bind="text: description"></span>
                                     <span class="form-preview-date"
-                                        data-bind="text: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })">
-                                    </span>
+                                        data-bind="text: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })"></span>
                                 </div>
                                 <div class="form-preview-body">
                                     <br>
                                     <div class="section-preview-header" data-bind="if: reviewMode">
-                                        <h5 data-bind="text: reviewSectionTitle">
-                                        </h5>
+                                        <h5 data-bind="text: reviewSectionTitle"></h5>
                                         <span data-bind="text: reviewSectionSubTitle"></span><br>
-                                        <span class="d-inline" data-bind="html: reviewSectionHelpText"> </span>
+                                        <span class="d-inline" data-bind="html: reviewSectionHelpText"></span>
                                         <br>
                                     </div>
                                     <!-- ko foreach: sections -->
-                                    <div
-                                        data-bind="visible: $parent.isCurrentSection($index()) || !$data.newPage || $parent.reviewMode()">
-
-                                        <div class="section-preview-header" data-bind="ifnot: reviewPage">
-                                            <h5 data-bind="text: title">
-                                            </h5>
+                                    <div class="pb-2"
+                                        data-bind="visible: pgNumber == $parent.currentSectionIndex() || $parent.reviewMode()">
+                                        <div class="section-preview-header" data-bind="ifnot: reviewPage()">
+                                            <h5 data-bind="text: title"></h5>
+                                            <!-- ko if: subtitle -->
                                             <span data-bind="text: subtitle"></span><br>
-                                            <span class="d-inline" data-bind="html: helpText"> </span>
+                                            <!-- /ko -->
+                                            <!-- ko if: helpText -->
+                                            <span class="d-inline" data-bind="html: helpText"></span>
                                             <br>
+                                            <!-- /ko -->
                                         </div>
 
                                         <div style="margin-right: 0.5rem;" class="tabular-section-preview-header"
                                             data-bind="if: tabular">
-                                            <div>
-                                                <span style="font-size: small" data-bind="text: questionHeader"></span>
-                                            </div>
-                                            <div data-bind="foreach: choiceHeaders">
-                                                <span data-bind="text: $data"></span>&nbsp;
-                                            </div>
+                                            <span class="col-8 p-0" style="font-size: small; text-align: left"
+                                                data-bind="text: questionHeader"></span>
+                                            <!-- ko foreach: choiceHeaders -->
+                                            <span style="padding-left: 0; text-align: center"
+                                                data-bind="text: $data, style: { width: (100 / ($parent.choiceHeaders.length + 1)) + '%' }"></span>&nbsp;
+                                            <!-- /ko -->
                                         </div>
 
                                         <!-- ko foreach: questions -->
-                                        <div style="width: 98%">
+                                        <div style="width: 98%; padding-bottom:0.25rem">
                                             <div data-bind="visible: $parent.tabular">
-                                                <hr style="margin: 0;">
+                                                <hr style="margin: 0; padding: 0.25rem">
                                             </div>
-                                            <!-- ko if: type !== 'acknowledgement' && ((!$parent.tabular) || (type !== 'choice' && $parent.tabular))  -->
+                                            <!-- ko if: type !== 'acknowledgement' && ((!$parent.tabular) || (type !== 'choice' && $parent.tabular)) -->
                                             <span style="margin-bottom: 0; font-size: small"
                                                 data-bind="text: title, css: {'required': required }"></span>
                                             <!-- ko if: subtitle -->
@@ -974,7 +959,7 @@
                                             </i>
                                             <!-- /ko -->
                                             <!-- ko if: helpText -->
-                                            <span class="d-inline-block" data-bind="html: helpText"> </span>
+                                            <span class="d-inline-block" data-bind="html: helpText"></span>
                                             <span data-bind="if: helpTextContainsLink">
                                                 <i style="font-size: smaller" class="fa-solid fa-link"></i>
                                             </span>
@@ -986,7 +971,7 @@
                                                 <!-- ko if: !multiLineText -->
                                                 <input disabled type="text" class="line-input"> <!-- /ko -->
                                                 <!-- ko if: multiLineText === true  -->
-                                                <textarea disabled style="width: 98%"></textarea>
+                                                <textarea disabled style="width: 98%; resize: none"></textarea>
                                                 <!-- /ko -->
                                             </div>
                                             <!-- /ko -->
@@ -1051,9 +1036,11 @@
                                             <!-- ko if: type === 'boolean' -->
                                             <div>
                                                 <span class="d-block"><input disabled style="vertical-align: middle;"
-                                                        type="radio" name="yesNo"> &nbsp;Yes </span>
+                                                        type="radio" name="yesNo">
+                                                    &nbsp;Yes </span>
                                                 <span class="d-block"><input disabled style="vertical-align: middle;"
-                                                        type="radio" name="yesNo"> &nbsp;No </span>
+                                                        type="radio" name="yesNo">
+                                                    &nbsp;No </span>
                                             </div>
                                             <!-- /ko -->
 
@@ -1074,17 +1061,19 @@
                                             <!-- ko if: type === 'choice' && $parent.tabular -->
                                             <table style="width:100%">
                                                 <tr>
-                                                    <td style="margin-bottom: 0; font-size: small"
-                                                        data-bind="text: title"></td>
-                                                    <!-- ko if: hasOnlyTabularChoices -->
-                                                    <td style="padding-right: 0.5rem" rowspan="3">
-                                                        <div class="tabular-input-container"
-                                                            data-bind="foreach: sectionHeaderChoices">
+                                                    <td class="d-flex" style="margin-bottom: 0; font-size: small">
+                                                        <span class="col-8 p-0" col-span="2"
+                                                            data-bind="text: title, style: { width: (100 / ($parent.choiceHeaders.length + 1)) + '%' }"></span>
+                                                        <!-- ko if: hasOnlyTabularChoices -->
+                                                        <!-- ko foreach: sectionHeaderChoices -->
+                                                        <span style="text-align: center; padding-left: 0"
+                                                            data-bind="style: { width: (100 / ($parent.sectionHeaderChoices.length + 1)) + '%' } ">
                                                             <input
                                                                 data-bind="attr: {name: $parent.title, type: $parent.multiChoice ? 'checkbox': 'radio', disabled: !$parents[2].isHeaderChoiceInQuestionChoice($data, $parent.choices)}" />
-                                                        </div>
+                                                        </span>
+                                                        <!-- /ko -->
+                                                        <!-- /ko -->
                                                     </td>
-                                                    <!-- /ko -->
                                                 </tr>
                                                 <!-- ko if: subtitle -->
                                                 <tr>
@@ -1117,7 +1106,6 @@
                                                 </tr>
                                             </table>
                                             <!-- /ko -->
-                                            <br>
                                         </div>
                                         <!-- /ko -->
                                     </div>
@@ -1131,24 +1119,26 @@
                                         <button class="form-preview-button-2 btn-sm"
                                             data-bind="click: nextSection">Next</button>
                                         <!-- /ko -->
-                                        <!-- ko if: sections()[currentSectionIndex()+1] && sections()[currentSectionIndex()+1].reviewPage && !reviewMode() -->
+                                        <!-- ko if: sections()[currentSectionIndex()+1] && sections()[currentSectionIndex()+1].reviewPage() && !reviewMode() -->
                                         <button class="form-preview-button-2 btn-sm"
                                             data-bind="click: showReviewPage">Review</button>
                                         <!-- /ko -->
-                                        <!-- ko if: reviewMode() -->
+                                        <!-- ko if: reviewMode() || currentSectionIndex() === lastPageNumber() -->
                                         <button class="form-preview-button-2 btn-sm">Submit</button>
                                         <!-- /ko -->
                                     </div>
-
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bind="click: previewJSON">Preview JSON</button>
-                    <button type="button" class="btn btn-success" data-bind="click: downloadJSON">Download JSON</button>
+                    <button type="button" class="btn btn-primary" data-bind="click: previewJSON">Preview
+                        JSON</button>
+                    <button type="button" class="btn btn-success" data-bind="click: downloadJSON">Download
+                        JSON</button>
+                    <button type="button" class="btn btn-success" data-bind="click: submitForm">Import
+                        Form</button>
                 </div>
             </div>
         </div>
@@ -1214,7 +1204,6 @@
                 this.isQuestionVisible = ko.observable(true);
                 this.captureTime = ko.observable(false);
                 this.captureLocation = ko.observable(false);
-                this.isIdEditable = ko.observable(false);
                 this.isNew = ko.observable(isNew); // Add a flag to indicate if the question is new
 
                 if (documentViewModel.formViewModel.sections().find(section => section.sectionId() === sectionId)?.tabular()) {
@@ -1227,9 +1216,10 @@
                 });
 
                 this.title.subscribe(newValue => {
-                    if (newValue && !this.isIdEditable() && this.isNew()) {
-                        var camelCaseId = documentViewModel.toCamelCase(newValue);
-                        this.questionId(camelCaseId);
+                    if (newValue && this.isNew()) {
+                        const camelCaseTitle = documentViewModel.toCamelCase(newValue).slice(0, 58);
+                        const guid = documentViewModel.generateGuid().slice(-4);
+                        this.questionId(guid + camelCaseTitle);
                     }
                 })
             }
@@ -1293,18 +1283,19 @@
 
 
                 this.title.subscribe(newValue => {
-                    var camelCaseId = documentViewModel.toCamelCase(newValue);
-                    this.sectionId(camelCaseId);
+                    const camelCaseTitle = documentViewModel.toCamelCase(newValue).slice(0, 58);
+                    const guid = documentViewModel.generateGuid().slice(-4);
+                    this.sectionId(guid + camelCaseTitle);
                 })
 
                 this.newPage.subscribe(newValue => {
                     $(document).ready(() => {
                         if (newValue) {
                             // add an <hr> tag before the section to signify a new page
-                            $('#section_' + this.sectionId()).before('<hr style="height: 2rem; margin: 20px 0;">');
+                            $('#section_' + CSS.escape(this.sectionId())).before('<hr style="height: 2rem; margin: 20px 0;">');
                         } else {
                             // remove the <hr> tag if it exists 
-                            $('#section_' + this.sectionId()).prev('hr').remove();
+                            $('#section_' + CSS.escape(this.sectionId())).prev('hr').remove();
                         }
                     });
                 })
@@ -1319,7 +1310,7 @@
 
             }
 
-            disableIfPreviousReviewPage = function (sections, index) {
+            disableIfPreviousReviewPage(sections, index) {
                 if (sections()[index()]?.reviewPage()) {
                     return true;
                 }
@@ -1331,7 +1322,7 @@
                 return false;
             };
 
-            disableIfReviewPageExists = function (sections, index) {
+            disableIfReviewPageExists(sections, index) {
                 for (var i = 0; i < sections().length; i++) {
                     if (sections()[i]?.reviewPage() && i !== index()) {
                         return true;
@@ -1584,6 +1575,10 @@
                         section.choiceHeaderDisplayText = choiceHeaderDisplayText;
                     }
 
+                    if (section.reviewPage) {
+                        delete section.newPage;
+                    }
+
                     // Clean the section itself
                     section = cleanObject(section);
 
@@ -1591,7 +1586,6 @@
                     section.questions = section.questions.map(question => {
                         delete question.sectionId;
                         delete question.isQuestionVisible;
-                        delete question.isIdEditable;
                         delete question.isNew;
 
                         // If question type is integer or decimal, the min/max values should be numbers
@@ -1796,7 +1790,7 @@
                     reader.onload = (e) => {
                         const json = JSON.parse(e.target.result);
                         this.sections.removeAll();
-                        this.formId(documentViewModel.toCamelCase(json.formId));
+                        this.formId(json.formId);
                         this.title(json.title);
                         this.description(json.description);
                         this.associatedEntity(json.associatedEntity);
@@ -1861,6 +1855,28 @@
                     reader.readAsText(file);
                 }
             };
+
+            submitForm() {
+                const cleanedJson = this.createJsonFromViewModel(this);
+                const parentUrl = document.referrer;
+
+                // Check if the form builder is opened in its own window
+                if (parentUrl === document.URL) {
+                    alert('Unable to submit the form. Please open the form builder from WrightPlan to submit the form.');
+                    return;
+                }
+
+                try {
+                    // Extract the origin from the parent URL
+                    const parentOrigin = new URL(parentUrl).origin;
+                    const postData = JSON.stringify(cleanedJson, null, 2);
+
+                    // Post message to the parent window using the extracted origin
+                    window.parent.postMessage(postData, parentOrigin);
+                } catch (error) {
+                    console.error('Unable to submit the form.', error);
+                }
+            }
         }
 
         class DocumentViewModel {
@@ -1870,9 +1886,17 @@
             }
 
             toCamelCase = (str) => {
-                return str.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function (match, index) {
+                return str?.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function (match, index) {
                     return index === 0 ? match.toLowerCase() : match.toUpperCase();
                 }).replace(/\s+/g, '');
+            }
+
+            generateGuid = () => {
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                    var r = Math.random() * 16 | 0,
+                        v = c == 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
             }
 
         }
@@ -1900,7 +1924,7 @@
                             questionHeader: section.questionHeader(),
                             choiceHeaderDisplayText: section.choiceHeaderDisplayText(),
                             newPage: ko.observable(section.newPage()),
-                            reviewPage: section.reviewPage(),
+                            reviewPage: ko.observable(section.reviewPage()),
                             tabular: section.tabular(),
                             questions: section.questions().map(question => {
                                 var helpTextContainsLink = false;
@@ -1948,6 +1972,27 @@
                     });
                 });
 
+                ko.computed(() => {
+                    var sections = this.sections();
+                    var pageNumber = 0;
+                    sections.forEach((section, index) => {
+                        if (index !== 0) {
+                            if (section.newPage() || section.reviewPage()) {
+                                pageNumber += 1;
+                            }
+                            section.pgNumber = pageNumber;
+                        } else {
+                            section.pgNumber = pageNumber;
+                        }
+                    });
+                });
+
+                this.lastPageNumber = ko.computed(() => {
+
+                    var sections = this.sections();
+                    var lastSection = sections.length > 0 ? sections[sections.length - 1] : 0;
+                    return lastSection.pgNumber;
+                })
                 this.currentSectionIndex = ko.observable(0);
                 this.reviewMode = ko.observable(false);
                 this.reviewSectionTitle = ko.observable(null);
@@ -1955,7 +2000,7 @@
                 this.reviewSectionHelpText = ko.observable(null);
 
                 ko.computed(() => {
-                    var reviewSection = this.sections().find(section => section.reviewPage);
+                    var reviewSection = this.sections().find(section => section.reviewPage());
                     if (reviewSection) {
                         this.reviewSectionTitle(reviewSection.title);
                         this.reviewSectionSubTitle(reviewSection.subtitle);
@@ -1967,7 +2012,7 @@
             nextSection() {
                 var currentIndex = this.currentSectionIndex();
                 if (currentIndex < this.sections().length - 1) {
-                    if (this.sections()[currentIndex + 1].reviewPage) {
+                    if (this.sections()[currentIndex + 1].reviewPage()) {
                         this.reviewMode(true);
                     } else if (this.sections()[currentIndex + 1].newPage) {
                         this.currentSectionIndex(currentIndex + 1);
@@ -1999,7 +2044,7 @@
                 var currentIndex = this.currentSectionIndex();
                 if (currentIndex < this.sections().length - 1) {
 
-                    return this.sections()[currentIndex + 1].reviewPage == true ? false : this.sections()[currentIndex + 1].newPage();
+                    return this.sections()[currentIndex + 1].reviewPage() == true ? false : this.sections()[currentIndex + 1].newPage();
                 }
                 return false;
             };
@@ -2031,7 +2076,6 @@
                 }
                 return text;
             }
-
 
             isHeaderChoiceInQuestionChoice(headerChoice, questionChoices) {
                 return questionChoices.some(choice => choice.toLowerCase() === headerChoice.toLowerCase());
@@ -2117,6 +2161,21 @@
             });
         }
 
+        // add a listener for postMessage from the parent window and upload the file if data comes in
+        window.addEventListener('message', (event) => {
+            const receivedData = event.data.data;
+            if (receivedData) {
+                documentViewModel.formViewModel.readJSON({ target: { files: [new Blob([receivedData])] } });
+            }
+        })
+
+        const parentUrl = document.referrer;
+        if (parentUrl) {
+            const parentOrigin = new URL(parentUrl).origin;
+
+            // once loaded, send a message to the parent window to indicate that the form builder is ready
+            window.parent.postMessage('ready', parentOrigin);
+        }
         document.getElementById('jsonFileInput').addEventListener('change', function (event) {
             documentViewModel.formViewModel.readJSON(event);
         });

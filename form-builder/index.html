@@ -530,7 +530,8 @@
                     </div>
                     <div class="form-group">
                         <label class="required" for="associatedEntity">Associated Entity</label>
-                        <select class="form-control" id="associatedEntity" data-bind="value: associatedEntity" required>
+                        <select class="form-control" id="associatedEntity"
+                            data-bind="value: associatedEntity, disable: documentViewModel.isUploaded" required>
                             <option style="color:#545b62" value="" disabled selected>Select an associated entity...
                             </option>
                             <option value="dispatch-job">Dispatch Job</option>

@@ -1861,7 +1861,7 @@
                 const parentUrl = document.referrer;
 
                 // Check if the form builder is opened in its own window
-                if (parentUrl === document.URL) {
+                if (parentUrl === "") {
                     alert('Unable to submit the form. Please open the form builder from WrightPlan to submit the form.');
                     return;
                 }

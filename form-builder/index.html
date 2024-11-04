@@ -1365,11 +1365,11 @@
                 }
                 //duplicate the question and add it to the section
                 const newQuestion = new QuestionViewModel(this.sectionId(), question.questionId());
-                newQuestion.title(question.title());
+                newQuestion.title(question.title() + '-copy');
                 newQuestion.subtitle(question.subtitle());
                 newQuestion.helpText(question.helpText());
                 newQuestion.type(question.type());
-                newQuestion.choices(question.choices()?.map(choice => ko.observable(choice())));
+                newQuestion.choices(question.choices()?.map(choice => ko.observable(choice)));
                 newQuestion.minimum(question.minimum());
                 newQuestion.maximum(question.maximum());
                 newQuestion.exclusiveMinimum(question.exclusiveMinimum());
@@ -1450,7 +1450,7 @@
                     newQuestion.subtitle(question.subtitle());
                     newQuestion.helpText(question.helpText());
                     newQuestion.type(question.type());
-                    newQuestion.choices(question.choices()?.map(choice => ko.observable(choice())));
+                    newQuestion.choices(question.choices()?.map(choice => ko.observable(ko.unwrap(choice))));
                     newQuestion.minimum(question.minimum());
                     newQuestion.maximum(question.maximum());
                     newQuestion.exclusiveMinimum(question.exclusiveMinimum());
@@ -1677,8 +1677,8 @@
                     if (section.tabular()) {
                         const choiceHeaderValues = section.choiceHeaders().map(choiceHeader => choiceHeader.value().trim());
                         const choiceHeaderDisplayTexts = section.choiceHeaders()
-                            .map(choiceHeader => choiceHeader.displayText().trim())
-                            .filter(displayText => displayText !== ""); // Filter out empty strings
+                            .map(choiceHeader => choiceHeader.displayText()?.trim())
+                            .filter(displayText => displayText !== "" && displayText !== undefined && displayText !== null); // Filter out empty strings
 
                         const uniqueChoiceHeaderValues = new Set(choiceHeaderValues);
                         const uniqueChoiceHeaderDisplayTexts = new Set(choiceHeaderDisplayTexts);
@@ -1722,7 +1722,7 @@
                             }
 
                             // Validate unique choices
-                            const choiceValues = question.choices().map(choice => choice.value().trim());
+                            const choiceValues = question.choices().map(choice => ko.unwrap(choice.value)?.trim());
                             const uniqueChoices = new Set(choiceValues);
                             if (uniqueChoices.size !== choiceValues.length) {
                                 isValid = false;
@@ -1807,7 +1807,9 @@
 
                             if (sectionData.choiceHeaders) {
                                 section.questionHeader(sectionData.questionHeader);
-                                section.choiceHeaders(sectionData.choiceHeaders.map(choiceHeader => new TabularChoiceHeader(choiceHeader, sectionData.choiceHeaderDisplayText[choiceHeader])));
+                                section.choiceHeaders(sectionData.choiceHeaders.map(choiceHeader => {
+                                    const displayText = sectionData.choiceHeaderDisplayText && Object.keys(sectionData.choiceHeaderDisplayText).length > 0 ? sectionData.choiceHeaderDisplayText[choiceHeader] ?? null : null; return new TabularChoiceHeader(choiceHeader, displayText);
+                                }));
                                 section.tabular(true);
                             }
 
@@ -1931,7 +1933,7 @@
                                 var helpTextContainsLink = false;
                                 var helpTextParsed = this.parseMarkdown(question.helpText());
                                 var hasOnlyTabularChoices = question.type() === 'choice' && question.choices().length > 0 && question.choices().every(choice => {
-                                    const unwrappedChoice = ko.unwrap(choice.value).toLowerCase();
+                                    const unwrappedChoice = ko.unwrap(choice.value)?.toLowerCase();
                                     const unwrappedChoiceHeaders = section.choiceHeaders().map(header => ko.unwrap(header.value).toLowerCase());
                                     return unwrappedChoiceHeaders.includes(unwrappedChoice);
                                 });
@@ -1940,7 +1942,7 @@
                                     if (section.choiceHeaderDisplayText()) {
                                         return section.choiceHeaderDisplayText()[choice()] || choice();
                                     }
-                                    return choice.value();
+                                    return ko.unwrap(choice.value);
                                 })
 
                                 return {
@@ -1949,7 +1951,7 @@
                                     helpText: helpTextParsed,
                                     helpTextContainsLink: helpTextContainsLink,
                                     type: question.type(),
-                                    choices: hasOnlyTabularChoices ? choices : question.choices()?.map(choice => choice.value()),
+                                    choices: hasOnlyTabularChoices ? choices : question.choices()?.map(choice => ko.unwrap(choice.value)),
                                     minimum: question.minimum(),
                                     maximum: question.maximum(),
                                     exclusiveMinimum: question.exclusiveMinimum(),

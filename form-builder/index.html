@@ -1369,7 +1369,9 @@
                 newQuestion.subtitle(question.subtitle());
                 newQuestion.helpText(question.helpText());
                 newQuestion.type(question.type());
-                newQuestion.choices(question.choices()?.map(choice => ko.observable(choice)));
+                ko.unwrap(question.choices)?.forEach(choice => {
+                    newQuestion.choices.push(new Choice(ko.unwrap(choice.value)));
+                });
                 newQuestion.minimum(question.minimum());
                 newQuestion.maximum(question.maximum());
                 newQuestion.exclusiveMinimum(question.exclusiveMinimum());
@@ -1450,7 +1452,9 @@
                     newQuestion.subtitle(question.subtitle());
                     newQuestion.helpText(question.helpText());
                     newQuestion.type(question.type());
-                    newQuestion.choices(question.choices()?.map(choice => ko.observable(ko.unwrap(choice))));
+                    ko.unwrap(question.choices)?.forEach(choice => {
+                        newQuestion.choices.push(new Choice(ko.unwrap(choice.value)));
+                    });
                     newQuestion.minimum(question.minimum());
                     newQuestion.maximum(question.maximum());
                     newQuestion.exclusiveMinimum(question.exclusiveMinimum());
@@ -1664,7 +1668,7 @@
                     // Validate section title
                     if (!section.title().trim()) {
                         isValid = false;
-                        errorMessages.push(`Section ${section.sectionId()} title is required.`);
+                        errorMessages.push(`Section "${section.title()}" title is required.`);
                     }
 
                     if (section.reviewPage()) {
@@ -1685,12 +1689,12 @@
 
                         if (uniqueChoiceHeaderValues.size !== choiceHeaderValues.length) {
                             isValid = false;
-                            errorMessages.push(`Section ${section.sectionId()} has duplicate choice header values.`);
+                            errorMessages.push(`Section "${section.title()}" has duplicate choice header values.`);
                         }
 
                         if (uniqueChoiceHeaderDisplayTexts.size !== choiceHeaderDisplayTexts.length) {
                             isValid = false;
-                            errorMessages.push(`Section ${section.sectionId()} has duplicate choice header display texts.`);
+                            errorMessages.push(`Section "${section.title()}" has duplicate choice header display texts.`);
                         }
                     }
 
@@ -1698,18 +1702,18 @@
                         // Validate question title
                         if (!question.title().trim()) {
                             isValid = false;
-                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} must have a title.`);
+                            errorMessages.push(`Question "${question.title()}" in section "${section.title()}" must have a title.`);
                         }
 
                         if (question.type() === '') {
                             isValid = false;
-                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} must have a question type.`);
+                            errorMessages.push(`Question "${question.title()}" in section "${section.title()}" must have a question type.`);
                         }
 
                         // Check for duplicate questionId
                         if (questionIds.has(question.questionId())) {
                             isValid = false;
-                            errorMessages.push(`Duplicate questionId found: "${question.questionId()}" in section ${section.sectionId()}" Each question must have a unique questionId.`);
+                            errorMessages.push(`Duplicate questionId found: "${question.title()}" in section "${section.title()}" Each question must have a unique questionId.`);
                         } else {
                             questionIds.add(question.questionId());
                         }
@@ -1718,48 +1722,48 @@
                         if (question.type() === 'choice') {
                             if (question.choices().length === 0) {
                                 isValid = false;
-                                errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} must have at least one choice.`);
+                                errorMessages.push(`Question "${question.title()}" in section "${section.title()}" must have at least one choice.`);
                             }
 
                             // Validate unique choices
-                            const choiceValues = question.choices().map(choice => ko.unwrap(choice.value)?.trim());
+                            const choiceValues = question.choices().map(choice => ko.unwrap(ko.unwrap(choice).value)?.trim());
                             const uniqueChoices = new Set(choiceValues);
                             if (uniqueChoices.size !== choiceValues.length) {
                                 isValid = false;
-                                errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} has duplicate choices.`);
+                                errorMessages.push(`Question "${question.title()}" in section "${section.title()}" has duplicate choices.`);
                             }
 
                             // Validate multi-choice
                             if (question.multiChoice() && question.choices().length < 2) {
                                 isValid = false;
-                                errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} must have at least two choices for multi-choice.`);
+                                errorMessages.push(`Question "${question.title()}" in section "${section.title()}" must have at least two choices for multi-choice.`);
                             }
                         }
 
                         // Validate numeric range
                         if (question.minimum() !== null && question.maximum() !== null && parseInt(question.minimum()) >= parseInt(question.maximum())) {
                             isValid = false;
-                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} has an invalid numeric range. Minimum should be less than maximum.`);
+                            errorMessages.push(`Question "${question.title()}" in section "${section.title()}" has an invalid numeric range. Minimum should be less than maximum.`);
                         }
 
                         // Validate exclusive minimum/maximum
                         if (question.exclusiveMinimum() && question.minimum() === null) {
                             isValid = false;
-                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} has exclusive minimum set but no minimum value.`);
+                            errorMessages.push(`Question "${question.title()}" in section "${section.title()}" has exclusive minimum set but no minimum value.`);
                         }
                         if (question.exclusiveMaximum() && question.maximum() === null) {
                             isValid = false;
-                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} has exclusive maximum set but no maximum value.`);
+                            errorMessages.push(`Question "${question.title()}" in section "${section.title()}" has exclusive maximum set but no maximum value.`);
                         }
 
                         // validate integer vs decimal input
                         if (question.type() === 'integer' && question.minimum() % 1 !== 0 && question.minimum() !== null && question.minimum() !== undefined) {
                             isValid = false;
-                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} has a minimum value that is not an integer.`);
+                            errorMessages.push(`Question "${question.title()}" in section "${section.title()}" has a minimum value that is not an integer.`);
                         }
                         if (question.type() === 'integer' && question.maximum() % 1 !== 0 && question.maximum() !== null && question.maximum() !== undefined) {
                             isValid = false;
-                            errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} has a maximum value that is not an integer.`);
+                            errorMessages.push(`Question "${question.title()}" in section "${section.title()}" has a maximum value that is not an integer.`);
                         }
                     });
                 });

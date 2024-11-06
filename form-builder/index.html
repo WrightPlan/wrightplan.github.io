@@ -1737,7 +1737,7 @@
                         }
 
                         // Validate numeric range
-                        if (question.minimum() !== null && question.maximum() !== null && question.minimum() >= question.maximum()) {
+                        if (question.minimum() !== null && question.maximum() !== null && parseInt(question.minimum()) >= parseInt(question.maximum())) {
                             isValid = false;
                             errorMessages.push(`Question "${question.questionId()}" in section ${section.sectionId()} has an invalid numeric range. Minimum should be less than maximum.`);
                         }

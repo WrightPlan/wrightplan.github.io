@@ -924,7 +924,7 @@
                                     </div>
                                     <!-- ko foreach: sections -->
                                     <div class="pb-2"
-                                        data-bind="visible: pgNumber == $parent.currentSectionIndex() || $parent.reviewMode()">
+                                        data-bind="visible: pgNumber == $parent.currentPageIndex() || $parent.reviewMode()">
                                         <div class="section-preview-header" data-bind="ifnot: reviewPage()">
                                             <h5 data-bind="text: title"></h5>
                                             <!-- ko if: subtitle -->
@@ -1112,19 +1112,19 @@
                                     </div>
                                     <!-- /ko -->
                                     <div class="button-container">
-                                        <!-- ko if: currentSectionIndex() > 0 -->
+                                        <!-- ko if: currentPageIndex() > 0 || reviewMode() -->
                                         <button class="form-preview-button btn-sm"
-                                            data-bind="click: previousSection">Back</button>
+                                            data-bind="click: previousPage">Back</button>
                                         <!-- /ko -->
                                         <!-- ko if: hasNextSectionNewPage() -->
                                         <button class="form-preview-button-2 btn-sm"
-                                            data-bind="click: nextSection">Next</button>
+                                            data-bind="click: nextPage">Next</button>
                                         <!-- /ko -->
-                                        <!-- ko if: sections()[currentSectionIndex()+1] && sections()[currentSectionIndex()+1].reviewPage() && !reviewMode() -->
+                                        <!-- ko if: hasNextSectionReviewPage() && !reviewMode() -->
                                         <button class="form-preview-button-2 btn-sm"
                                             data-bind="click: showReviewPage">Review</button>
                                         <!-- /ko -->
-                                        <!-- ko if: reviewMode() || currentSectionIndex() === lastPageNumber() -->
+                                        <!-- ko if: reviewMode() || currentPageIndex() === lastPageNumber() -->
                                         <button class="form-preview-button-2 btn-sm">Submit</button>
                                         <!-- /ko -->
                                     </div>
@@ -1446,6 +1446,11 @@
                 newSection.repeatable(section.repeatable());
                 newSection.newPage(section.newPage());
                 newSection.helpText(section.helpText());
+                newSection.tabular(section.tabular());
+                newSection.choiceHeaders.removeAll();
+                section.choiceHeaders().forEach(choiceHeader => {
+                    newSection.choiceHeaders.push(new TabularChoiceHeader(choiceHeader.value()));
+                });
                 section.questions().forEach(question => {
                     const newQuestion = new QuestionViewModel(newSection.sectionId(), question.questionId());
                     newQuestion.title(question.title());
@@ -2000,7 +2005,12 @@
                     var lastSection = sections.length > 0 ? sections[sections.length - 1] : 0;
                     return lastSection.pgNumber;
                 })
-                this.currentSectionIndex = ko.observable(0);
+                this.currentPageIndex = ko.observable(0);
+                this.currentSectionIndex = ko.computed(() => {
+                    return this.sections().reduceRight((lastIndex, section, index) => {
+                        return section.pgNumber === this.currentPageIndex() && lastIndex === -1 ? index : lastIndex;
+                    }, -1);
+                });
                 this.reviewMode = ko.observable(false);
                 this.reviewSectionTitle = ko.observable(null);
                 this.reviewSectionSubTitle = ko.observable(null);
@@ -2016,36 +2026,32 @@
                 });
             }
 
-            nextSection() {
+            nextPage() {
                 var currentIndex = this.currentSectionIndex();
                 if (currentIndex < this.sections().length - 1) {
                     if (this.sections()[currentIndex + 1].reviewPage()) {
                         this.reviewMode(true);
                     } else if (this.sections()[currentIndex + 1].newPage) {
-                        this.currentSectionIndex(currentIndex + 1);
+                        this.currentPageIndex(this.currentPageIndex() + 1);
                     } else {
                         this.sections()[currentIndex].visible(false);
                         this.sections()[currentIndex + 1].newPage(false);
-                        this.currentSectionIndex(currentIndex + 1);
+                        this.currentPageIndex(this.currentPageIndex() + 1);
                     }
                     this.scrollToTop();
                 }
             }
 
-            previousSection() {
-                var currentIndex = this.currentSectionIndex();
+            previousPage() {
+                var currentIndex = this.currentPageIndex();
                 if (this.reviewMode()) {
                     // Exit review mode and go to the section before the review page
                     this.reviewMode(false);
                 } else if (currentIndex > 0) {
-                    this.currentSectionIndex(currentIndex - 1);
+                    this.currentPageIndex(currentIndex - 1);
                 }
                 this.scrollToTop();
             }
-
-            isCurrentSection(index) {
-                return this.currentSectionIndex() === index;
-            };
 
             hasNextSectionNewPage() {
                 var currentIndex = this.currentSectionIndex();
@@ -2055,6 +2061,14 @@
                 }
                 return false;
             };
+
+            hasNextSectionReviewPage() {
+                var currentIndex = this.currentSectionIndex();
+                if (currentIndex < this.sections().length - 1) {
+                    return this.sections()[currentIndex + 1].reviewPage();
+                }
+                return false;
+            }
 
             showReviewPage() {
                 this.reviewMode(true);

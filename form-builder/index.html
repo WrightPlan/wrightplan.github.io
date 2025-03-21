@@ -1246,6 +1246,21 @@
 
                 if (this.type() === 'choice') {
                     this.choices = ko.observableArray(choiceHeaders.map(choice => new Choice(choice)));
+                    this.captureTime(false);
+                    this.captureLocation(false);
+                }
+
+                if (this.type() === 'acknowledgement') {
+                    this.captureTime(false);
+                }
+
+                const typesWithCaptureReset = [
+                    'boolean', 'date', 'decimal', 'dispatchJob', 'employee',
+                    'equipment', 'integer', 'text', 'time'
+                ];
+                if (typesWithCaptureReset.includes(this.type())) {
+                    this.captureTime(false);
+                    this.captureLocation(false);
                 }
 
             }

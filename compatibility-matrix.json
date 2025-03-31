@@ -2,7 +2,7 @@
   "CompatibilityMatrix": [
     {
       "FS": ">=2024.10 <2025.02",
-      "WrightPlan": "<2024.02"
+      "WrightPlan": "<2025.02"
     },
     {
       "FS": ">=2025.02",

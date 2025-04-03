@@ -1,12 +1,12 @@
 {
-  "CompatibilityMatrix": [
+  "compatibilityMatrix": [
     {
-      "FS": ">=2024.10 <2025.02",
-      "WrightPlan": "<2025.02"
+      "fS": ">=2024.10 <2025.02",
+      "wrightPlan": "<2025.02"
     },
     {
-      "FS": ">=2025.02",
-      "WrightPlan": ">=2025.02"
+      "fS": ">=2025.02",
+      "wrightPlan": ">=2025.02"
     }
   ]
 }

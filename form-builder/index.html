@@ -746,13 +746,6 @@
                                                 </select>
                                             </div>
 
-                                            <!-- ko if: (type() === 'time' || type() === 'date') && required() !== true -->
-                                            <span class="small d-block"
-                                                style="color: gray; padding-bottom: 0.5rem;"><b>Note:</b>
-                                                Even if this question is not 'required', this question will be
-                                                pre-filled with a default value in the actual form.</span>
-                                            <!-- /ko -->
-
                                             <div class="form-group form-check d-inline-block">
                                                 <input class="form-check-input" type="checkbox"
                                                     data-bind="checked: required, attr: { id: 'required_' + questionId() }">

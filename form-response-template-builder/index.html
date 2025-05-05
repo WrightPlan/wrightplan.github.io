@@ -198,7 +198,7 @@
         max-width: 20%;
       }
 
-      .mceNonEditable {
+      .non-editable {
       height: fit-content;
       width: auto;
       }
@@ -242,43 +242,43 @@
         'add-form-title',
         'leaf',
         'Form Title',
-        `<div class="editable"><h2 data-id="add-form-title" class="mceNonEditable" data-bind="text: formTitle">{{ formTitle }}</h2></div>`
+        `<div class="editable"><h2 data-id="add-form-title" class="non-editable" data-bind="text: formTitle">{{ formTitle }}</h2></div>`
       ),
       new TreeItemViewModel(
         'add-response-date',
         'leaf',
         'Form Response Date',
-        `<div class="editable"><div data-id="add-response-date" class="mceNonEditable" data-bind="text: responseDate">{{ responseDate }}</div></div>`
+        `<div class="editable"><div data-id="add-response-date" class="non-editable" data-bind="text: responseDate">{{ responseDate }}</div></div>`
       ),
       new TreeItemViewModel(
         'add-respondent',
         'leaf',
         'Respondent',
-        `<div class="editable"><div data-id="add-respondent" class="mceNonEditable" data-bind="text: respondent">{{ respondent }}</div></div>`
+        `<div class="editable"><div data-id="add-respondent" class="non-editable" data-bind="text: respondent">{{ respondent }}</div></div>`
       ),
       new TreeItemViewModel(
         'add-customer-name',
         'leaf',
         'Customer Name',
-        `<div class="editable"><div data-id="add-customer-name" class="mceNonEditable" data-bind="text: customerName">{{ customer.name }}</div></div>`
+        `<div class="editable"><div data-id="add-customer-name" class="non-editable" data-bind="text: customerName">{{ customer.name }}</div></div>`
       ),
       new TreeItemViewModel(
         'add-work-order-number',
         'leaf',
         'Work Order Number',
-        `<div class="editable"><div data-id="add-work-order-number" class="mceNonEditable" data-bind="text: workOrderNumber">{{ workOrder.number }}</div></div>`
+        `<div class="editable"><div data-id="add-work-order-number" class="non-editable" data-bind="text: workOrderNumber">{{ workOrder.number }}</div></div>`
       ),
       new TreeItemViewModel(
         'add-dispatch-job-number',
         'leaf',
         'Dispatch Job Number',
-        `<div class="editable"><div data-id="add-dispatch-job-number" class="mceNonEditable" data-bind="text: dispatchJob.number">{{ dispatchJob.number }}</div></div>`
+        `<div class="editable"><div data-id="add-dispatch-job-number" class="non-editable" data-bind="text: dispatchJob.number">{{ dispatchJob.number }}</div></div>`
       ),
       new TreeItemViewModel(
         'add-dispatch-job-description',
         'leaf',
         'Dispatch Job Description',
-        `<div class="editable"><div data-id="add-dispatch-job-description" class="mceNonEditable" data-bind="text: dispatchJob.description">{{ dispatchJob.description }}</div></div>`
+        `<div class="editable"><div data-id="add-dispatch-job-description" class="non-editable" data-bind="text: dispatchJob.description">{{ dispatchJob.description }}</div></div>`
       )
     ];
 
@@ -298,12 +298,7 @@
               new TreeItemViewModel(section.title + '-add-section-subtitle', 'leaf', `Add Section Subtitle`, `${generateSectionSubtitle(section)}`),
             ]
             : []),
-          {
-            type: 'directory',
-            id: 'questionDirectory',
-            title: 'Questions',
-            children: [...section.questions.map((question) => new TreeItemViewModel(question.questionId, 'leaf', question.title, `<h3>{{ ${question.questionId + '.title'} }}</h3>`))],
-          },
+          new TreeItemViewModel('questionDirectory', 'directory', 'Questions', null, [...section.questions.map((question) => new TreeItemViewModel(question.questionId, 'leaf', question.title, `${generateQuestion(question)})`))])
         ],
       })
       ))
@@ -333,16 +328,11 @@
         html: `<section class="repeatable-section" data-bind="foreach: ${section.title}.records">
                 <p class="removeElementOnProcessing"><span style="color: #e03e2d;">--NOTE: THIS SECTION WILL HAVE REPEATED ANSWERS--</span></p>
                   <div class="editable">
-                  <h3 class="mceNonEditable" data-bind="text: ${section.title}.title">${section.title}</h3>
-                  ${section.subtitle ? `<h4 class="mceNonEditable" data-bind="text: ${section.title}.subtitle">${section.subtitle}</h4>` : ''}
-                </div>
+                    ${generateSectionTitle(section)}
+                    ${section.subtitle ? `${generateSectionSubtitle(section)}` : ''}
+                  </div>
                 <dl>
-                ${section.questions.map(question => `
-                  <div class="editable">
-                    <h4 class="mceNonEditable" data-bind="text: ${question.questionId}.title"> ${question.title} </h4>
-                    ${question.subtitle ? `<div class="mceNonEditable" data-bind="text: ${question.questionId}.subtitle"> ${question.subtitle} </div>` : ''}
-                    <div class="mceNonEditable" data-bind="text: ${question.questionId}.answer">{{ ${question.questionId + '.answer'} }}</div>
-                    </div>`).join('')}
+                ${section.questions.map(question => `${generateQuestion(question)}`).join('')}
                 </dl>
               </section>`
       };
@@ -356,22 +346,25 @@
               ${section.subtitle ? `${generateSectionSubtitle(section)}` : ''}
             </div>
             <dl>
-              ${section.questions.map(question => `
-              <div class="editable" data-bind="with: ${question.questionId}">
-                <h4 class="mceNonEditable" data-bind="text: title"> ${question.title} </h4>
-                ${question.subtitle ? `<div class="mceNonEditable" data-bind="text: subtitle"> ${question.subtitle} </div>` : ''}
-                <div class="mceNonEditable" data-bind="text: answer">{{ ${question.questionId + '.answer'} }}</div>
-                </div>`).join('')}
+              ${section.questions.map(question => `${generateQuestion(question)}`).join('')}
             </dl>
           </section>` };
     }
 
     function generateSectionTitle(section) {
-      return `<div class="editable"><h3 data-id="${section.title + '-add-section-title'}" class="mceNonEditable" data-bind="text: ${section.title}.title">${section.title}</h3></div>`
+      return `<div class="editable"><h3 data-id="${section.title + '-add-section-title'}" class="non-editable" data-bind="text: ${section.title}.title">${section.title}</h3></div>`
     }
 
     function generateSectionSubtitle(section) {
-      return `<div class="editable"><h4 data-id="${section.title + '-add-section-subtitle'}" class="mceNonEditable" data-bind="text: ${section.title}.subtitle">${section.subtitle}</h4></div>`
+      return `<div class="editable"><h4 data-id="${section.title + '-add-section-subtitle'}" class="non-editable" data-bind="text: ${section.title}.subtitle">${section.subtitle}</h4></div>`
+    }
+
+    function generateQuestion(question) {
+      return `<div class="editable">
+        <h4 data-id="${question.questionId}" class="non-editable" data-bind="text: ${question.questionId}.title"> ${question.title} </h4>
+        ${question.subtitle ? `<div class="non-editable" data-bind="text: ${question.questionId}.subtitle"> ${question.subtitle} </div>` : ''}
+        <div class="non-editable" data-bind="text: ${question.questionId}.answer">{{ ${question.questionId + '.answer'} }}</div>
+        </div>`
     }
 
     function generateHTMLFromGenericTreeItem(item, addedElementIds) {
@@ -444,13 +437,9 @@
 
         for (const question of section.questions) {
           if (question.questionId === item.id) {
-            // Return HTML for the question
             return {
-              html: `<div class="editable"">
-                <h4  data-id="${question.questionId} class="mceNonEditable" data-bind="text: ${question.questionId}.title"> ${question.title} </h4>
-                ${question.subtitle ? `<div class="mceNonEditable" data-bind="text: ${question.questionId}.subtitle"> ${question.subtitle} </div>` : ''}
-                <div class="mceNonEditable" data-bind="text: ${question.questionId}.answer">{{ ${question.questionId + '.answer'} }}</div>
-                </div>` };
+              html: `${generateQuestion(question)}`
+            }
           }
         }
       }
@@ -492,12 +481,12 @@
           license_key: 'gpl',
           height: 600,
           content_style: EDITOR_STYLES,
-          plugins: 'noneditable visualblocks code preview advlist anchor autolink charmap codesample fullscreen help image insertdatetime link lists media pagebreak preview searchreplace table visualblocks',
+          plugins: 'visualblocks code preview advlist anchor autolink charmap codesample fullscreen help image insertdatetime link lists media pagebreak preview searchreplace table visualblocks',
           toolbar: 'toggleSidebar | visualblock undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons link | fullscreen preview | customSave',
           extended_valid_elements: 'img[onerror|src|alt|class|style]',
           editable_class: 'editable',
           format_noneditable_selector: 'h2, h4, h3, div, p, span',
-          noneditable_class: 'mceNonEditable',
+          noneditable_class: 'non-editable',
           editable_root: false,
           sidebar_show: 'customTreeSidebar',
           init_instance_callback: function (editor) {
@@ -673,19 +662,15 @@
                 if (item.type === 'leaf') {
                   let isPresent = false;
 
-                  if (item.html && item.html.includes('data-id')) {
-                    // Check for other items using their unique data-id
-                    const dataIdMatch = item.html.match(/data-id="([^"]+)"/);
-                    if (dataIdMatch) {
-                      const dataId = dataIdMatch[1];
-                      isPresent = editorContent.includes(`data-id="${dataId}"`);
-                    }
-                  } else {
-                    // Fallback: Check for the title if no data-id is available
-                    isPresent = editorContent.includes(item.title);
+                  // Check for other items using their unique data-id
+                  const dataIdMatch = item.html?.match(/data-id="([^"]+)"/);
+                  if (dataIdMatch) {
+                    const dataId = dataIdMatch[1].replace(/&/g, '&amp;');
+                    isPresent = editorContent.includes(`data-id="${dataId}"`);
                   }
 
-                  if (!isPresent) {
+
+                  if (!isPresent && self.addedElementIds.has(item.id)) {
                     // If the element is no longer in the editor, update the Set and isAdded
                     self.addedElementIds.delete(item.id);
                     item.setIsAdded(false);

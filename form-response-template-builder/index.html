@@ -766,7 +766,7 @@
       // Replace placeholders in the HTML template with actual data
       return `
           <script>
-    function Question(question) {
+    function Question(question, response) {
       this.questionId = question.questionId;
       this.title = question.title;
       this.subtitle = question.subtitle;
@@ -779,7 +779,7 @@
       this.title = section.title;
       var self = this;
       section.questions.forEach(function (question) {
-        var questionObj = new Question(question);
+        var questionObj = new Question(question, response);
         questionObj.answer = getAnswerByQuestionId(response, questionObj, null);
         self[question.questionId] = questionObj;
       });
@@ -802,7 +802,7 @@
       for (var i = 1; i <= maxOrdinal; i++) {
         var record = {};
         section.questions.forEach(function (question) {
-          var questionObj = new Question(question);
+          var questionObj = new Question(question, response);
           questionObj.ordinal = i;
           record[question.questionId] = getAnswerByQuestionId(response, questionObj, i);
         });
@@ -844,7 +844,7 @@
                   viewModel[section.title] = repeatableSection;
                   repeatableSection.records.forEach(function (record) {
                     section.questions.forEach(function (question) {
-                      var questionVM = new Question(question);
+                      var questionVM = new Question(question, response);
                       questionVM.answer = record[question.questionId];
                       viewModel[questionVM.questionId] = questionVM;
                     });
@@ -854,7 +854,7 @@
                   viewModel[section.title] = sectionVM;
 
                   sectionVM.questions = section.questions.map(function (question) {
-                    var questionVM = new Question(question);
+                    var questionVM = new Question(question, response);
                     viewModel[questionVM.questionId] = questionVM;
                   });
                 }

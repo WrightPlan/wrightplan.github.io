@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Template Designer</title>
+  <script src="https://fieldsolutions.wrightplan.net/tinymce/tinymce.min.js" referrerpolicy="origin"></script>
+  <script src="https://cdn.jsdelivr.net/npm/knockout@3.5.1/build/output/knockout-latest.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+  <style>
+    .tree-container ul {
+      list-style-type: none;
+      padding-left: 10px;
+      margin: 0;
+    }
+
+    .tree-container .directory {
+      font-weight: bold;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      color: #37474f;
+      background-color: #eceff1;
+      display: flex;
+      align-items: center;
+      position: relative;
+      padding-left: 40px;
+    }
+
+    .tree-container .directory:hover {
+      background-color: #cfd8dc;
+      color: #263238;
+    }
+
+    .tree-container .directory::before {
+      content: "\f054";
+      position: absolute;
+      font-family: "Font Awesome 6 Free";
+      /* Apply Font Awesome only to the arrow */
+      left: 0;
+      top: 50%;
+      padding: 0 0.75rem;
+      transform: translateY(-50%);
+      transition: transform 1s ease;
+    }
+
+    .tree-container .directory.expanded::before {
+      content: "\f078";
+    }
+
+    .tree-container .leaf {
+      cursor: pointer;
+      color: #1e88e5;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      background-color: #f5f5f5;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .tree-container .leaf:hover {
+      background-color: #bbdefb;
+      color: #0d47a1;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .tree-container .leaf:active {
+      background-color: #90caf9;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      transform: translateY(0);
+    }
+
+    .tree-container .selected {
+      background-color: #64b5f6;
+      color: #ffffff;
+      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .tree-container ul {
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.3s ease;
+    }
+
+    .tree-container ul.collapsed {
+      max-height: 0;
+      opacity: 0;
+    }
+
+    .tree-container ul.expanded {
+      opacity: 1;
+    }
+
+    .tree-container ul,
+    .tree-container ul ul {
+      padding-left: 20px !important;
+    }
+
+    .tox .tox-sidebar {
+      max-width: 20% !important;
+      background-color: #f4f4f4 !important;
+      border-right: 1px solid #e0e0e0;
+    }
+
+    .tox .tox-sidebar__slider {
+      overflow-y: auto !important;
+    }
+
+    .tox .tox-promotion {
+      display: none !important;
+    }
+
+    .tox-statusbar__branding {
+      display: none !important;
+    }
+
+    .btn-primary {
+      color: #fff !important;
+      background-color: #337ab7 !important;
+      border-color: #2e6da4 !important;
+    }
+
+    .btn-primary:hover {
+      color: #fff !important;
+      background-color: #286090 !important;
+      border-color: #204d74 !important;
+    }
+
+    .tox .tox-sidebar {
+      max-width: 20% !important;
+      background-color: #f4f4f4 !important;
+      border-left: 1px solid #e0e0e0;
+      order: -1;
+    }
+
+    .tox .tox-edit-area {
+      order: 1;
+    }
+
+    .tox .tox-tinymce {
+      display: flex !important;
+    }
+
+    .no-content-leaf {
+      background-color: #eceff1 !important;
+      padding: 20px 10px !important
+    }
+
+    .no-content-leaf::before {
+      content: "\f022";
+      /* Font Awesome checkmark */
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      transform: none !important;
+      padding: 0 0.5rem;
+    }
+  </style>
+  <script>
+    const EDITOR_STYLES = `
+      #tinymce {
+        background-color: darkgray !important  ;
+        padding: 1rem;
+      }
+
+      .editable-container {
+        padding: 4rem 4rem 1rem;
+        box-sizing: border-box;
+        max-width: 1050px;
+        min-width: 820px;
+        min-height: 600px;
+        margin: 2rem auto;
+        background-color: #fff;
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+        background-size: 100%;
+        background-position: right bottom;
+        background-repeat: no-repeat;
+        display: grid;
+      }
+
+      section main:empty::before,
+      section main:has(> br[data-mce-bogus]:first-child)::before {
+        content: "Write something...";
+        position: absolute;
+        top: 0;
+        left: 0;
+        color: #999;
+      }
+
+      .editable:focus {
+        outline: none;
+      }
+
+      .tox .tox-sidebar{
+        max-width: 20%;
+      }
+
+      .mceNonEditable {
+      height: fit-content;
+      width: auto;
+      }
+      `;
+
+    class TreeItemViewModel {
+
+      constructor(id, type, title, html, children, cssClass = null) {
+        this.id = id;
+        this.type = type;
+        this.title = title;
+        this.html = html;
+        this.children = children || [];
+        this.isAdded = ko.observable(false);
+        this.cssClass = cssClass;
+      }
+
+      setIsAdded(isAdded) {
+        this.isAdded(isAdded);
+      }
+    }
+
+    function debounce(func, delay) {
+      let timeout;
+      return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+      };
+    }
+
+
+    // Refactor GENERIC_DATA_ELEMENTS to use TreeItemViewModel
+    const GENERIC_DATA_ELEMENTS = [
+      new TreeItemViewModel(
+        'add-logo',
+        'leaf',
+        'Logo',
+        `<img data-id="logo" style="height: 3em" src="${document.referrer}Api/branding/default-logo" />`
+      ),
+      new TreeItemViewModel(
+        'add-form-title',
+        'leaf',
+        'Form Title',
+        `<div class="editable"><h2 data-id="add-form-title" class="mceNonEditable" data-bind="text: formTitle">{{ formTitle }}</h2></div>`
+      ),
+      new TreeItemViewModel(
+        'add-response-date',
+        'leaf',
+        'Form Response Date',
+        `<div class="editable"><div data-id="add-response-date" class="mceNonEditable" data-bind="text: responseDate">{{ responseDate }}</div></div>`
+      ),
+      new TreeItemViewModel(
+        'add-respondent',
+        'leaf',
+        'Respondent',
+        `<div class="editable"><div data-id="add-respondent" class="mceNonEditable" data-bind="text: respondent">{{ respondent }}</div></div>`
+      ),
+      new TreeItemViewModel(
+        'add-customer-name',
+        'leaf',
+        'Customer Name',
+        `<div class="editable"><div data-id="add-customer-name" class="mceNonEditable" data-bind="text: customerName">{{ customer.name }}</div></div>`
+      ),
+      new TreeItemViewModel(
+        'add-work-order-number',
+        'leaf',
+        'Work Order Number',
+        `<div class="editable"><div data-id="add-work-order-number" class="mceNonEditable" data-bind="text: workOrderNumber">{{ workOrder.number }}</div></div>`
+      ),
+      new TreeItemViewModel(
+        'add-dispatch-job-number',
+        'leaf',
+        'Dispatch Job Number',
+        `<div class="editable"><div data-id="add-dispatch-job-number" class="mceNonEditable" data-bind="text: dispatchJob.number">{{ dispatchJob.number }}</div></div>`
+      ),
+      new TreeItemViewModel(
+        'add-dispatch-job-description',
+        'leaf',
+        'Dispatch Job Description',
+        `<div class="editable"><div data-id="add-dispatch-job-description" class="mceNonEditable" data-bind="text: dispatchJob.description">{{ dispatchJob.description }}</div></div>`
+      )
+    ];
+
+    function getFormSectionsAndQuestions(jsonData) {
+
+      var allElementsLeaf = [new TreeItemViewModel('add-all-content', 'leaf', 'Add All Elements', null, null, 'no-content-leaf')];
+
+      return allElementsLeaf.concat(jsonData.sections.map((section) => ({
+        type: 'directory',
+        id: section.sectionId || section.title,
+        title: 'Section: ' + section.title,
+        children: [
+          new TreeItemViewModel(section.title + '-add-full-section', 'leaf', `Add Full Section`, `<h2>{{ ${section.title} }}</h2>`, null, 'no-content-leaf'),
+          new TreeItemViewModel(section.title + '-add-section-title', 'leaf', `Add Section Title`, `${generateSectionTitle(section)}`),
+          ...(section.subtitle
+            ? [
+              new TreeItemViewModel(section.title + '-add-section-subtitle', 'leaf', `Add Section Subtitle`, `${generateSectionSubtitle(section)}`),
+            ]
+            : []),
+          {
+            type: 'directory',
+            id: 'questionDirectory',
+            title: 'Questions',
+            children: [...section.questions.map((question) => new TreeItemViewModel(question.questionId, 'leaf', question.title, `<h3>{{ ${question.questionId + '.title'} }}</h3>`))],
+          },
+        ],
+      })
+      ))
+    }
+
+    generateTreeItemsFromJson = function (jsonData) {
+      return [
+        new TreeItemViewModel(
+          'genericDataElements',
+          'directory',
+          'Dynamic Elements',
+          null,
+          GENERIC_DATA_ELEMENTS
+        ),
+        new TreeItemViewModel(
+          'formDataElements',
+          'directory',
+          'Form Data Elements',
+          null,
+          getFormSectionsAndQuestions(jsonData)
+        )
+      ];
+    };
+
+    function generateRepeatableSection(section) {
+      return {
+        html: `<section class="repeatable-section" data-bind="foreach: ${section.title}.records">
+                <p class="removeElementOnProcessing"><span style="color: #e03e2d;">--NOTE: THIS SECTION WILL HAVE REPEATED ANSWERS--</span></p>
+                  <div class="editable">
+                  <h3 class="mceNonEditable" data-bind="text: ${section.title}.title">${section.title}</h3>
+                  ${section.subtitle ? `<h4 class="mceNonEditable" data-bind="text: ${section.title}.subtitle">${section.subtitle}</h4>` : ''}
+                </div>
+                <dl>
+                ${section.questions.map(question => `
+                  <div class="editable">
+                    <h4 class="mceNonEditable" data-bind="text: ${question.questionId}.title"> ${question.title} </h4>
+                    ${question.subtitle ? `<div class="mceNonEditable" data-bind="text: ${question.questionId}.subtitle"> ${question.subtitle} </div>` : ''}
+                    <div class="mceNonEditable" data-bind="text: ${question.questionId}.answer">{{ ${question.questionId + '.answer'} }}</div>
+                    </div>`).join('')}
+                </dl>
+              </section>`
+      };
+    }
+
+    function generateSection(section) {
+      return {
+        html: `<section>
+            <div class="editable">
+              ${generateSectionTitle(section)}
+              ${section.subtitle ? `${generateSectionSubtitle(section)}` : ''}
+            </div>
+            <dl>
+              ${section.questions.map(question => `
+              <div class="editable" data-bind="with: ${question.questionId}">
+                <h4 class="mceNonEditable" data-bind="text: title"> ${question.title} </h4>
+                ${question.subtitle ? `<div class="mceNonEditable" data-bind="text: subtitle"> ${question.subtitle} </div>` : ''}
+                <div class="mceNonEditable" data-bind="text: answer">{{ ${question.questionId + '.answer'} }}</div>
+                </div>`).join('')}
+            </dl>
+          </section>` };
+    }
+
+    function generateSectionTitle(section) {
+      return `<div class="editable"><h3 data-id="${section.title + '-add-section-title'}" class="mceNonEditable" data-bind="text: ${section.title}.title">${section.title}</h3></div>`
+    }
+
+    function generateSectionSubtitle(section) {
+      return `<div class="editable"><h4 data-id="${section.title + '-add-section-subtitle'}" class="mceNonEditable" data-bind="text: ${section.title}.subtitle">${section.subtitle}</h4></div>`
+    }
+
+    function generateHTMLFromGenericTreeItem(item, addedElementIds) {
+
+      item.setIsAdded(true);
+      addedElementIds.add(item.id);
+
+      return {
+        html: item.html
+      };
+    }
+
+    function setAllChildrenAsAdded(treeItems, addedElementIds) {
+      treeItems.forEach((treeItem) => {
+        if (treeItem.type === 'leaf') {
+          // Only apply setIsAdded to leaf items
+          treeItem.setIsAdded(true);
+          addedElementIds.add(treeItem.id);
+        }
+
+        if (treeItem.children && treeItem.children.length > 0) {
+          // Recursively process child items
+          setAllChildrenAsAdded(treeItem.children, addedElementIds);
+        }
+      });
+    }
+
+    function generateHTMLFromTreeItem(item, jsonData, addedElementIds, treeItems) {
+
+      // Mark the item as added
+      item.setIsAdded(true);
+      addedElementIds.add(item.id);
+
+      if (item.id === 'add-all-content') {
+
+        setAllChildrenAsAdded(treeItems, addedElementIds);
+
+        const sectionsHtml = jsonData.sections.map((section) => {
+          if (section.repeatable === true) {
+            return generateRepeatableSection(section)?.html;
+          }
+          return generateSection(section)?.html;
+        });
+
+        return { html: sectionsHtml.join(' ') };
+      }
+
+      for (const section of jsonData.sections) {
+
+        if (section.title + '-add-full-section' === item.id) {
+          // find the section in treeItems and set it's children as added
+          const sectionItems = treeItems.find(treeItem => treeItem.id === item.id.split('-add-full-section')[0]);
+          setAllChildrenAsAdded([sectionItems], addedElementIds);
+
+          if (section.repeatable === true) {
+            return generateRepeatableSection(section);
+          }
+          return generateSection(section);
+
+        } else if (section.title + '-add-section-title' === item.id) {
+          return {
+            html: `${generateSectionTitle(section)}`
+          };
+        } else if (section.title + '-add-section-subtitle' === item.id) {
+          return {
+            html: `${generateSectionSubtitle(section)}`
+          };
+        }
+
+
+        for (const question of section.questions) {
+          if (question.questionId === item.id) {
+            // Return HTML for the question
+            return {
+              html: `<div class="editable"">
+                <h4  data-id="${question.questionId} class="mceNonEditable" data-bind="text: ${question.questionId}.title"> ${question.title} </h4>
+                ${question.subtitle ? `<div class="mceNonEditable" data-bind="text: ${question.questionId}.subtitle"> ${question.subtitle} </div>` : ''}
+                <div class="mceNonEditable" data-bind="text: ${question.questionId}.answer">{{ ${question.questionId + '.answer'} }}</div>
+                </div>` };
+          }
+        }
+      }
+
+      return null; // Return null if no match is found
+    }
+
+    function flattenTreeItems(items) {
+      const result = [];
+      const stack = [...items];
+
+      while (stack.length > 0) {
+        const item = stack.pop();
+        result.push(item);
+        if (item.children && item.children.length > 0) {
+          stack.push(...item.children);
+        }
+      }
+
+      return result;
+    }
+
+    // ViewModel for the Template Designer
+    function TemplateDesignerViewModel() {
+      const self = this;
+
+      // Observable for the template content
+      self.templateContent = ko.observable('');
+
+      self.flattenedTreeItems = ko.observableArray([]);
+
+      self.addedElementIds = new Set();
+
+
+      // Initialize TinyMCE
+      self.initEditor = function (jsonData) {
+        tinymce.init({
+          selector: '#templateEditor',
+          license_key: 'gpl',
+          height: 600,
+          content_style: EDITOR_STYLES,
+          plugins: 'noneditable visualblocks code preview advlist anchor autolink charmap codesample fullscreen help image insertdatetime link lists media pagebreak preview searchreplace table visualblocks',
+          toolbar: 'toggleSidebar | visualblock undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons link | fullscreen preview | customSave',
+          extended_valid_elements: 'img[onerror|src|alt|class|style]',
+          editable_class: 'editable',
+          format_noneditable_selector: 'h2, h4, h3, div, p, span',
+          noneditable_class: 'mceNonEditable',
+          editable_root: false,
+          sidebar_show: 'customTreeSidebar',
+          init_instance_callback: function (editor) {
+            editor.execCommand('mceFullScreen'); // Automatically activate fullscreen
+          },
+          setup: function (editor) {
+
+            editor.ui.registry.addButton('toggleSidebar', {
+              text: 'Toggle Sidebar',
+              tooltip: 'Toggle Data Elements Sidebar',
+              onAction: function () {
+                editor.execCommand('ToggleSidebar', false, 'customtreesidebar');
+              }
+            });
+
+            editor.ui.registry.addButton('customSave', {
+              text: 'Import Template',
+              tooltip: 'Import this template',
+              icon: 'save',
+              onAction: function () {
+                const content = editor.getContent();
+                const processedContent = self.processEditorContent(content, jsonData);
+                self.saveTemplate(processedContent);
+              }
+            });
+
+            // Add a custom sidebar
+            editor.ui.registry.addSidebar('customTreeSidebar', {
+              icon: 'comment-add',
+              onSetup: function (api) {
+                const container = document.createElement('div');
+                container.style.padding = '10px';
+
+                const buttonContainer = document.createElement('div');
+                buttonContainer.classList.add('mb-3', 'd-flex', 'gap-2');
+
+                // Create Expand All button
+                const expandAllButton = document.createElement('button');
+                expandAllButton.textContent = 'Expand All';
+                expandAllButton.classList.add('btn', 'btn-primary', 'btn-sm', 'p-2');
+                expandAllButton.addEventListener('click', () => {
+                  document.querySelectorAll('.tree-container ul').forEach((ul) => {
+                    ul.classList.remove('collapsed');
+                    ul.classList.add('expanded');
+                  });
+
+                  // Add the 'expanded' class to all directories
+                  document.querySelectorAll('.tree-container .directory').forEach((directory) => {
+                    directory.classList.add('expanded');
+                  });
+                });
+
+                // Create Collapse All button
+                const collapseAllButton = document.createElement('button');
+                collapseAllButton.textContent = 'Collapse All';
+                collapseAllButton.classList.add('btn', 'btn-primary', 'btn-sm', 'p-2');
+                collapseAllButton.addEventListener('click', () => {
+                  document.querySelectorAll('.tree-container ul').forEach((ul) => {
+                    ul.classList.remove('expanded');
+                    ul.classList.add('collapsed');
+                  });
+
+                  // Remove the 'expanded' class from all directories
+                  document.querySelectorAll('.tree-container .directory').forEach((directory) => {
+                    directory.classList.remove('expanded');
+                  });
+                });
+
+                buttonContainer.appendChild(expandAllButton);
+                buttonContainer.appendChild(collapseAllButton);
+                container.appendChild(buttonContainer);
+
+                // Generate the tree structure
+                const treeItems = generateTreeItemsFromJson(jsonData);
+                self.flattenedTreeItems(flattenTreeItems(treeItems));
+
+
+                function createTree(items) {
+                  const ul = document.createElement('ul');
+                  ul.classList.add('tree-container');
+
+                  items.forEach((item) => {
+                    const li = document.createElement('li');
+                    li.style.marginBottom = '5px';
+
+                    if (item.type === 'directory') {
+                      // Create a collapsible parent
+                      const parent = document.createElement('div');
+                      parent.textContent = item.title;
+                      parent.classList.add('directory');
+                      parent.addEventListener('click', () => {
+                        const childUl = li.querySelector('ul');
+                        if (childUl) {
+                          if (childUl.classList.contains('collapsed')) {
+                            childUl.classList.remove('collapsed');
+                            childUl.classList.add('expanded');
+                            parent.classList.add('expanded');
+                          } else {
+                            childUl.classList.remove('expanded');
+                            childUl.classList.add('collapsed');
+                            parent.classList.remove('expanded');
+                          }
+                        }
+                      });
+
+                      li.appendChild(parent);
+
+                      // Recursively create child items
+                      const childUl = createTree(item.children);
+                      childUl.classList.add('collapsed');
+                      li.appendChild(childUl);
+                    } else if (item.type === 'leaf') {
+                      const elementId = item.id;
+                      const leaf = document.createElement('div');
+                      leaf.textContent = item.title;
+                      leaf.classList.add('leaf');
+                      if (item.cssClass) {
+                        leaf.classList.add(item.cssClass);
+                      }
+                      li.appendChild(leaf);
+
+                      leaf.addEventListener('click', () => {
+                        let htmlToAdd;
+
+                        // Find the selected element from GENERIC_DATA_ELEMENTS
+                        const genericItem = GENERIC_DATA_ELEMENTS.find(generic => generic.id === item.id);
+
+                        if (genericItem) {
+                          htmlToAdd = generateHTMLFromGenericTreeItem(genericItem, self.addedElementIds)?.html;
+                        } else {
+                          htmlToAdd = generateHTMLFromTreeItem(item, jsonData, self.addedElementIds, self.flattenedTreeItems())?.html;
+                        }
+
+                        if (htmlToAdd) {
+                          editor.execCommand('mceInsertContent', true, htmlToAdd + ' ');
+                        } else {
+                          console.error(`Element with id "${item.id}" not found in jsonData.`);
+                        }
+                      });
+
+
+                      //keep track of the added items
+                      ko.computed(() => {
+                        if (item.isAdded()) {
+                          leaf.style.backgroundColor = '#d6e9c6';
+                          leaf.style.color = 'black';
+                        } else {
+                          leaf.style.backgroundColor = '#faebcc';
+                          leaf.style.color = 'black';
+                        }
+                      });
+                    }
+
+                    ul.appendChild(li);
+                  });
+
+                  return ul;
+                }
+
+                const tree = createTree(treeItems);
+                container.appendChild(tree);
+
+                api.element().appendChild(container);
+              }
+            });
+
+
+            // listen for changes in the content to update the sidebar items accordingly
+            const debouncedUpdate = debounce(() => {
+              const editorContent = editor.getContent();
+
+              self.flattenedTreeItems().forEach((item) => {
+                if (item.type === 'leaf') {
+                  let isPresent = false;
+
+                  if (item.html && item.html.includes('data-id')) {
+                    // Check for other items using their unique data-id
+                    const dataIdMatch = item.html.match(/data-id="([^"]+)"/);
+                    if (dataIdMatch) {
+                      const dataId = dataIdMatch[1];
+                      isPresent = editorContent.includes(`data-id="${dataId}"`);
+                    }
+                  } else {
+                    // Fallback: Check for the title if no data-id is available
+                    isPresent = editorContent.includes(item.title);
+                  }
+
+                  if (!isPresent) {
+                    // If the element is no longer in the editor, update the Set and isAdded
+                    self.addedElementIds.delete(item.id);
+                    item.setIsAdded(false);
+                  }
+                }
+              });
+            }, 500);
+
+            // Use the debounced function in the event listener to avoid performance issues
+            editor.on('NodeChange Input', debouncedUpdate);
+          }
+        });
+      };
+
+      // Save template content
+      self.saveTemplate = function (content) {
+        const parentUrl = document.referrer;
+        const parentOrigin = new URL(parentUrl).origin;
+
+        window.parent.postMessage(content, parentOrigin);
+      };
+
+      self.processEditorContent = function (content, jsonData) {
+        const headerContent = content.match(/<header[^>]*>([\s\S]*?)<\/header>/i)[1];
+        const bodyContent = content.match(/<section[^>]*>([\s\S]*?)<\/section>/i)[1];
+        const footerContent = content.match(/<footer[^>]*>([\s\S]*?)<\/footer>/i)[1];
+        const formId = jsonData.formId || 'Form Title';
+
+        var htmlTemplate = `
+        <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <title>${formId}</title>
+               <meta name="viewport" content="width=device-width, initial-scale=1" />
+              <meta charset="utf-8" />
+              <meta name="wrightplan.id" content="${generateGUID()}" />
+              <meta name="wrightplan.version" content="2024.12" />
+              <meta name="wrightplan.role" content="FormResponse" />
+              <meta name="wrightplan.description" content="Free form for admins" />
+            </head>
+            <body class="container">
+              <header>${headerContent}</header>
+              ${bodyContent}</section>
+              <footer>${footerContent}</footer>
+            `;
+
+        const jsForResponsePDF = getJSForResponsePDF();
+        htmlTemplate += jsForResponsePDF;
+        htmlTemplate += `
+            </body>
+          </html>`;
+
+        return htmlTemplate;
+      };
+
+      generateGUID = function () {
+        return 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+          const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+      };
+
+      // Listen for data from the parent page
+      window.addEventListener('load', () => {
+        // Send a message to the parent window to indicate that the form builder is ready
+        const parentUrl = document.referrer;
+        if (parentUrl) {
+          const parentOrigin = new URL(parentUrl).origin;
+          window.parent.postMessage('ready', parentOrigin);
+        }
+
+        window.addEventListener('message', function (event) {
+
+          if (event.data) {
+            try {
+              // Parse the JSON string into an object
+              const jsonData = JSON.parse(event.data.data);
+              console.log('Received JSON data:', jsonData);
+              self.initEditor(jsonData);
+
+            } catch (error) {
+              console.error('Error parsing JSON data:', error);
+            }
+          }
+        });
+      });
+    }
+
+    // Apply bindings on page load
+    document.addEventListener('DOMContentLoaded', function () {
+      ko.applyBindings(new TemplateDesignerViewModel());
+    });
+
+
+    function getJSForResponsePDF() {
+      // Replace placeholders in the HTML template with actual data
+      return `
+          <script>
+    function Question(question) {
+      this.questionId = question.questionId;
+      this.title = question.title;
+      this.subtitle = question.subtitle;
+      this.ordinal = question.ordinal;
+      this.type = question.type;
+      this.answer = getAnswerByQuestionId(response, questionObj, null);
+    }
+
+    function Section(section, response) {
+      this.title = section.title;
+      var self = this;
+      section.questions.forEach(function (question) {
+        var questionObj = new Question(question);
+        questionObj.answer = getAnswerByQuestionId(response, questionObj, null);
+        self[question.questionId] = questionObj;
+      });
+    }
+
+    function RepeatableSection(section, response) {
+      this.title = section.title;
+      this.records = [];
+      var self = this;
+
+      var maxOrdinal = section.questions.reduce(function (max, question) {
+        var questionMaxOrdinal = response.answers.filter(function (item) {
+          return item.questionId === question.questionId;
+        }).reduce(function (max, item) {
+          return Math.max(max, item.ordinal);
+        }, 0);
+        return Math.max(max, questionMaxOrdinal);
+      }, 0);
+
+      for (var i = 1; i <= maxOrdinal; i++) {
+        var record = {};
+        section.questions.forEach(function (question) {
+          var questionObj = new Question(question);
+          questionObj.ordinal = i;
+          record[question.questionId] = getAnswerByQuestionId(response, questionObj, i);
+        });
+        self.records.push(record);
+      }
+    }
+
+    var formResponseUrl = document.head.querySelector(
+      'meta[name="form-response-url"]'
+    ).content;
+
+    var viewModel = Object.create(null);
+
+    var apiGet = wp.api.helpers.get;
+    var api = wp.api.helpers;
+    try {
+      apiGet(formResponseUrl)
+        .then(function (response) {
+
+          return apiGet(response.form).then(function (formDefinition) {
+            return apiGet(api.getLink('definition', formDefinition)).then(function (formDefinitionForRevision) {
+
+              viewModel.formTitle = formDefinitionForRevision.title;
+              viewModel.respondent = response.associations.employees[0].firstName + ' ' + response.associations.employees[0].lastName;
+              viewModel.customerName = response.associations.customers[0].name;
+              viewModel.workOrderNumber = response.associations.workOrders[0].number;
+              viewModel.dispatchJob = { number: response.associations.dispatchJobs[0].number, description: response.associations.dispatchJobs[0].description };
+              viewModel.responseDate = response.date;
+
+              var title = formDefinitionForRevision.title + ' - ' + viewModel.Job;
+              if (response.date) {
+                title += " (" + response.date + ")";
+              }
+              document.title = title;
+
+              formDefinitionForRevision.sections.forEach(function (section) {
+                if (section.repeatable) {
+                  var repeatableSection = new RepeatableSection(section, response);
+                  viewModel[section.title] = repeatableSection;
+                  repeatableSection.records.forEach(function (record) {
+                    section.questions.forEach(function (question) {
+                      var questionVM = new Question(question);
+                      questionVM.answer = record[question.questionId];
+                      viewModel[questionVM.questionId] = questionVM;
+                    });
+                  });
+                } else {
+                  var sectionVM = new Section(section, response);
+                  viewModel[section.title] = sectionVM;
+
+                  sectionVM.questions = section.questions.map(function (question) {
+                    var questionVM = new Question(question);
+                    viewModel[questionVM.questionId] = questionVM;
+                  });
+                }
+              })
+            });
+
+            return viewModel;
+          });
+        })
+        .fail(function (error) {
+          viewModel.error = error;
+        })
+        .always(function () {
+          ko.applyBindings(viewModel);
+        });
+    } catch (e) {
+      viewModel.error = e;
+      ko.applyBindings(viewModel);
+    }
+
+    function getAnswerByQuestionId(formResponse, questionVM, ordinal) {
+      var questionRef = formResponse.answers.find(function (item) {
+        return item.questionId === questionVM.questionId && item.ordinal === ordinal;
+      });
+
+      if (questionRef) {
+        return ParseAnswer(questionRef, questionVM, formResponse);
+      } else {
+        return "";
+      }
+    }
+
+    function ParseAnswer(questionRef, questionVM, formResponse) {
+      if (questionVM.type === 'employee') {
+        return ParseEmployee(questionRef, formResponse.associations);
+      } else if (questionVM.type === 'choice') {
+        return questionRef.answer[0];
+      }
+      else {
+        return questionRef.answer
+      }
+    }
+
+    function ParseEmployee(questionRef, associations) {
+
+      var employee = associations.employees.find(function (item) {
+        return item.id === questionRef.answer;
+      });
+
+      if (employee) {
+        return employee.firstName + ' ' + employee.lastName;
+      } else {
+        return "";
+      }
+    }
+
+  <\/script>`;
+    };
+
+
+  </script>
+</head>
+
+<body>
+  <h1>Template Designer</h1>
+  <textarea id="templateEditor">
+    <header class="editable editable-container" id="header"><h2> --- insert header content here --- </h2></header>
+    <section class="editable editable-container" id="body"><h2> --- insert body content here --- <h2></section>
+    <footer class="editable editable-container" id="footer"><h2> --- insert footer content here --- <h2></footer>
+  </textarea>
+</body>
+
+</html>

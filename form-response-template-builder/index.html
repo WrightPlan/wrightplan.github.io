@@ -690,35 +690,41 @@
       };
 
       self.processEditorContent = function (content, jsonData) {
-        const headerContent = content.match(/<header[^>]*>([\s\S]*?)<\/header>/i)[1];
-        const bodyContent = content.match(/<section[^>]*>([\s\S]*?)<\/section>/i)[1];
-        const footerContent = content.match(/<footer[^>]*>([\s\S]*?)<\/footer>/i)[1];
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(content, 'text/html');
+
+        // Query elements by their data-id attributes
+        const headerContent = doc.querySelector('[data-id="header"]')?.outerHTML || '';
+        const bodyContent = doc.querySelector('[data-id="body"]')?.outerHTML || '';
+        const footerContent = doc.querySelector('[data-id="footer"]')?.outerHTML || '';
+
+        console.log('bodyContent', bodyContent);
+
         const formId = jsonData.formId || 'Form Title';
 
         var htmlTemplate = `
-        <!DOCTYPE html>
-            <html lang="en">
-            <head>
-              <title>${formId}</title>
-               <meta name="viewport" content="width=device-width, initial-scale=1" />
-              <meta charset="utf-8" />
-              <meta name="wrightplan.id" content="${generateGUID()}" />
-              <meta name="wrightplan.version" content="2024.12" />
-              <meta name="wrightplan.role" content="FormResponse" />
-              <meta name="wrightplan.description" content="Free form for admins" />
-              <meta name="wrightplan.templateBuilderUsed" content="true" />
-            </head>
-            <body class="container">
-              <header>${headerContent}</header>
-              ${bodyContent}
-              <footer>${footerContent}</footer>
-            `;
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <title>${formId}</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <meta charset="utf-8" />
+      <meta name="wrightplan.id" content="${generateGUID()}" />
+      <meta name="wrightplan.version" content="2024.12" />
+      <meta name="wrightplan.role" content="FormResponse" />
+      <meta name="wrightplan.description" content="Free form for admins" />
+      <meta name="wrightplan.templateBuilderUsed" content="true" />
+    </head>
+    <body class="container">
+      ${headerContent}
+      ${bodyContent}
+      ${footerContent}
+    </body>
+    </html>
+  `;
 
         const jsForResponsePDF = getJSForResponsePDF();
         htmlTemplate += jsForResponsePDF;
-        htmlTemplate += `
-            </body>
-          </html>`;
 
         return htmlTemplate;
       };

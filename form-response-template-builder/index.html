@@ -327,13 +327,9 @@
       return {
         html: `<section class="repeatable-section" data-bind="foreach: ${section.title}.records">
                 <p class="removeElementOnProcessing"><span style="color: #e03e2d;">--NOTE: THIS SECTION WILL HAVE REPEATED ANSWERS--</span></p>
-                  <div class="editable">
                     ${generateSectionTitle(section)}
                     ${section.subtitle ? `${generateSectionSubtitle(section)}` : ''}
-                  </div>
-                <dl>
                 ${section.questions.map(question => `${generateQuestion(question)}`).join('')}
-                </dl>
               </section>`
       };
     }

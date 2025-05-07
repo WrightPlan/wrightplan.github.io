@@ -282,25 +282,42 @@
       )
     ];
 
+    function createSectionId(sectionTitle) {
+      return sectionTitle
+        .split(/[-_\s]+/) // Split by spaces, dashes, or underscores
+        .map(function (word) {
+          return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        })
+        .join('');
+    }
+
+    function transformQuestionId(questionId) {
+      // remove first 4 characters and add them to the end of the string
+      //also remove any characters that are not supported in javascript variable names
+      questionId = questionId.replace(/[^a-zA-Z0-9_]/g, '');
+      return questionId.slice(4) + questionId.slice(0, 4);
+    }
+
     function getFormSectionsAndQuestions(jsonData) {
 
       var allElementsLeaf = [new TreeItemViewModel('add-all-content', 'leaf', 'Add All Elements', null, null, 'no-content-leaf')];
 
-      return allElementsLeaf.concat(jsonData.sections.map((section) => ({
-        type: 'directory',
-        id: section.sectionId || section.title,
-        title: 'Section: ' + section.title,
-        children: [
-          new TreeItemViewModel(section.title + '-add-full-section', 'leaf', `Add Full Section`, `<h2>{{ ${section.title} }}</h2>`, null, 'no-content-leaf'),
-          new TreeItemViewModel(section.title + '-add-section-title', 'leaf', `Add Section Title`, `${generateSectionTitle(section)}`),
-          ...(section.subtitle
-            ? [
-              new TreeItemViewModel(section.title + '-add-section-subtitle', 'leaf', `Add Section Subtitle`, `${generateSectionSubtitle(section)}`),
-            ]
-            : []),
-          new TreeItemViewModel('questionDirectory', 'directory', 'Questions', null, [...section.questions.map((question) => new TreeItemViewModel(question.questionId, 'leaf', question.title, `${generateQuestion(question)})`))])
-        ],
-      })
+      return allElementsLeaf.concat(jsonData.sections.map((section) => (
+        {
+          type: 'directory',
+          id: section.sectionId,
+          title: 'Section: ' + section.title,
+          children: [
+            new TreeItemViewModel(section.sectionId + '-add-full-section', 'leaf', `Add Full Section`, `<h2>{{ ${section.title} }}</h2>`, null, 'no-content-leaf'),
+            new TreeItemViewModel(section.sectionId + '-add-section-title', 'leaf', `Add Section Title`, `${generateSectionTitle(section)}`),
+            ...(section.subtitle
+              ? [
+                new TreeItemViewModel(section.sectionId + '-add-section-subtitle', 'leaf', `Add Section Subtitle`, `${generateSectionSubtitle(section)}`),
+              ]
+              : []),
+            new TreeItemViewModel('questionDirectory', 'directory', 'Questions', null, [...section.questions.map((question) => new TreeItemViewModel(question.questionId, 'leaf', question.title, `${generateQuestion(question)})`))])
+          ],
+        })
       ))
     }
 
@@ -325,11 +342,14 @@
 
     function generateRepeatableSection(section) {
       return {
-        html: `<section class="repeatable-section" data-bind="foreach: ${section.title}.records">
-                <p class="removeElementOnProcessing"><span style="color: #e03e2d;">--NOTE: THIS SECTION WILL HAVE REPEATED ANSWERS--</span></p>
+        html: `<section class="repeatable-section">
+                <p class="removeOnProcessing"><span style="color: #e03e2d;">--NOTE: THIS SECTION WILL HAVE REPEATED ANSWERS--</span></p>
                     ${generateSectionTitle(section)}
                     ${section.subtitle ? `${generateSectionSubtitle(section)}` : ''}
+                    <div data-bind="foreach: ${section.sectionId}.records">
+
                 ${section.questions.map(question => `${generateQuestion(question)}`).join('')}
+                </div>
               </section>`
       };
     }
@@ -348,18 +368,22 @@
     }
 
     function generateSectionTitle(section) {
-      return `<div class="editable"><h3 data-id="${section.title + '-add-section-title'}" class="non-editable" data-bind="text: ${section.title}.title">${section.title}</h3></div>`
+      return `<div class="editable"><h3 data-id="${section.sectionId + '-add-section-title'}" class="non-editable" data-bind="text: ${section.sectionId}.title">${section.title}</h3></div>`
     }
 
     function generateSectionSubtitle(section) {
-      return `<div class="editable"><h4 data-id="${section.title + '-add-section-subtitle'}" class="non-editable" data-bind="text: ${section.title}.subtitle">${section.subtitle}</h4></div>`
+      return `<div class="editable"><h4 data-id="${section.sectionId + '-add-section-subtitle'}" class="non-editable" data-bind="text: ${section.sectionId}.subtitle">${section.subtitle}</h4></div>`
     }
 
     function generateQuestion(question) {
       return `<div class="editable">
-        <h4 data-id="${question.questionId}" class="non-editable" data-bind="text: ${question.questionId}.title"> ${question.title} </h4>
-        ${question.subtitle ? `<div class="non-editable" data-bind="text: ${question.questionId}.subtitle"> ${question.subtitle} </div>` : ''}
-        <div class="non-editable" data-bind="text: ${question.questionId}.answer">{{ ${question.questionId + '.answer'} }}</div>
+        <h4 data-id="${question.transformedQuestionId}" class="non-editable" data-bind="text: ${question.transformedQuestionId}.title"> ${question.title} </h4>
+        ${question.subtitle ? `<div class="non-editable" data-bind="text: ${question.transformedQuestionId}.subtitle"> ${question.subtitle} </div>` : ''}
+        ${question.type == 'initials' || question.type == 'signature' ?
+          `<table class="non-editable"><tr><td><i class="removeOnProcessing">Signature/Initials</i>
+            <img style="max-width: 100%; height: auto; display: block;" class="non-editable" data-bind="attr: { src: ${question.transformedQuestionId}.answer }"></td></tr></table>` :
+          `<div class="non-editable" data-bind="text: ${question.transformedQuestionId}.answer">{{ ${question.questionId + '.answer'} }}</div>`
+        }
         </div>`
     }
 
@@ -410,7 +434,7 @@
 
       for (const section of jsonData.sections) {
 
-        if (section.title + '-add-full-section' === item.id) {
+        if (section.sectionId + '-add-full-section' === item.id) {
           // find the section in treeItems and set it's children as added
           const sectionItems = treeItems.find(treeItem => treeItem.id === item.id.split('-add-full-section')[0]);
           setAllChildrenAsAdded([sectionItems], addedElementIds);
@@ -420,11 +444,11 @@
           }
           return generateSection(section);
 
-        } else if (section.title + '-add-section-title' === item.id) {
+        } else if (section.sectionId + '-add-section-title' === item.id) {
           return {
             html: `${generateSectionTitle(section)}`
           };
-        } else if (section.title + '-add-section-subtitle' === item.id) {
+        } else if (section.sectionId + '-add-section-subtitle' === item.id) {
           return {
             html: `${generateSectionSubtitle(section)}`
           };
@@ -469,6 +493,16 @@
 
       self.addedElementIds = new Set();
 
+      self.processJSONData = function (jsonData) {
+        //transform all section titles to PascalCase
+        jsonData.sections.forEach(section => {
+          section.sectionId = createSectionId(section.title);
+          section.questions.forEach(question => {
+            question.transformedQuestionId = transformQuestionId(question.questionId);
+          });
+        });
+        return jsonData;
+      }
 
       // Initialize TinyMCE
       self.initEditor = function (jsonData) {
@@ -478,7 +512,7 @@
           height: 600,
           content_style: EDITOR_STYLES,
           plugins: 'visualblocks code preview advlist anchor autolink charmap codesample fullscreen help image insertdatetime link lists media pagebreak preview searchreplace table visualblocks',
-          toolbar: 'toggleSidebar | visualblock undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons link | fullscreen preview | customSave',
+          toolbar: 'toggleSidebar | visualblock undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons link | fullscreen | customPreview customSave',
           extended_valid_elements: 'img[onerror|src|alt|class|style]',
           editable_class: 'editable',
           format_noneditable_selector: 'h2, h4, h3, div, p, span',
@@ -495,6 +529,17 @@
               tooltip: 'Toggle Data Elements Sidebar',
               onAction: function () {
                 editor.execCommand('ToggleSidebar', false, 'customtreesidebar');
+              }
+            });
+
+            editor.ui.registry.addButton('customPreview', {
+              text: 'Preview',
+              tooltip: 'Preview Template',
+              icon: 'preview',
+              onAction: function () {
+                const content = editor.getContent();
+                const processedContent = self.processEditorContent(content, jsonData);
+                self.fetchPreview(processedContent);
               }
             });
 
@@ -686,19 +731,29 @@
         const parentUrl = document.referrer;
         const parentOrigin = new URL(parentUrl).origin;
 
-        window.parent.postMessage(content, parentOrigin);
+        window.parent.postMessage({ action: 'save', content: content }, parentOrigin);
       };
+
+      self.fetchPreview = function (content) {
+        const parentUrl = document.referrer;
+        const parentOrigin = new URL(parentUrl).origin;
+
+        window.parent.postMessage({ action: 'preview', content: content }, parentOrigin);
+      }
 
       self.processEditorContent = function (content, jsonData) {
         const parser = new DOMParser();
         const doc = parser.parseFromString(content, 'text/html');
 
         // Query elements by their data-id attributes
-        const headerContent = doc.querySelector('[data-id="header"]')?.outerHTML || '';
-        const bodyContent = doc.querySelector('[data-id="body"]')?.outerHTML || '';
-        const footerContent = doc.querySelector('[data-id="footer"]')?.outerHTML || '';
+        var headerContent = doc.querySelector('[data-id="header"]')?.outerHTML || '';
+        var bodyContent = doc.querySelector('[data-id="body"]')?.outerHTML || '';
+        var footerContent = doc.querySelector('[data-id="footer"]')?.outerHTML || '';
 
-        console.log('bodyContent', bodyContent);
+        // remove all elements with class "removeOnProcessing" from header, body and footer content
+        headerContent = headerContent.replace(/<[^>]+class="removeOnProcessing"[^>]*>(.*?)<\/[^>]+>/g, '');
+        bodyContent = bodyContent.replace(/<[^>]+class="removeOnProcessing"[^>]*>(.*?)<\/[^>]+>/g, '');
+        footerContent = footerContent.replace(/<[^>]+class="removeOnProcessing"[^>]*>(.*?)<\/[^>]+>/g, '');
 
         const formId = jsonData.formId || 'Form Title';
 
@@ -709,7 +764,7 @@
       <title>${formId}</title>
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <meta charset="utf-8" />
-      <meta name="wrightplan.id" content="${generateGUID()}" />
+      <meta name="wrightplan.id" content="${generateGUID(formId)}" />
       <meta name="wrightplan.version" content="2024.12" />
       <meta name="wrightplan.role" content="FormResponse" />
       <meta name="wrightplan.description" content="Free form for admins" />
@@ -729,11 +784,15 @@
         return htmlTemplate;
       };
 
-      generateGUID = function () {
-        return 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-          const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-          return v.toString(16);
-        });
+      generateGUID = function (formTitle) {
+        // Hash the form title to generate a consistent GUID
+        const hash = Array.from(formTitle).reduce((hash, char) => {
+          return ((hash << 5) - hash) + char.charCodeAt(0);
+        }, 0);
+
+        // Convert the hash to a hexadecimal string and format it as a GUID
+        const hex = Math.abs(hash).toString(16).padStart(32, '0');
+        return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`;
       };
 
       // Listen for data from the parent page
@@ -750,9 +809,30 @@
           if (event.data) {
             try {
               // Parse the JSON string into an object
-              const jsonData = JSON.parse(event.data.data);
+              var jsonData = JSON.parse(event.data.formData);
               console.log('Received JSON data:', jsonData);
+              jsonData = self.processJSONData(jsonData);
               self.initEditor(jsonData);
+
+              var existingTemplateContent = event.data.existingTemplate;
+              if (existingTemplateContent) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(existingTemplateContent, 'text/html');
+
+                // Extract content for header, body, and footer
+                const headerContent = doc.querySelector('[data-id="header"]')?.innerHTML || '';
+                const bodyContent = doc.querySelector('[data-id="body"]')?.innerHTML || '';
+                const footerContent = doc.querySelector('[data-id="footer"]')?.innerHTML || '';
+
+                // Populate the templateEditor with the extracted content
+                document.getElementById('templateEditor').value = `
+                    <header class="editable editable-container" data-id="header">${headerContent}</header>
+                    <section class="editable editable-container" data-id="body">${bodyContent}</section>
+                    <footer class="editable editable-container" data-id="footer">${footerContent}</footer>
+                  `;
+              }
+
+
 
             } catch (error) {
               console.error('Error parsing JSON data:', error);
@@ -783,11 +863,12 @@
 
     function Section(section, response) {
       this.title = section.title;
+      this.subtitle = section.subtitle;
       var self = this;
       section.questions.forEach(function (question) {
         var questionObj = new Question(question, response);
         questionObj.answer = getAnswerByQuestionId(response, questionObj, null);
-        self[question.questionId] = questionObj;
+        self[transformQuestionId(question.questionId)] = questionObj;
       });
     }
 
@@ -809,8 +890,10 @@
         var record = {};
         section.questions.forEach(function (question) {
           var questionObj = new Question(question, response);
+          var transformedQuestionId = transformQuestionId(question.questionId);
           questionObj.ordinal = i;
-          record[question.questionId] = getAnswerByQuestionId(response, questionObj, i);
+          record[transformedQuestionId] = questionObj;
+          record[transformedQuestionId].answer = getAnswerByQuestionId(response, questionObj, i);
         });
         self.records.push(record);
       }
@@ -822,6 +905,28 @@
 
     var viewModel = Object.create(null);
 
+      function createSectionId(str) {
+        return str
+          .replace(/[-_ ]+/g, ' ')
+          .trim()
+          .split(' ')
+          .map(function(word) {
+            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+          }).join('');
+      }
+
+      function transformQuestionId(questionId) {
+        questionId = questionId.replace(/[^a-zA-Z0-9_]/g, '');
+        return questionId.slice(4) + questionId.slice(0, 4);
+      }
+
+      function cleanJsonData (jsonData) {
+          jsonData.sections.forEach(function (section) {
+          section.sectionId = createSectionId(section.title);
+        });
+        return jsonData;
+      }
+
     var apiGet = wp.api.helpers.get;
     var api = wp.api.helpers;
     try {
@@ -831,6 +936,7 @@
           return apiGet(response.form).then(function (formDefinition) {
             return apiGet(api.getLink('definition', formDefinition)).then(function (formDefinitionForRevision) {
 
+              formDefinitionForRevision = cleanJsonData(formDefinitionForRevision);
               viewModel.formTitle = formDefinitionForRevision.title;
               viewModel.respondent = response.associations.employees[0].firstName + ' ' + response.associations.employees[0].lastName;
               viewModel.customerName = response.associations.customers[0].name;
@@ -847,21 +953,21 @@
               formDefinitionForRevision.sections.forEach(function (section) {
                 if (section.repeatable) {
                   var repeatableSection = new RepeatableSection(section, response);
-                  viewModel[section.title] = repeatableSection;
+                  viewModel[section.sectionId] = repeatableSection;
                   repeatableSection.records.forEach(function (record) {
                     section.questions.forEach(function (question) {
                       var questionVM = new Question(question, response);
-                      questionVM.answer = record[question.questionId];
-                      viewModel[questionVM.questionId] = questionVM;
+                      questionVM.answer = record[transformQuestionId(question.questionId)].answer;
+                      viewModel[transformQuestionId(questionVM.questionId)] = questionVM;
                     });
                   });
                 } else {
                   var sectionVM = new Section(section, response);
-                  viewModel[section.title] = sectionVM;
+                  viewModel[section.sectionId] = sectionVM;
 
                   sectionVM.questions = section.questions.map(function (question) {
                     var questionVM = new Question(question, response);
-                    viewModel[questionVM.questionId] = questionVM;
+                    viewModel[transformQuestionId(questionVM.questionId)] = questionVM;
                   });
                 }
               })
@@ -927,9 +1033,9 @@
 <body>
   <h1>Template Designer</h1>
   <textarea id="templateEditor">
-    <header class="editable editable-container" data-id="header"><h2> --- insert header content here --- </h2></header>
-    <section class="editable editable-container" data-id="body"><h2> --- insert body content here --- <h2></section>
-    <footer class="editable editable-container" data-id="footer"><h2> --- insert footer content here --- <h2></footer>
+    <header class="editable editable-container" data-id="header"><h2 class="removeOnProcessing"> --- insert header content here --- </h2></header>
+    <section class="editable editable-container" data-id="body"><h2 class="removeOnProcessing"> --- insert body content here --- <h2></section>
+    <footer class="editable editable-container" data-id="footer"><h2 class="removeOnProcessing"> --- insert footer content here --- <h2></footer>
   </textarea>
 </body>
 

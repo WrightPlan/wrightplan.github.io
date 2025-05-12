@@ -381,7 +381,7 @@
         ${question.subtitle ? `<div class="non-editable" data-bind="text: ${question.transformedQuestionId}.subtitle"> ${question.subtitle} </div>` : ''}
         ${question.type == 'initials' || question.type == 'signature' ?
           `<table class="non-editable"><tr><td><i class="removeOnProcessing">Signature/Initials</i>
-            <img style="max-width: 100%; height: auto; display: block;" class="non-editable" data-bind="attr: { src: ${question.transformedQuestionId}.answer }"></td></tr></table>` :
+            <img style="max-width: 10rem; max-height: 5rem; display: block;" class="non-editable" data-bind="attr: { src: ${question.transformedQuestionId}.answer }"></td></tr></table>` :
           `<div class="non-editable" data-bind="text: ${question.transformedQuestionId}.answer">{{ ${question.questionId + '.answer'} }}</div>`
         }
         </div>`
@@ -511,7 +511,17 @@
           license_key: 'gpl',
           height: 600,
           content_style: EDITOR_STYLES,
-          plugins: 'visualblocks code preview advlist anchor autolink charmap codesample fullscreen help image insertdatetime link lists media pagebreak preview searchreplace table visualblocks',
+          menu: {
+            file: { title: 'File', items: '' },
+            edit: { title: 'Edit', items: 'undo redo | cut copy paste pastetext | selectall | searchreplace' },
+            view: { title: 'View', items: 'code | visualaid visualblocks | fullscreen' },
+            insert: { title: 'Insert', items: 'link codesample inserttable | charmap hr | insertdatetime' },
+            format: { title: 'Format', items: 'bold italic underline strikethrough superscript subscript codeformat | styles blocks fontfamily fontsize align lineheight | forecolor backcolor | removeformat' },
+            tools: { title: 'Tools', items: 'code' },
+            table: { title: 'Table', items: 'inserttable | cell row column | advtablesort | tableprops deletetable' },
+            help: { title: 'Help', items: 'customHelp' }
+          },
+          plugins: 'visualblocks code preview advlist anchor autolink charmap codesample fullscreen image insertdatetime link lists media pagebreak preview searchreplace table visualblocks',
           toolbar: 'toggleSidebar | visualblock undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons link | fullscreen | customPreview customSave',
           extended_valid_elements: 'img[onerror|src|alt|class|style]',
           editable_class: 'editable',
@@ -523,6 +533,42 @@
             editor.execCommand('mceFullScreen'); // Automatically activate fullscreen
           },
           setup: function (editor) {
+
+            editor.ui.registry.addMenuItem('customHelp', {
+              text: 'Template Builder Help',
+              icon: 'help',
+              onAction: function () {
+                editor.windowManager.open({
+                  title: 'Template Designer Help',
+                  size: 'medium',
+                  body: {
+                    type: 'panel',
+                    items: [
+                      {
+                        type: 'htmlpanel', // Use an HTML panel to display custom content
+                        html: `
+              <p> You can use the builder to create a template for form responses. The data elements in the sidebar contain some dynamic elements that will be replaced with the actual data when the template is used.</p>
+              <p> To start building your template, you can:</p>
+              <ul>
+                <li>Use the <strong>Toggle Sidebar</strong> button to view available data elements.</li>
+                <li>Click on any data element in the sidebar to insert it into the template.</li>
+                <li>Format the elements in the editor as you like with the available formatting options.</li>
+                <li>Use the <strong>Preview</strong> button to see how your template will look, without actually saving the template. Note: to preview the template, you need at least one form response associated with the form you're building the template for. </li>
+                <li>Use the <strong>Save Template</strong> button to save your work and import the template into the WrightPlan system.</li>
+              </ul>
+            `
+                      }
+                    ]
+                  },
+                  buttons: [
+                    {
+                      type: 'cancel',
+                      text: 'Close'
+                    }
+                  ]
+                });
+              }
+            });
 
             editor.ui.registry.addButton('toggleSidebar', {
               text: 'Toggle Sidebar',
@@ -543,10 +589,12 @@
               }
             });
 
+            editor.ui.registry.addIcon('font-awesome-save', '<svg height="1rem" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M433.9 129.9l-83.9-83.9A48 48 0 0 0 316.1 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V163.9a48 48 0 0 0 -14.1-33.9zM224 416c-35.3 0-64-28.7-64-64 0-35.3 28.7-64 64-64s64 28.7 64 64c0 35.3-28.7 64-64 64zm96-304.5V212c0 6.6-5.4 12-12 12H76c-6.6 0-12-5.4-12-12V108c0-6.6 5.4-12 12-12h228.5c3.2 0 6.2 1.3 8.5 3.5l3.5 3.5A12 12 0 0 1 320 111.5z"/></svg>');
+
             editor.ui.registry.addButton('customSave', {
-              text: 'Import Template',
-              tooltip: 'Import this template',
-              icon: 'save',
+              text: 'Save Template',
+              tooltip: 'Save this template and associate it to the form.',
+              icon: 'font-awesome-save',
               onAction: function () {
                 const content = editor.getContent();
                 const processedContent = self.processEditorContent(content, jsonData);
@@ -715,6 +763,11 @@
                     // If the element is no longer in the editor, update the Set and isAdded
                     self.addedElementIds.delete(item.id);
                     item.setIsAdded(false);
+                  } else if (isPresent) {
+                    // If the element is present in the editor, update the Set and isAdded
+                    self.addedElementIds.add(item.id);
+                    item.setIsAdded(true);
+
                   }
                 }
               });
@@ -769,6 +822,13 @@
       <meta name="wrightplan.role" content="FormResponse" />
       <meta name="wrightplan.description" content="Free form for admins" />
       <meta name="wrightplan.templateBuilderUsed" content="true" />
+      <style>
+        
+      .top-bottom-padding {
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+      }
+      </style>
     </head>
     <body class="container">
       ${headerContent}
@@ -1035,7 +1095,7 @@
   <textarea id="templateEditor">
     <header class="editable editable-container" data-id="header" data-bind="withPaging"><h2 class="removeOnProcessing"> --- insert header content here --- </h2></header>
     <section class="editable editable-container" data-id="body"><h2 class="removeOnProcessing"> --- insert body content here --- <h2></section>
-    <footer class="editable editable-container" data-id="footer"><h2 class="removeOnProcessing"> --- insert footer content here --- <h2></footer>
+    <footer class="editable editable-container top-bottom-padding" data-id="footer" data-bind="withPaging"><h2 class="removeOnProcessing"> --- insert footer content here --- <h2></footer>
   </textarea>
 </body>
 

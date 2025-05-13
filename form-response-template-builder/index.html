@@ -387,15 +387,15 @@
     }
 
     function generateSectionTitle(section) {
-      return `<div class="editable"><h3 data-id="${section.sectionId + '-add-section-title'}" class="non-editable" data-bind="text: ${section.sectionId}.title">${section.title}</h3></div>`
+      return `<div class="editable" data-bind="if: $data.${section.sectionId}"><h3 data-id="${section.sectionId + '-add-section-title'}" class="non-editable" data-bind="text: ${section.sectionId}.title">${section.title}</h3></div>`
     }
 
     function generateSectionSubtitle(section) {
-      return `<div class="editable"><h4 data-id="${section.sectionId + '-add-section-subtitle'}" class="non-editable" data-bind="text: ${section.sectionId}.subtitle">${section.subtitle}</h4></div>`
+      return `<div class="editable" data-bind="if: $data.${section.sectionId}"><h4 data-id="${section.sectionId + '-add-section-subtitle'}" class="non-editable" data-bind="text: ${section.sectionId}.subtitle">${section.subtitle}</h4></div>`
     }
 
     function generateQuestion(question) {
-      return `<div class="editable">
+      return `<div class="editable" data-bind="if: $data.${question.transformedQuestionId}">
         <h4 data-id="${question.transformedQuestionId}" class="non-editable" data-bind="text: ${question.transformedQuestionId}.title"> ${question.title} </h4>
         ${question.subtitle ? `<div class="non-editable" data-bind="text: ${question.transformedQuestionId}.subtitle"> ${question.subtitle} </div>` : ''}
         ${question.type == 'initials' || question.type == 'signature' ?

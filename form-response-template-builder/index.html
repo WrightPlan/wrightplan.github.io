@@ -996,7 +996,7 @@
 
     function transformQuestionId(questionId) {
       // 1. Replace invalid characters with underscores.
-      let validName = questionId.replace(/[^a-zA-Z0-9_$]/g, '_');
+      var validName = questionId.replace(/[^a-zA-Z0-9_$]/g, '_');
 
       // 2. Remove leading invalid characters.
       validName = validName.replace(/^[^a-zA-Z_$]+/, '');
@@ -1008,9 +1008,9 @@
 
       // 4. create a hash if the string contains only numbers.
       if (/^\d+$/.test(questionId)) {
-        let hash = 0;
-        for (let i = 0; i < questionId.length; i++) {
-          const charCode = questionId.charCodeAt(i);
+        var hash = 0;
+        for (var i = 0; i < questionId.length; i++) {
+          var charCode = questionId.charCodeAt(i);
           hash = ((hash << 5) - hash) + charCode;
           hash = hash & hash; // Convert to 32bit integer
         }

@@ -292,10 +292,27 @@
     }
 
     function transformQuestionId(questionId) {
-      // remove first 4 characters and add them to the end of the string
-      //also remove any characters that are not supported in javascript variable names
-      questionId = questionId.replace(/[^a-zA-Z0-9_]/g, '');
-      return questionId.slice(4) + questionId.slice(0, 4);
+      // 1. Replace invalid characters with underscores.
+      let validName = questionId.replace(/[^a-zA-Z0-9_$]/g, '_');
+
+      // 2. Remove leading invalid characters.
+      validName = validName.replace(/^[^a-zA-Z_$]+/, '');
+
+      // 3. Ensure the name is not empty. If it is, use a default name.
+      if (!validName) {
+        validName = '_';
+      }
+
+      // 4. create a hash if the string contains only numbers.
+      if (/^\d+$/.test(questionId)) {
+        let hash = 0;
+        for (let i = 0; i < questionId.length; i++) {
+          const charCode = questionId.charCodeAt(i);
+          hash = ((hash << 5) - hash) + charCode;
+          hash = hash & hash; // Convert to 32bit integer
+        }
+        validName = "hash_" + Math.abs(hash).toString(16);
+      }
     }
 
     function getFormSectionsAndQuestions(jsonData) {
@@ -975,10 +992,29 @@
           }).join('');
       }
 
-      function transformQuestionId(questionId) {
-        questionId = questionId.replace(/[^a-zA-Z0-9_]/g, '');
-        return questionId.slice(4) + questionId.slice(0, 4);
+    function transformQuestionId(questionId) {
+      // 1. Replace invalid characters with underscores.
+      let validName = questionId.replace(/[^a-zA-Z0-9_$]/g, '_');
+
+      // 2. Remove leading invalid characters.
+      validName = validName.replace(/^[^a-zA-Z_$]+/, '');
+
+      // 3. Ensure the name is not empty. If it is, use a default name.
+      if (!validName) {
+        validName = '_';
       }
+
+      // 4. create a hash if the string contains only numbers.
+      if (/^\d+$/.test(questionId)) {
+        let hash = 0;
+        for (let i = 0; i < questionId.length; i++) {
+          const charCode = questionId.charCodeAt(i);
+          hash = ((hash << 5) - hash) + charCode;
+          hash = hash & hash; // Convert to 32bit integer
+        }
+        validName = "hash_" + Math.abs(hash).toString(16);
+      }
+    }
 
       function cleanJsonData (jsonData) {
           jsonData.sections.forEach(function (section) {

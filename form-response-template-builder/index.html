@@ -405,9 +405,8 @@
             ? `<figure class="figure">
             <img class="figure-img img-fluid rounded"
                  data-bind="attr: { src: GenerateStaticMapURL(${question.transformedQuestionId}.answer) }" />
-            < class="figure-caption"
-                 data-bind="text: ${question.transformedQuestionId}.answer">{{ ${question.transformedQuestionId}.answer }}
-            </figcaption>
+            <figcaption class="figure-caption"
+                 data-bind="text: ${question.transformedQuestionId}.answer">{{ ${question.transformedQuestionId}.answer }}</figcaption>
            </figure>`
             : `<div class="non-editable" data-bind="text: ${question.transformedQuestionId}.answer">{{ ${question.questionId + '.answer'} }}</div>`
         }

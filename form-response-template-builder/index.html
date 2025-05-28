@@ -1154,26 +1154,25 @@
       return null;
     }
 
-    function GenerateStaticMapURL(coordinate, ) {
-      zoom = 14;
-      width = 400;
-      height = 192;
+    function GenerateStaticMapURL(coordinate) {
+      var zoom = 14;
+      var width = 400;
+      var height = 192;
 
       var parsedCoordinates = parseGeoCoordinate(coordinate);
       if (!parsedCoordinates || !cachedGoogleMapsKey) return '';
 
       var latlng = parsedCoordinates.latitude + ',' + parsedCoordinates.longitude;
 
-      var params = new URLSearchParams({
-        maptype: 'roadmap',
-        zoom: zoom.toString(),
-        size: width + 'x' + height,
-        center: latlng,
-        markers: latlng,
-        key: cachedGoogleMapsKey
-      });
-
-      return 'https://maps.googleapis.com/maps/api/staticmap?' + params.toString();
+      var params = [
+        'maptype=roadmap',
+        'zoom=' + encodeURIComponent(zoom),
+        'size=' + encodeURIComponent(width + 'x' + height),
+        'center=' + encodeURIComponent(latlng),
+        'markers=' + encodeURIComponent(latlng),
+        'key=' + encodeURIComponent(cachedGoogleMapsKey)
+      ].join('&');
+      return 'https://maps.googleapis.com/maps/api/staticmap?' + params;
     }
 
   <\/script>`;

@@ -402,10 +402,10 @@
           ? `<table class="non-editable"><tr><td><i class="removeOnProcessing">Signature/Initials</i>
             <img style="max-width: 10rem; max-height: 5rem; display: block;" class="non-editable" data-bind="attr: { src: ${question.transformedQuestionId}.answer }"></td></tr></table>`
           : question.type == 'geolocation'
-            ? `<figure class="figure">
+            ? `<figure class="figure" style="max-width: 400px; max-height: 192px; border:1px solid black;">
             <img class="figure-img img-fluid rounded"
                  data-bind="attr: { src: GenerateStaticMapURL(${question.transformedQuestionId}.answer) }" />
-            <figcaption class="figure-caption text-center"
+            <figcaption class="figure-caption"
                  data-bind="text: ${question.transformedQuestionId}.answer">
             </figcaption>
            </figure>`
@@ -1155,10 +1155,10 @@
       return null;
     }
 
-    function GenerateStaticMapURL(coordinate, zoom, width, height) {
-      zoom = typeof zoom !== 'undefined' ? zoom : 14;
-      width = typeof width !== 'undefined' ? width : 400;
-      height = typeof height !== 'undefined' ? height : 192;
+    function GenerateStaticMapURL(coordinate, ) {
+      zoom = 14;
+      width = 400;
+      height = 192;
 
       var parsedCoordinates = parseGeoCoordinate(coordinate);
       if (!parsedCoordinates || !cachedGoogleMapsKey) return '';

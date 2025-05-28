@@ -181,6 +181,16 @@
         display: grid;
       }
 
+      section.editable-container table {
+        max-width: 100%;
+        width: 100%;
+        table-layout: auto;
+        box-sizing: border-box;
+        margin: 0 auto;
+        overflow-x: auto;
+        display: block;
+      }
+
       section main:empty::before,
       section main:has(> br[data-mce-bogus]:first-child)::before {
         content: "Write something...";
@@ -402,12 +412,14 @@
           ? `<table class="non-editable"><tr><td><i class="removeOnProcessing">Signature/Initials</i>
             <img style="max-width: 10rem; max-height: 5rem; display: block;" class="non-editable" data-bind="attr: { src: ${question.transformedQuestionId}.answer }"></td></tr></table>`
           : question.type == 'geolocation'
-            ? `<figure class="figure">
-            <img class="figure-img img-fluid rounded"
-                 data-bind="attr: { src: GenerateStaticMapURL(${question.transformedQuestionId}.answer) }" />
-            <figcaption class="figure-caption"
-                 data-bind="text: ${question.transformedQuestionId}.answer">{{ ${question.transformedQuestionId}.answer }}</figcaption>
-           </figure>`
+            ? `<div class="non-editable" style="width: 400px; height: 192px; border: 1px solid black">
+            <figure class="figure>
+              <img class="figure-img img-fluid rounded"
+              data-bind="attr: { src: GenerateStaticMapURL(${question.transformedQuestionId}.answer) }" />
+              <figcaption class="figure-caption"
+              data-bind="text: ${question.transformedQuestionId}.answer">{{ ${question.transformedQuestionId}.answer }}</figcaption>
+            </figure>
+            </div>`
             : `<div class="non-editable" data-bind="text: ${question.transformedQuestionId}.answer">{{ ${question.questionId + '.answer'} }}</div>`
         }
     </div>`
@@ -918,8 +930,6 @@
                   `;
               }
 
-
-
             } catch (error) {
               console.error('Error parsing JSON data:', error);
             }
@@ -1120,6 +1130,8 @@
         return ParseEmployee(questionRef, formResponse.associations);
       } else if (questionVM.type === 'choice') {
         return questionRef.answer[0];
+      } else if (questionVM.type === 'acknowledgement'){
+       return new Date(questionRef.answer);
       }
       else {
         return questionRef.answer

@@ -181,13 +181,15 @@
         display: grid;
       }
 
-      section.editable-container table {
+      .editable-container table {
         max-width: 100%;
         width: 100%;
         table-layout: auto;
         box-sizing: border-box;
         margin: 0 auto;
         overflow-x: auto;
+        overflow-y: visible;
+        height: 100% !important;
         display: block;
       }
 
@@ -560,7 +562,7 @@
             help: { title: 'Help', items: 'customHelp' }
           },
           plugins: 'visualblocks code preview advlist anchor autolink charmap codesample fullscreen image insertdatetime link lists media pagebreak preview searchreplace table visualblocks',
-          toolbar: 'toggleSidebar | visualblock undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons link | fullscreen | customPreview customSave',
+          toolbar: 'toggleSidebar | visualblock undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist | forecolor backcolor removeformat | charmap emoticons link | fullscreen | customPreview customSave',
           extended_valid_elements: 'img[onerror|src|alt|class|style]',
           editable_class: 'editable',
           format_noneditable_selector: 'h2, h4, h3, div, p, span',

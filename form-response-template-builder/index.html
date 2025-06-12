@@ -413,15 +413,16 @@
           ? `<table class="non-editable"><tr><td><i class="removeOnProcessing">Signature/Initials</i>
             <img style="max-width: 10rem; max-height: 5rem; display: block;" class="non-editable" data-bind="attr: { src: ${question.transformedQuestionId}.answer }"></td></tr></table>`
           : question.type == 'geolocation'
-            ? `<div class="non-editable" style="width: 400px; height: 192px; border: 1px solid black">
+            ? `<div class="non-editable" style="width: 400px; height: 192px; border: 1px solid black; margin-bottom: 4rem">
             <figure class="figure">
               <img class="figure-img img-fluid rounded"
               data-bind="attr: { src: GenerateStaticMapURL(${question.transformedQuestionId}.answer) }" />
               <figcaption class="figure-caption"
-              data-bind="text: ${question.transformedQuestionId}.answer">{{ ${question.transformedQuestionId}.answer }}</figcaption>
+              data-bind="text: geoInputToDMSString(${question.transformedQuestionId}.answer)">{{ ${question.transformedQuestionId}.answer }}</figcaption>
             </figure>
-            </div><br>`
-            : `<div class="non-editable" data-bind="text: ${question.transformedQuestionId}.answer">{{ ${question.questionId + '.answer'} }}</div>`
+            </div><br />`
+            : question.type == 'text' && question.multiLineText ? '<pre class="non-editable" style="border: none" data-bind="text: ' + question.transformedQuestionId + '.answer">{{ ' + question.transformedQuestionId + '.answer }}</pre>'
+              : `<div class="non-editable" data-bind="text: ${question.transformedQuestionId}.answer">{{ ${question.questionId + '.answer'} }}</div>`
         }
     </div>`
     }
@@ -1165,6 +1166,50 @@
         };
       }
       return null;
+    }
+      
+    function geoInputToDMSString(input) {
+      if (typeof input !== 'string') return '';
+
+      // Remove 'geo:' prefix if present
+      if (input.indexOf('geo:') === 0) input = input.substring(4);
+
+      // Split accuracy (u=)
+      var parts = input.split(';');
+      var coords = parts[0];
+      var accuracy = null;
+      for (var i = 1; i < parts.length; i++) {
+        if (parts[i].indexOf('u=') === 0) {
+          accuracy = parseFloat(parts[i].substring(2));
+          break;
+        }
+      }
+
+      // Parse lat/lng
+      var coordParts = coords.split(',');
+      var lat = parseFloat(coordParts[0]);
+      var lng = parseFloat(coordParts[1]);
+
+      function toDMS(deg, isLat) {
+        var absolute = Math.abs(deg);
+        var degrees = Math.floor(absolute);
+        var minutesNotTruncated = (absolute - degrees) * 60;
+        var minutes = Math.floor(minutesNotTruncated);
+        var seconds = Math.round((minutesNotTruncated - minutes) * 60);
+        var direction;
+        if (isLat) {
+          direction = deg >= 0 ? 'N' : 'S';
+        } else {
+          direction = deg >= 0 ? 'E' : 'W';
+        }
+        return degrees + '° ' + minutes + '′ ' + seconds + '″ ' + direction;
+      }
+
+      var result = toDMS(lat, true) + ', ' + toDMS(lng, false);
+      if (accuracy !== null && !isNaN(accuracy)) {
+        result += ' ±' + Math.round(accuracy) + 'm';
+      }
+      return result;
     }
 
     function GenerateStaticMapURL(coordinate) {

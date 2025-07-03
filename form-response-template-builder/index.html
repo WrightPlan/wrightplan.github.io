@@ -680,7 +680,7 @@
                 const bottomButtonContainer = document.createElement('div');
                 bottomButtonContainer.classList.add('mt-3', 'd-flex', 'justify-content-center');
                 // Make the container sticky at the bottom of the sidebar
-                bottomButtonContainer.style.position = 'absolute';
+                bottomButtonContainer.style.position = 'sticky';
                 bottomButtonContainer.style.bottom = '0';
                 bottomButtonContainer.style.left = '0';
                 bottomButtonContainer.style.width = '100%';
@@ -724,10 +724,12 @@
                 // create reset editor button that removes any added elements from the editor
                 const resetEditorButton = document.createElement('button');
                 resetEditorButton.textContent = 'Reset Editor';
-                resetEditorButton.classList.add('btn', 'btn-secondary', 'btn-sm', 'p-2');
+                resetEditorButton.classList.add('btn', 'btn-danger', 'btn-sm', 'p-2');
                 resetEditorButton.addEventListener('click', () => {
-                  // Clear the editor content
-                  editor.resetContent();
+                  // Show confirmation before clearing the editor content
+                  if (confirm('Are you sure you want to reset the editor? This will remove all content.')) {
+                    editor.resetContent();
+                  }
                 });
 
                 buttonContainer.appendChild(expandAllButton);

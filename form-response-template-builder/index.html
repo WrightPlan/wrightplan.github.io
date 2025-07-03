@@ -130,6 +130,18 @@
       border-color: #204d74 !important;
     }
 
+    .btn-danger {
+      color: #fff !important;
+      background-color: #d9534f !important;
+      border-color: #d43f3a !important;
+    }
+
+    .btn-danger:hover {
+      color: #fff !important;
+      background-color: #c9302c !important;
+      border-color: #ac2925 !important;
+    }
+
     .tox .tox-sidebar {
       max-width: 20% !important;
       background-color: #f4f4f4 !important;
@@ -665,6 +677,18 @@
                 const buttonContainer = document.createElement('div');
                 buttonContainer.classList.add('mb-3', 'd-flex', 'gap-2');
 
+                const bottomButtonContainer = document.createElement('div');
+                bottomButtonContainer.classList.add('mt-3', 'd-flex', 'justify-content-center');
+                // Make the container sticky at the bottom of the sidebar
+                bottomButtonContainer.style.position = 'absolute';
+                bottomButtonContainer.style.bottom = '0';
+                bottomButtonContainer.style.left = '0';
+                bottomButtonContainer.style.width = '100%';
+                bottomButtonContainer.style.background = '#f4f4f4';
+                bottomButtonContainer.style.zIndex = '10';
+                bottomButtonContainer.style.padding = '1rem 0 1rem 0';
+                bottomButtonContainer.style.boxShadow = '0 -2px 8px rgba(0,0,0,0.04)';
+
                 // Create Expand All button
                 const expandAllButton = document.createElement('button');
                 expandAllButton.textContent = 'Expand All';
@@ -697,8 +721,18 @@
                   });
                 });
 
+                // create reset editor button that removes any added elements from the editor
+                const resetEditorButton = document.createElement('button');
+                resetEditorButton.textContent = 'Reset Editor';
+                resetEditorButton.classList.add('btn', 'btn-secondary', 'btn-sm', 'p-2');
+                resetEditorButton.addEventListener('click', () => {
+                  // Clear the editor content
+                  editor.resetContent();
+                });
+
                 buttonContainer.appendChild(expandAllButton);
                 buttonContainer.appendChild(collapseAllButton);
+                bottomButtonContainer.appendChild(resetEditorButton);
                 container.appendChild(buttonContainer);
 
                 // Generate the tree structure
@@ -790,6 +824,7 @@
 
                 const tree = createTree(treeItems);
                 container.appendChild(tree);
+                container.appendChild(bottomButtonContainer)
 
                 api.element().appendChild(container);
               }

@@ -728,7 +728,7 @@
                 resetEditorButton.addEventListener('click', () => {
                   // Show confirmation before clearing the editor content
                   if (confirm('Are you sure you want to reset the editor? This will remove all content.')) {
-                    editor.resetContent();
+                    editor.setContent(getDefaultTemplateHTML());
                   }
                 });
 
@@ -995,6 +995,7 @@
     // Apply bindings on page load
     document.addEventListener('DOMContentLoaded', function () {
       ko.applyBindings(new TemplateDesignerViewModel());
+      document.getElementById('templateEditor').value = getDefaultTemplateHTML();
     });
 
 
@@ -1323,6 +1324,20 @@
   <\/script>`;
     };
 
+    function getDefaultTemplateHTML() {
+      return `
+    <header class="editable editable-container" data-id="header" data-bind="withPaging">
+      <h2 class="removeOnProcessing"> --- insert header content here --- </h2>
+    </header>
+    <section class="editable editable-container" data-id="body">
+      <h2 class="removeOnProcessing"> --- insert body content here --- </h2>
+    </section>
+    <footer class="editable editable-container top-bottom-padding" data-id="footer" data-bind="withPaging">
+      <h2 class="removeOnProcessing"> --- insert footer content here --- </h2>
+    </footer>
+  `;
+    }
+
 
   </script>
 </head>
@@ -1330,9 +1345,6 @@
 <body>
   <h1>Template Designer</h1>
   <textarea id="templateEditor">
-    <header class="editable editable-container" data-id="header" data-bind="withPaging"><h2 class="removeOnProcessing"> --- insert header content here --- </h2></header>
-    <section class="editable editable-container" data-id="body"><h2 class="removeOnProcessing"> --- insert body content here --- <h2></section>
-    <footer class="editable editable-container top-bottom-padding" data-id="footer" data-bind="withPaging"><h2 class="removeOnProcessing"> --- insert footer content here --- <h2></footer>
   </textarea>
 </body>
 

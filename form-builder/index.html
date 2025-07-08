@@ -1949,7 +1949,7 @@
                             questions: section.questions().map(question => {
                                 var helpTextContainsLink = false;
                                 var helpTextParsed = this.parseMarkdown(question.helpText());
-                                var hasOnlyTabularChoices = question.type() === 'choice' && question.choices().length > 0 && question.choices().every(choice => {
+                                var hasOnlyTabularChoices = question.type() === 'choice' && question.choices()?.length > 0 && question.choices().every(choice => {
                                     const unwrappedChoice = ko.unwrap(choice.value)?.toLowerCase();
                                     const unwrappedChoiceHeaders = section.choiceHeaders().map(header => ko.unwrap(header.value).toLowerCase());
                                     return unwrappedChoiceHeaders.includes(unwrappedChoice);

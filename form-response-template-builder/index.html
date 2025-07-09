@@ -1326,15 +1326,9 @@
 
     function getDefaultTemplateHTML() {
       return `
-    <header class="editable editable-container" data-id="header" data-bind="withPaging">
-      <h2 class="removeOnProcessing"> --- insert header content here --- </h2>
-    </header>
-    <section class="editable editable-container" data-id="body">
-      <h2 class="removeOnProcessing"> --- insert body content here --- </h2>
-    </section>
-    <footer class="editable editable-container top-bottom-padding" data-id="footer" data-bind="withPaging">
-      <h2 class="removeOnProcessing"> --- insert footer content here --- </h2>
-    </footer>
+     <header class="editable editable-container" data-id="header" data-bind="withPaging"><h2 class="removeOnProcessing"> --- insert header content here --- </h2></header>
+    <section class="editable editable-container" data-id="body"><h2 class="removeOnProcessing"> --- insert body content here --- <h2></section>
+    <footer class="editable editable-container top-bottom-padding" data-id="footer" data-bind="withPaging"><h2 class="removeOnProcessing"> --- insert footer content here --- <h2></footer>
   `;
     }
 

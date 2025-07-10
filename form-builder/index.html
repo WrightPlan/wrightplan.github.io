@@ -2154,7 +2154,7 @@
                     text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2"> $1 <i style="font-size: smaller" class="fa-solid fa-up-right-from-square"></i></a>');
                     // Replace markdown image ![alt](src) with <img>
                     text = text.replace(/\[(image\d+)\]/g, function (match, key) {
-                        var src = documentViewModel.helpTextImageDict && documentViewModel.helpTextImageDict[key] ? documentViewModel.helpTextImageDict[key] : '';
+                        var src = documentViewModel.helpTextImageDict?.[key] ?? '';
                         if (src) {
                             return `<img alt="${key}" src="${src}" style="max-width:100%;max-height:150px;display:block;margin:5px 0;">`;
                         }
@@ -2174,7 +2174,7 @@
         function replaceImagePlaceholdersWithDataUri(text, imageDict) {
             if (!text) return text;
             return text.replace(/\[(image\d+)\]/g, function (match, key) {
-                return imageDict && imageDict[key] ? `![${key}](${imageDict[key]})` : match;
+                return imageDict?.[key] ? `![${key}](${imageDict[key]})` : match;
             });
         }
 
@@ -2281,7 +2281,7 @@
                 // Insert markdown image with placeholder at cursor position
                 const oldVal = $textarea.val();
                 const markdown = `[${imageKey}]`;
-                const newVal = oldVal.slice(0, cursorPos) + markdown + oldVal.slice(cursorPos);
+                const newVal = oldVal.slice(0, cursorPos) + '\n' + markdown + oldVal.slice(cursorPos);
                 $textarea.val(newVal).trigger('input');
 
                 // Update the Knockout observable directly so the preview updates

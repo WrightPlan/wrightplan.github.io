@@ -479,6 +479,10 @@
             scrollbar-color: rgba(0, 0, 0, 0.6) rgba(0, 0, 0, 0.1);
         }
 
+        span.d-inline img {
+            height: 35px;
+        }
+
         #json-modal {
             z-index: 99999999;
         }
@@ -597,10 +601,29 @@
                                         data-bind="attr: { id: 'sectionSubtitle_' + sectionId() }, value: subtitle">
                                 </div>
                                 <div class="form-group">
-                                    <label data-bind="attr: { for: 'helpText_' + sectionId() }">Section
-                                        Help Text</label>
-                                    <input type="text" class="form-control"
-                                        data-bind="attr: { id: 'helpText_' + sectionId() }, value: helpText">
+                                    <label class="d-inline-block"
+                                        data-bind="attr: { for: 'helpText_' + sectionId() }">Section Help
+                                        Text</label>
+                                    <button type="button"
+                                        class="btn btn-secondary btn-sm insert-image-btn d-inline-block mb-1 ml-3"
+                                        data-bind="attr: { 'data-target': 'helpText_' + sectionId() }">
+                                        <i class="fa fa-image"></i> Insert Image
+                                    </button>
+                                    <div class="input-group">
+                                        <textarea class="form-control"
+                                            data-bind="attr: { id: 'helpText_' + sectionId() }, value: helpText"
+                                            rows="3"></textarea>
+                                        <div class="input-group-append" style="vertical-align: top;">
+                                            <input type="file" accept="image/*" style="display:none"
+                                                class="helptext-image-input">
+                                        </div>
+                                    </div>
+                                    <!-- ko if: helpText() != "" -->
+                                    <div class="helptext-preview"
+                                        data-bind="html: $root.formPreviewViewModel.parseMarkdown(helpText())"
+                                        style="margin-top:5px; background:#f8f9fa; padding:8px; border-radius:4px;">
+                                    </div>
+                                    <!-- /ko -->
                                 </div>
                                 <div class="form-group form-check d-inline-block">
                                     <input type="checkbox" class="form-check-input"
@@ -714,10 +737,29 @@
                                                     data-bind="attr: { id: 'questionSubtitle_' + questionId() }, value: subtitle">
                                             </div>
                                             <div class="form-group">
-                                                <label data-bind="attr: { for: 'helpText_' + questionId() }">Question
+                                                <label class="d-inline-block"
+                                                    data-bind="attr: { for: 'helpText_' + questionId() }">Question
                                                     Help Text</label>
-                                                <input type="text" class="form-control"
-                                                    data-bind="attr: { id: 'helpText_' + questionId() }, value: helpText">
+                                                <button type="button"
+                                                    class="btn btn-secondary btn-sm insert-image-btn d-inline-block mb-1 ml-3"
+                                                    data-bind="attr: { 'data-target': 'helpText_' + questionId() }">
+                                                    <i class="fa fa-image"></i> Insert Image
+                                                </button>
+                                                <div class="input-group">
+                                                    <textarea class="form-control"
+                                                        data-bind="attr: { id: 'helpText_' + questionId() }, value: helpText"
+                                                        rows="3"></textarea>
+                                                    <div class="input-group-append" style="vertical-align: top;">
+                                                        <input type="file" accept="image/*" style="display:none"
+                                                            class="helptext-image-input">
+                                                    </div>
+                                                </div>
+                                                <!-- ko if: helpText() != "" -->
+                                                <div class="helptext-preview"
+                                                    data-bind="html: $root.formPreviewViewModel.parseMarkdown(helpText())"
+                                                    style="margin-top:5px; background:#f8f9fa; padding:8px; border-radius:4px;">
+                                                </div>
+                                                <!-- /ko -->
                                             </div>
                                             <div class="form-group">
                                                 <label class="required"
@@ -953,7 +995,7 @@
                                             </i>
                                             <!-- /ko -->
                                             <!-- ko if: helpText -->
-                                            <span class="d-inline-block" data-bind="html: helpText"></span>
+                                            <span class="d-inline" data-bind="html: helpText"></span>
                                             <span data-bind="if: helpTextContainsLink">
                                                 <i style="font-size: smaller" class="fa-solid fa-link"></i>
                                             </span>
@@ -1597,6 +1639,10 @@
                         delete section.newPage;
                     }
 
+                    if (section.helpText) {
+                        section.helpText = replaceImagePlaceholdersWithDataUri(section.helpText, documentViewModel.helpTextImageDict);
+                    }
+
                     // Clean the section itself
                     section = cleanObject(section);
 
@@ -1632,6 +1678,10 @@
                         if (question.exclusiveMaximum && question.maximum !== undefined) {
                             question.exclusiveMaximum = question.maximum;
                             delete question.maximum;
+                        }
+
+                        if (question.helpText) {
+                            question.helpText = replaceImagePlaceholdersWithDataUri(question.helpText, documentViewModel.helpTextImageDict);
                         }
 
                         // Clean the question itself
@@ -1819,7 +1869,7 @@
                             section.subtitle(sectionData.subtitle);
                             section.repeatable(sectionData.repeatable);
                             section.newPage(sectionData.newPage);
-                            section.helpText(sectionData.helpText);
+                            section.helpText(extractImagesToPlaceholders(sectionData.helpText, documentViewModel.helpTextImageDict));
                             section.reviewPage(sectionData.reviewPage);
 
                             if (sectionData.choiceHeaders) {
@@ -1835,7 +1885,7 @@
                                 const question = new QuestionViewModel(index + 1, questionData.questionId, section.choiceHeaders().map(choice => choice.value()), false);
                                 question.title(questionData.title);
                                 question.subtitle(questionData.subtitle);
-                                question.helpText(questionData.helpText);
+                                question.helpText(extractImagesToPlaceholders(questionData.helpText, documentViewModel.helpTextImageDict));
                                 question.type(questionData.type);
                                 question.choices(questionData.choices?.map(choice => new Choice(choice)));
                                 question.minimum(questionData.minimum || questionData.exclusiveMinimum);
@@ -1903,6 +1953,8 @@
             constructor() {
                 this.formViewModel = new FormViewModel();
                 this.isUploaded = ko.observable(false);
+                this.helpTextImageDict = {};
+                this.helpTextImageCounter = 1;
             }
 
             toCamelCase = (str) => {
@@ -2100,6 +2152,14 @@
                     text = text.replace(/\*(.*?)\*/g, '<i>$1</i>');
                     // Replace [text](url) with <a href="url">text</a>
                     text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2"> $1 <i style="font-size: smaller" class="fa-solid fa-up-right-from-square"></i></a>');
+                    // Replace markdown image ![alt](src) with <img>
+                    text = text.replace(/\[(image\d+)\]/g, function (match, key) {
+                        var src = documentViewModel.helpTextImageDict?.[key] ?? '';
+                        if (src) {
+                            return `<img alt="${key}" src="${src}" style="max-width:100%;max-height:150px;display:block;margin:5px 0;">`;
+                        }
+                        return match;
+                    });
                     // replace `code` with <code>code</code>
                     text = text.replace(/`(.*?)`/g, '<code>$1</code>');
                 }
@@ -2111,6 +2171,21 @@
             }
         }
 
+        function replaceImagePlaceholdersWithDataUri(text, imageDict) {
+            if (!text) return text;
+            return text.replace(/\[(image\d+)\]/g, function (match, key) {
+                return imageDict?.[key] ? `![${key}](${imageDict[key]})` : match;
+            });
+        }
+
+        function extractImagesToPlaceholders(helpText, imageDict) {
+            if (!helpText) return helpText;
+            // Replace all ![imageX](data:image/...) with [imageX] and store mapping
+            return helpText.replace(/!\[(image\d+)\]\((data:image\/[a-zA-Z]+;base64,[^)]+)\)/g, function (match, key, dataUri) {
+                imageDict[key] = dataUri;
+                return `[${key}]`;
+            });
+        }
 
         const documentViewModel = new DocumentViewModel();
         const formPreviewViewModel = new FormPreviewViewModel();
@@ -2173,6 +2248,52 @@
                 },
 
             });
+        });
+
+        $(document).on('click', '.insert-image-btn', function () {
+            // Find the related file input (sibling or in the same form-group)
+            var $formGroup = $(this).closest('.form-group');
+            $formGroup.find('.helptext-image-input').click();
+        });
+
+        // Handle image file selection and insert as base64 markdown
+        $(document).on('change', '.helptext-image-input', function (event) {
+            const fileInput = this;
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            // Find the parent form-group and the textarea by id from the button's data-target
+            const $formGroup = $(fileInput).closest('.form-group');
+            const $button = $formGroup.find('.insert-image-btn');
+            const targetId = $button.attr('data-target');
+            const $textarea = $formGroup.find('#' + targetId);
+
+            const textarea = $textarea[0];
+            const cursorPos = textarea ? textarea.selectionStart : 0;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const base64 = e.target.result;
+                // Generate a unique image key
+                const imageKey = 'image' + documentViewModel.helpTextImageCounter++;
+                documentViewModel.helpTextImageDict[imageKey] = base64;
+
+                // Insert markdown image with placeholder at cursor position
+                const oldVal = $textarea.val();
+                const markdown = `[${imageKey}]`;
+                const newVal = oldVal.slice(0, cursorPos) + '\n' + markdown + oldVal.slice(cursorPos);
+                $textarea.val(newVal).trigger('input');
+
+                // Update the Knockout observable directly so the preview updates
+                const koContext = ko.dataFor($textarea[0]);
+                if (koContext && koContext.helpText && typeof koContext.helpText === "function") {
+                    koContext.helpText(newVal);
+                }
+
+                // Clear the file input for next use
+                fileInput.value = '';
+            };
+            reader.readAsDataURL(file);
         });
 
         function updateHrTags() {

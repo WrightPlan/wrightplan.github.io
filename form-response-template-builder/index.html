@@ -1084,6 +1084,26 @@
 
           const formId = jsonData.formId || "Form Title";
 
+          function addImportantToInlineStyles(html) {
+            return html.replace(/style="([^"]*)"/g, (match, style) => {
+              const updated = style
+                .split(";")
+                .map((rule) => {
+                  let [prop, value] = rule.split(":");
+                  if (prop && value) {
+                    value =
+                      value.replace(/!important\s*$/, "").trim() +
+                      " !important";
+                    return `${prop.trim()}: ${value}`;
+                  }
+                  return "";
+                })
+                .filter(Boolean)
+                .join("; ");
+              return `style="${updated}"`;
+            });
+          }
+
           var htmlTemplate = `
     <!DOCTYPE html>
     <html lang="en">
@@ -1117,7 +1137,8 @@
           const jsForResponsePDF = getJSForResponsePDF();
           htmlTemplate += jsForResponsePDF;
 
-          return htmlTemplate;
+          var html = addImportantToInlineStyles(htmlTemplate);
+          return html;
         };
 
         generateGUID = function (formTitle) {

@@ -1131,8 +1131,12 @@
                         JSON</button>
                     <button type="button" class="btn btn-success" data-bind="click: downloadJSON">Download
                         JSON</button>
-                    <button type="button" class="btn btn-success" data-bind="click: submitForm">Import
+                    <button type="button" class="btn btn-success"
+                        data-bind="click: function() { submitForm(false) }">Import
                         Form</button>
+                    <button type="button" class="btn btn-success"
+                        data-bind="click: function() { submitForm(true) }">Import
+                        Form and Build PDF</button>
                 </div>
             </div>
         </div>
@@ -1530,7 +1534,7 @@
                 document.body.removeChild(link);
             }
 
-            createJsonFromViewModel(viewModel) {
+            createJsonFromViewModel(viewModel, onImportAction) {
                 const json = ko.toJS(viewModel);
                 delete json.isIdEditable;
 
@@ -1656,7 +1660,10 @@
                 });
 
                 // Generate the final JSON using the cleaned data
-                return json;
+                return {
+                    data: json,
+                    onImportAction: onImportAction
+                }
             }
 
             validateForm() {
@@ -1876,8 +1883,16 @@
                 }
             };
 
-            submitForm() {
-                const cleanedJson = this.createJsonFromViewModel(this);
+            submitForm(onImportCallback) {
+                var cleanedJson;
+
+                if (onImportCallback) {
+                    cleanedJson = this.createJsonFromViewModel(this, "openTemplateBuilder");
+                }
+                else {
+                    cleanedJson = this.createJsonFromViewModel(this, null);
+                }
+
                 const parentUrl = document.referrer;
 
                 // Check if the form builder is opened in its own window

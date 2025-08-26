@@ -1883,10 +1883,10 @@
                 }
             };
 
-            submitForm(onImportCallback) {
+            submitForm(openBuilderAfterImport) {
                 var cleanedJson;
 
-                if (onImportCallback) {
+                if (openBuilderAfterImport) {
                     cleanedJson = this.createJsonFromViewModel(this, "openTemplateBuilder");
                 }
                 else {

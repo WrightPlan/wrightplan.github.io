@@ -1134,9 +1134,11 @@
                     <button type="button" class="btn btn-success"
                         data-bind="click: function() { submitForm(false) }">Import
                         Form</button>
+                    <!-- ko if: documentViewModel.supportsTemplateBuilderWorkflow() -->
                     <button type="button" class="btn btn-success"
                         data-bind="click: function() { submitForm(true) }">Import
                         Form and Build PDF</button>
+                    <!-- /ko     -->
                 </div>
             </div>
         </div>
@@ -1659,11 +1661,14 @@
                     };
                 });
 
-                // Generate the final JSON using the cleaned data
-                return {
-                    data: json,
-                    onImportAction: onImportAction
+                if (onImportAction) {
+                    return {
+                        data: json,
+                        onImportAction: onImportAction
+                    };
                 }
+
+                return json;
             }
 
             validateForm() {
@@ -1918,6 +1923,7 @@
             constructor() {
                 this.formViewModel = new FormViewModel();
                 this.isUploaded = ko.observable(false);
+                this.supportsTemplateBuilderWorkflow = ko.observable(false);
             }
 
             toCamelCase = (str) => {
@@ -2219,6 +2225,9 @@
                 receivedData = event.data.data;
                 if (receivedData) {
                     documentViewModel.formViewModel.readJSON({ target: { files: [new Blob([receivedData])] } });
+                    if (event.data.supportsTemplateBuilderWorkflow) {
+                        documentViewModel.supportsTemplateBuilderWorkflow(true);
+                    }
                 }
             });
 

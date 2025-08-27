@@ -1131,8 +1131,14 @@
                         JSON</button>
                     <button type="button" class="btn btn-success" data-bind="click: downloadJSON">Download
                         JSON</button>
-                    <button type="button" class="btn btn-success" data-bind="click: submitForm">Import
+                    <button type="button" class="btn btn-success"
+                        data-bind="click: function() { submitForm(false) }">Import
                         Form</button>
+                    <!-- ko if: documentViewModel.supportsTemplateBuilderWorkflow() -->
+                    <button type="button" class="btn btn-success"
+                        data-bind="click: function() { submitForm(true) }">Import
+                        Form and Build PDF</button>
+                    <!-- /ko     -->
                 </div>
             </div>
         </div>
@@ -1530,7 +1536,7 @@
                 document.body.removeChild(link);
             }
 
-            createJsonFromViewModel(viewModel) {
+            createJsonFromViewModel(viewModel, onImportAction) {
                 const json = ko.toJS(viewModel);
                 delete json.isIdEditable;
 
@@ -1655,7 +1661,13 @@
                     };
                 });
 
-                // Generate the final JSON using the cleaned data
+                if (onImportAction) {
+                    return {
+                        data: json,
+                        onImportAction: onImportAction
+                    };
+                }
+
                 return json;
             }
 
@@ -1876,8 +1888,16 @@
                 }
             };
 
-            submitForm() {
-                const cleanedJson = this.createJsonFromViewModel(this);
+            submitForm(openBuilderAfterImport) {
+                var cleanedJson;
+
+                if (openBuilderAfterImport) {
+                    cleanedJson = this.createJsonFromViewModel(this, "openTemplateBuilder");
+                }
+                else {
+                    cleanedJson = this.createJsonFromViewModel(this, null);
+                }
+
                 const parentUrl = document.referrer;
 
                 // Check if the form builder is opened in its own window
@@ -1903,6 +1923,7 @@
             constructor() {
                 this.formViewModel = new FormViewModel();
                 this.isUploaded = ko.observable(false);
+                this.supportsTemplateBuilderWorkflow = ko.observable(false);
             }
 
             toCamelCase = (str) => {
@@ -2204,6 +2225,9 @@
                 receivedData = event.data.data;
                 if (receivedData) {
                     documentViewModel.formViewModel.readJSON({ target: { files: [new Blob([receivedData])] } });
+                    if (event.data.supportsTemplateBuilderWorkflow) {
+                        documentViewModel.supportsTemplateBuilderWorkflow(true);
+                    }
                 }
             });
 

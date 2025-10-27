@@ -254,7 +254,7 @@
     }
 
     // Store logo URL globally, will be set from parent window message
-    let LOGO_URL = '';
+    let LOGO_URL = document.referrer + "Api/branding/default-logo";
 
     // Function to get GENERIC_DATA_ELEMENTS after LOGO_URL is set
     function getGenericDataElements() {

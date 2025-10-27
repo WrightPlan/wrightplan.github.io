@@ -253,57 +253,62 @@
       };
     }
 
-    // Refactor GENERIC_DATA_ELEMENTS to use TreeItemViewModel
-    const GENERIC_DATA_ELEMENTS = [
-      new TreeItemViewModel(
-        "add-logo",
-        "leaf",
-        "Logo",
-        `<img data-id="logo" style="height: 3em" src="${document.referrer}Api/branding/default-logo" />`
-      ),
-      new TreeItemViewModel(
-        "add-form-title",
-        "leaf",
-        "Form Title",
-        `<div class="editable"><h2 data-id="add-form-title" class="non-editable" data-bind="text: formTitle">{{ formTitle }}</h2></div>`
-      ),
-      new TreeItemViewModel(
-        "add-response-date",
-        "leaf",
-        "Form Response Date",
-        `<div class="editable"><div data-id="add-response-date" class="non-editable" data-bind="text: responseDate">{{ responseDate }}</div></div>`
-      ),
-      new TreeItemViewModel(
-        "add-respondent",
-        "leaf",
-        "Respondent",
-        `<div class="editable"><div data-id="add-respondent" class="non-editable" data-bind="text: respondent">{{ respondent }}</div></div>`
-      ),
-      new TreeItemViewModel(
-        "add-customer-name",
-        "leaf",
-        "Customer Name",
-        `<div class="editable"><div data-id="add-customer-name" class="non-editable" data-bind="text: customerName">{{ customer.name }}</div></div>`
-      ),
-      new TreeItemViewModel(
-        "add-work-order-number",
-        "leaf",
-        "Work Order Number",
-        `<div class="editable"><div data-id="add-work-order-number" class="non-editable" data-bind="text: workOrderNumber">{{ workOrder.number }}</div></div>`
-      ),
-      new TreeItemViewModel(
-        "add-dispatch-job-number",
-        "leaf",
-        "Dispatch Job Number",
-        `<div class="editable"><div data-id="add-dispatch-job-number" class="non-editable" data-bind="text: dispatchJob.number">{{ dispatchJob.number }}</div></div>`
-      ),
-      new TreeItemViewModel(
-        "add-dispatch-job-description",
-        "leaf",
-        "Dispatch Job Description",
-        `<div class="editable"><div data-id="add-dispatch-job-description" class="non-editable" data-bind="text: dispatchJob.description">{{ dispatchJob.description }}</div></div>`
-      ),
-    ];
+    // Store logo URL globally, will be set from parent window message
+    let LOGO_URL = '';
+
+    // Function to get GENERIC_DATA_ELEMENTS after LOGO_URL is set
+    function getGenericDataElements() {
+      return [
+        new TreeItemViewModel(
+          'add-logo',
+          'leaf',
+          'Logo',
+          `<img data-id="logo" style="height:3em" src="${LOGO_URL}" />`
+        ),
+        new TreeItemViewModel(
+          'add-form-title',
+          'leaf',
+          'Form Title',
+          `<div class="editable"><h2 data-id="add-form-title" class="non-editable" data-bind="text: formTitle">{{ formTitle }}</h2></div>`
+        ),
+        new TreeItemViewModel(
+          'add-response-date',
+          'leaf',
+          'Form Response Date',
+          `<div class="editable"><div data-id="add-response-date" class="non-editable" data-bind="text: responseDate">{{ responseDate }}</div></div>`
+        ),
+        new TreeItemViewModel(
+          'add-respondent',
+          'leaf',
+          'Respondent',
+          `<div class="editable"><div data-id="add-respondent" class="non-editable" data-bind="text: respondent">{{ respondent }}</div></div>`
+        ),
+        new TreeItemViewModel(
+          'add-customer-name',
+          'leaf',
+          'Customer Name',
+          `<div class="editable"><div data-id="add-customer-name" class="non-editable" data-bind="text: customerName">{{ customer.name }}</div></div>`
+        ),
+        new TreeItemViewModel(
+          'add-work-order-number',
+          'leaf',
+          'Work Order Number',
+          `<div class="editable"><div data-id="add-work-order-number" class="non-editable" data-bind="text: workOrderNumber">{{ workOrder.number }}</div></div>`
+        ),
+        new TreeItemViewModel(
+          'add-dispatch-job-number',
+          'leaf',
+          'Dispatch Job Number',
+          `<div class="editable"><div data-id="add-dispatch-job-number" class="non-editable" data-bind="text: dispatchJob.number">{{ dispatchJob.number }}</div></div>`
+        ),
+        new TreeItemViewModel(
+          'add-dispatch-job-description',
+          'leaf',
+          'Dispatch Job Description',
+          `<div class="editable"><div data-id="add-dispatch-job-description" class="non-editable" data-bind="text: dispatchJob.description">{{ dispatchJob.description }}</div></div>`
+        )
+      ];
+    }
 
     function createSectionId(sectionTitle) {
       return sectionTitle
@@ -411,7 +416,7 @@
           "directory",
           "Dynamic Elements",
           null,
-          GENERIC_DATA_ELEMENTS
+          getGenericDataElements()
         ),
         new TreeItemViewModel(
           "formDataElements",
@@ -926,10 +931,9 @@
                       leaf.addEventListener("click", () => {
                         let htmlToAdd;
 
-                        // Find the selected element from GENERIC_DATA_ELEMENTS
-                        const genericItem = GENERIC_DATA_ELEMENTS.find(
-                          (generic) => generic.id === item.id
-                        );
+                        // Find the selected element from generic data elements
+                        const genericDataElements = getGenericDataElements();
+                        const genericItem = genericDataElements.find(generic => generic.id === item.id);
 
                         if (genericItem) {
                           htmlToAdd = generateHTMLFromGenericTreeItem(
@@ -1147,6 +1151,11 @@
         window.addEventListener("message", function (event) {
           if (event.data) {
             try {
+              // Set the logo URL from parent window
+              if (event.data.logoUrl) {
+                LOGO_URL = event.data.logoUrl;
+              }
+
               // Parse the JSON string into an object
               var jsonData = JSON.parse(event.data.formData);
               console.log("Received JSON data:", jsonData);

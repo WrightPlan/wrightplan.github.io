@@ -1,11 +1,6 @@
 pipeline {
     agent any
     stages {
-        stage('Build') {
-            steps {
-                bat 'build.cmd'
-            }
-        }
         stage('Package') {
             steps {
                 bat 'package.cmd'

@@ -3,63 +3,72 @@
 SETLOCAL EnableDelayedExpansion
 
 ECHO Downloading tools...
-.nuget\NuGet.exe install 7-Zip.CommandLine -ExcludeVersion -o packages
-IF %ERRORLEVEL% NEQ 0 EXIT /B %ERRORLEVEL%
+
+.nuget\NuGet.exe install 7-Zip.CommandLine -Source https://api.nuget.org/v3/index.json -ExcludeVersion -o packages
 
 ECHO.
 ECHO Packaging...
 
-hg branch > branch.txt
-IF %ERRORLEVEL% NEQ 0 EXIT /B %ERRORLEVEL%
+
+REM Get current branch name
+git rev-parse --abbrev-ref HEAD > branch.txt
+
 
 SET /P branch=<branch.txt
 DEL branch.txt
 ECHO Branch: %branch%
 
+
 SET revision_num=%BUILD_NUMBER%
 IF "%revision_num%"=="" SET revision_num=0
 
-hg identify --id --rev . > revision.txt
-IF %ERRORLEVEL% NEQ 0 EXIT /B %ERRORLEVEL%
-SET /P revision=<revision.txt
 
+REM Get short commit hash
+git rev-parse --short HEAD > revision.txt
+
+SET /P revision=<revision.txt
 DEL revision.txt
 
 ECHO Revision Number: %revision_num%
 ECHO Revision: %revision%
 
+
 SET version=0.0.0
-SET /A version_score=0
+REM ...existing code...
 
-SETLOCAL EnableDelayedExpansion
-FOR /F "tokens=1,2,3 delims=." %%x IN ('dir /B /O:D build\*.sql') DO (
-	SET /A score = %%z
-	SET /A score += %%y * 100
-	SET /A score += %%x * 10000
-
-	IF !score! GTR !version_score! (
-		SET version_score=!score!
-		SET version=%%x.%%y.%%z
-	)
+REM Read version from version.txt
+IF EXIST version.txt (
+    SET /P version=<version.txt
+) ELSE (
+    SET version=0.0.0
 )
 ECHO Version: %version%
 
+REM ...existing code...
+
+
 FOR /F "tokens=1 delims=/" %%s IN ("%branch%") DO SET stream=%%s
 ECHO Stream: %stream%
+
 
 SET semversion=%version%
 IF NOT %stream%==default SET semversion=%semversion%-%stream%.%revision_num%+%revision%
 
 ECHO Semantic Version: %semversion%
 
-SET filename=Scripts_v%semversion%.zip
-PUSHD build
+
+REM Replace + with _ for the zip filename (7-Zip wildcard limitation)
+SET safe_semversion=%semversion:+=_%
+SET safe_semversion=%safe_semversion: =%
+SET filename=Scripts_v%safe_semversion%.zip
+
+SET zippath=%filename%
 
 ECHO.
-ECHO Creating package %filename%...
-IF EXIST %filename% DEL /F %filename%
-..\packages\7-Zip.CommandLine\tools\7za.exe a %filename% >nul 2>&1
-MOVE /Y %filename% .. >nul 2>&1
+ECHO Creating package %zippath%...
 
-POPD
+
+IF EXIST %zippath% DEL /F %zippath%
+REM Only include specific folders and files
+packages\7-Zip.CommandLine\tools\7za.exe a %zippath% form-builder\* form-response-template-builder\* privacy\* register\* tinymce\* assets\* compatibility-matrix.json index.html
 ECHO Done

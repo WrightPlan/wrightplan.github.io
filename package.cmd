@@ -60,7 +60,7 @@ ECHO Semantic Version: %semversion%
 REM Replace + with _ for the zip filename (7-Zip wildcard limitation)
 SET safe_semversion=%semversion:+=_%
 SET safe_semversion=%safe_semversion: =%
-SET filename=Scripts_v%safe_semversion%.zip
+SET filename=Github_v%safe_semversion%.zip
 
 SET zippath=%filename%
 

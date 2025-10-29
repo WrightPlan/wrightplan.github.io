@@ -12,9 +12,16 @@ ECHO Packaging...
 
 REM Get current branch name
 git rev-parse --abbrev-ref HEAD > branch.txt
-
-
 SET /P branch=<branch.txt
+IF /I "%branch%"=="HEAD" (
+    FOR /F "delims=" %%b IN ('git branch --remote --contains HEAD ^| findstr /R /C:"origin/"') DO (
+        SET "branch=%%b"
+        SET "branch=!branch:origin/=!"
+        SET "branch=!branch: =!"
+        GOTO :got_branch
+    )
+)
+:got_branch
 DEL branch.txt
 ECHO Branch: %branch%
 

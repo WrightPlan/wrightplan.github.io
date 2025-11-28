@@ -1307,6 +1307,10 @@
             }
 
             addChoice() {
+                if (this.choices().length > 64) {
+                    alert('You cannot add more than 64 choices.');
+                    return;
+                }
                 this.choices.push(new Choice(''));
             }
 
@@ -1389,6 +1393,10 @@
             };
 
             addChoice() {
+                if (this.choices().length > 64) {
+                    alert('You cannot add more than 64 choices.');
+                    return;
+                }
                 this.choiceHeaders.push(new TabularChoiceHeader(''));
             }
 

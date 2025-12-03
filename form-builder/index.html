@@ -1307,8 +1307,8 @@
             }
 
             addChoice() {
-                if (this.choices().length > 64) {
-                    alert('You cannot add more than 64 choices.');
+                if (this.choices().length > 256) {
+                    alert('You cannot add more than 256 choices.');
                     return;
                 }
                 this.choices.push(new Choice(''));
@@ -1393,8 +1393,8 @@
             };
 
             addChoice() {
-                if (this.choices().length > 64) {
-                    alert('You cannot add more than 64 choices.');
+                if (this.choices().length > 256) {
+                    alert('You cannot add more than 256 choices.');
                     return;
                 }
                 this.choiceHeaders.push(new TabularChoiceHeader(''));
@@ -1788,6 +1788,12 @@
                             errorMessages.push(`Question "${question.title()}" in section "${section.title()}" must have a title.`);
                         }
 
+                        // Validate questionId length
+                        if (question.questionId() && question.questionId().length > 64) {
+                            isValid = false;
+                            errorMessages.push(`Question "${question.title()}" in section "${section.title()}" has a questionId longer than 64 characters.`);
+                        }
+
                         if (question.type() === '') {
                             isValid = false;
                             errorMessages.push(`Question "${question.title()}" in section "${section.title()}" must have a question type.`);
@@ -1803,9 +1809,9 @@
 
                         // Validate choices for 'choice' type questions
                         if (question.type() === 'choice') {
-                            if (question.choices().length === 0) {
+                            if (question.choices().length <= 1) {
                                 isValid = false;
-                                errorMessages.push(`Question "${question.title()}" in section "${section.title()}" must have at least one choice.`);
+                                errorMessages.push(`Question "${question.title()}" in section "${section.title()}" must have at least two choices.`);
                             }
 
                             // Validate unique choices
@@ -1821,6 +1827,16 @@
                                 isValid = false;
                                 errorMessages.push(`Question "${question.title()}" in section "${section.title()}" must have at least two choices for multi-choice.`);
                             }
+
+                            // if choice has more than 64 characters, show an error
+                            let choiceTooLongErrorShown = false;
+                            question.choices().forEach(choice => {
+                                if (ko.unwrap(choice.value).length > 64 && !choiceTooLongErrorShown) {
+                                    isValid = false;
+                                    errorMessages.push(`Question "${question.title()}" in section "${section.title()}" has a choice that exceeds 64 characters.`);
+                                    choiceTooLongErrorShown = true;
+                                }
+                            });
                         }
 
                         // Validate numeric range

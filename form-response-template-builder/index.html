@@ -1062,23 +1062,78 @@
         const formId = jsonData.formId || "Form Title";
 
         function addImportantToInlineStyles(html) {
-          return html.replace(/style="([^"]*)"/g, (match, style) => {
-            const updated = style
-              .split(";")
-              .map((rule) => {
-                let [prop, value] = rule.split(":");
-                if (prop && value) {
-                  value =
-                    value.replace(/!important\s*$/, "").trim() +
-                    " !important";
-                  return `${prop.trim()}: ${value}`;
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+
+          // Find all elements that have inline styles
+          const elementsWithStyles = doc.querySelectorAll('[style]');
+
+          elementsWithStyles.forEach((element) => {
+            const inlineStyle = element.getAttribute('style');
+            if (!inlineStyle || !inlineStyle.trim()) return;
+
+            // Find all non-editable spans within this element
+            const nonEditableSpans = element.querySelectorAll('span.non-editable');
+
+            if (nonEditableSpans.length > 0) {
+              // Copy parent styles to non-editable spans
+              nonEditableSpans.forEach((span) => {
+                // Parse the parent's inline styles and add !important
+                const styleString = inlineStyle
+                  .split(';')
+                  .map((rule) => {
+                    const trimmedRule = rule.trim();
+                    if (!trimmedRule) return '';
+
+                    let [prop, value] = trimmedRule.split(':');
+                    if (prop && value) {
+                      prop = prop.trim();
+                      value = value.trim();
+
+                      if (!value.endsWith('!important')) {
+                        value = value + ' !important';
+                      }
+                      return `${prop}: ${value}`;
+                    }
+                    return '';
+                  })
+                  .filter(Boolean)
+                  .join('; ');
+
+                if (styleString) {
+                  span.setAttribute('style', styleString);
                 }
-                return "";
+              });
+            }
+
+            // Add !important to the parent element's styles as well
+            const updatedStyle = inlineStyle
+              .split(';')
+              .map((rule) => {
+                const trimmedRule = rule.trim();
+                if (!trimmedRule) return '';
+
+                let [prop, value] = trimmedRule.split(':');
+                if (prop && value) {
+                  prop = prop.trim();
+                  value = value.trim();
+
+                  if (!value.endsWith('!important')) {
+                    value = value + ' !important';
+                  }
+                  return `${prop}: ${value}`;
+                }
+                return '';
               })
               .filter(Boolean)
-              .join("; ");
-            return `style="${updated}"`;
+              .join('; ');
+
+            if (updatedStyle) {
+              element.setAttribute('style', updatedStyle);
+            }
           });
+
+          return doc.documentElement.outerHTML;
         }
 
         var htmlTemplate = `

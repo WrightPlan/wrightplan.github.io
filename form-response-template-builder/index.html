@@ -221,6 +221,12 @@
       .tox .tox-sidebar{
         max-width: 20%;
       }
+
+      .non-editable {
+      height: fit-content;
+      width: auto;
+      font-size: 14px;
+      }
       `;
 
     class TreeItemViewModel {
@@ -263,43 +269,43 @@
           'add-form-title',
           'leaf',
           'Form Title',
-          `<div class="editable"><h2 data-id="add-form-title"><span class="non-editable" data-bind="text: formTitle">{{ formTitle }}</span></h2></div>`
+          `<div class="editable"><h2 data-id="add-form-title" class="non-editable" data-bind="text: formTitle">{{ formTitle }}</h2></div>`
         ),
         new TreeItemViewModel(
           'add-response-date',
           'leaf',
           'Form Response Date',
-          `<div class="editable"><div data-id="add-response-date"><span class="non-editable" data-bind="text: responseDate">{{ responseDate }}</span></div></div>`
+          `<div class="editable"><div data-id="add-response-date" class="non-editable" data-bind="text: responseDate">{{ responseDate }}</div></div>`
         ),
         new TreeItemViewModel(
           'add-respondent',
           'leaf',
           'Respondent',
-          `<div class="editable"><div data-id="add-respondent"><span class="non-editable" data-bind="text: respondent">{{ respondent }}</span></div></div>`
+          `<div class="editable"><div data-id="add-respondent" class="non-editable" data-bind="text: respondent">{{ respondent }}</div></div>`
         ),
         new TreeItemViewModel(
           'add-customer-name',
           'leaf',
           'Customer Name',
-          `<div class="editable"><div data-id="add-customer-name"><span class="non-editable" data-bind="text: customerName">{{ customer.name }}</span></div></div>`
+          `<div class="editable"><div data-id="add-customer-name" class="non-editable" data-bind="text: customerName">{{ customer.name }}</div></div>`
         ),
         new TreeItemViewModel(
           'add-work-order-number',
           'leaf',
           'Work Order Number',
-          `<div class="editable"><div data-id="add-work-order-number"><span class="non-editable" data-bind="text: workOrderNumber">{{ workOrder.number }}</span></div></div>`
+          `<div class="editable"><div data-id="add-work-order-number" class="non-editable" data-bind="text: workOrderNumber">{{ workOrder.number }}</div></div>`
         ),
         new TreeItemViewModel(
           'add-dispatch-job-number',
           'leaf',
           'Dispatch Job Number',
-          `<div class="editable"><div data-id="add-dispatch-job-number"><span class="non-editable" data-bind="text: dispatchJob.number">{{ dispatchJob.number }}</span></div></div>`
+          `<div class="editable"><div data-id="add-dispatch-job-number" class="non-editable" data-bind="text: dispatchJob.number">{{ dispatchJob.number }}</div></div>`
         ),
         new TreeItemViewModel(
           'add-dispatch-job-description',
           'leaf',
           'Dispatch Job Description',
-          `<div class="editable"><div data-id="add-dispatch-job-description"><span class="non-editable" data-bind="text: dispatchJob.description">{{ dispatchJob.description }}</span></div></div>`
+          `<div class="editable"><div data-id="add-dispatch-job-description" class="non-editable" data-bind="text: dispatchJob.description">{{ dispatchJob.description }}</div></div>`
         )
       ];
     }
@@ -458,11 +464,17 @@
     }
 
     function generateSectionTitle(section) {
-      return `<div class="editable" data-bind="if: $data.${section.sectionId}"><h3 data-id="${section.sectionId + "-add-section-title"}"><span class="non-editable" data-bind="text: ${section.sectionId}.title">${section.title}</span></h3></div>`;
+      return `<div class="editable" data-bind="if: $data.${section.sectionId
+        }"><h3 data-id="${section.sectionId + "-add-section-title"
+        }" class="non-editable" data-bind="text: ${section.sectionId}.title">${section.title
+        }</h3></div>`;
     }
 
     function generateSectionSubtitle(section) {
-      return `<div class="editable" data-bind="if: $data.${section.sectionId}"><h4 data-id="${section.sectionId + "-add-section-subtitle"}"><span class="non-editable" data-bind="text: ${section.sectionId}.subtitle">${section.subtitle}</span></h4></div>`;
+      return `<div class="editable" data-bind="if: $data.${section.sectionId
+        }"><h4 data-id="${section.sectionId + "-add-section-subtitle"
+        }" class="non-editable" data-bind="text: ${section.sectionId
+        }.subtitle">${section.subtitle}</h4></div>`;
     }
 
     function generateQuestion(question) {
@@ -482,31 +494,33 @@
 
     function generateQuestionContent(question) {
       return `
-       <h4 data-id="${question.transformedQuestionId}"><span class="non-editable" data-bind="text: ${question.transformedQuestionId}.title">${question.title}</span></h4>
-          ${question.subtitle
-          ? `<div data-id="${question.transformedQuestionId}-subtitle"><span class="non-editable" data-bind="text: ${question.transformedQuestionId}.subtitle">${question.subtitle}</span></div>`
+       <h4 data-id="${question.transformedQuestionId
+        }" class="non-editable" data-bind="text: ${question.transformedQuestionId
+        }.title"> ${question.title} </h4>
+              ${question.subtitle
+          ? `<div class="non-editable" data-bind="text: ${question.transformedQuestionId}.subtitle"> ${question.subtitle} </div>`
           : ""
         }
-          ${question.type == "initials" || question.type == "signature"
-          ? `<table><tr><td><i class="removeOnProcessing">Signature/Initials</i>
-                  <img style="max-width: 10rem; max-height: 5rem; display: block;" class="non-editable" data-bind="attr: { src: ${question.transformedQuestionId}.answer }"></td></tr></table>`
+              ${question.type == "initials" || question.type == "signature"
+          ? `<table class="non-editable"><tr><td><i class="removeOnProcessing">Signature/Initials</i>
+                      <img style="max-width: 10rem; max-height: 5rem; display: block;" class="non-editable" data-bind="attr: { src: ${question.transformedQuestionId}.answer }"></td></tr></table>`
           : question.type == "geolocation"
-            ? `<div style="width: 400px; height: 192px; border: 1px solid black; margin-bottom: 4rem">
-                  <figure class="figure">
-                    <img class="figure-img img-fluid rounded non-editable"
-                    data-bind="attr: { src: GenerateStaticMapURL(${question.transformedQuestionId}.answer) }" />
-                    <figcaption class="figure-caption">
-                      <span class="non-editable" data-bind="text: geoInputToDMSString(${question.transformedQuestionId}.answer)">{{ ${question.transformedQuestionId}.answer }}</span>
-                    </figcaption>
-                  </figure>
-                  </div>`
+            ? `<div class="non-editable" style="width: 400px; height: 192px; border: 1px solid black; margin-bottom: 4rem">
+                      <figure class="figure">
+                        <img class="figure-img img-fluid rounded"
+                        data-bind="attr: { src: GenerateStaticMapURL(${question.transformedQuestionId}.answer) }" />
+                        <figcaption class="figure-caption"
+                        data-bind="text: geoInputToDMSString(${question.transformedQuestionId}.answer)">{{ ${question.transformedQuestionId}.answer }}</figcaption>
+                      </figure>
+                      </div><br />`
             : question.type == "text" && question.multiLineText
-              ? '<pre style="border: none"><span class="non-editable" data-bind="text: ' +
+              ? '<pre class="non-editable" style="border: none" data-bind="text: ' +
               question.transformedQuestionId +
               '.answer">{{ ' +
               question.transformedQuestionId +
-              ".answer }}</span></pre>"
-              : `<div><span class="non-editable" data-bind="text: ${question.transformedQuestionId}.answer">{{ ${question.questionId + ".answer"} }}</span></div>`
+              ".answer }}</pre>"
+              : `<div class="non-editable" data-bind="text: ${question.transformedQuestionId
+              }.answer">{{ ${question.questionId + ".answer"} }}</div>`
         }`;
     }
 
@@ -640,10 +654,6 @@
           content_style: EDITOR_STYLES,
           table_sizing_mode: 'responsive',
           table_clone_elements: 'strong em b i font',
-          table_cell_default_styles: {
-            'vertical-align': 'middle', // Change to 'middle', 'bottom', or remove this line entirely
-            'padding': '8px'
-          },
           menu: {
             file: { title: "File", items: "" },
             edit: {
@@ -676,10 +686,10 @@
           plugins:
             "visualblocks code preview advlist anchor autolink charmap codesample fullscreen image insertdatetime link lists media preview searchreplace table visualblocks",
           toolbar:
-            "toggleSidebar | visualblock undo redo | bold italic underline strikethrough | font fontsize format | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist | forecolor backcolor removeformat | charmap emoticons link | fullscreen | customPreview customSave",
+            "toggleSidebar | visualblock undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist | forecolor backcolor removeformat | charmap emoticons link | fullscreen | customPreview customSave",
           extended_valid_elements: "img[onerror|src|alt|class|style]",
           editable_class: "editable",
-          format_noneditable_selector: ".non-editable",
+          format_noneditable_selector: "h2, h4, h3, div, p, span",
           noneditable_class: "non-editable",
           editable_root: false,
           sidebar_show: "customTreeSidebar",
@@ -1062,78 +1072,23 @@
         const formId = jsonData.formId || "Form Title";
 
         function addImportantToInlineStyles(html) {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, 'text/html');
-
-          // Find all elements that have inline styles
-          const elementsWithStyles = doc.querySelectorAll('[style]');
-
-          elementsWithStyles.forEach((element) => {
-            const inlineStyle = element.getAttribute('style');
-            if (!inlineStyle || !inlineStyle.trim()) return;
-
-            // Find all non-editable spans within this element
-            const nonEditableSpans = element.querySelectorAll('span.non-editable');
-
-            if (nonEditableSpans.length > 0) {
-              // Copy parent styles to non-editable spans
-              nonEditableSpans.forEach((span) => {
-                // Parse the parent's inline styles and add !important
-                const styleString = inlineStyle
-                  .split(';')
-                  .map((rule) => {
-                    const trimmedRule = rule.trim();
-                    if (!trimmedRule) return '';
-
-                    let [prop, value] = trimmedRule.split(':');
-                    if (prop && value) {
-                      prop = prop.trim();
-                      value = value.trim();
-
-                      if (!value.endsWith('!important')) {
-                        value = value + ' !important';
-                      }
-                      return `${prop}: ${value}`;
-                    }
-                    return '';
-                  })
-                  .filter(Boolean)
-                  .join('; ');
-
-                if (styleString) {
-                  span.setAttribute('style', styleString);
-                }
-              });
-            }
-
-            // Add !important to the parent element's styles as well
-            const updatedStyle = inlineStyle
-              .split(';')
+          return html.replace(/style="([^"]*)"/g, (match, style) => {
+            const updated = style
+              .split(";")
               .map((rule) => {
-                const trimmedRule = rule.trim();
-                if (!trimmedRule) return '';
-
-                let [prop, value] = trimmedRule.split(':');
+                let [prop, value] = rule.split(":");
                 if (prop && value) {
-                  prop = prop.trim();
-                  value = value.trim();
-
-                  if (!value.endsWith('!important')) {
-                    value = value + ' !important';
-                  }
-                  return `${prop}: ${value}`;
+                  value =
+                    value.replace(/!important\s*$/, "").trim() +
+                    " !important";
+                  return `${prop.trim()}: ${value}`;
                 }
-                return '';
+                return "";
               })
               .filter(Boolean)
-              .join('; ');
-
-            if (updatedStyle) {
-              element.setAttribute('style', updatedStyle);
-            }
+              .join("; ");
+            return `style="${updated}"`;
           });
-
-          return doc.documentElement.outerHTML;
         }
 
         var htmlTemplate = `

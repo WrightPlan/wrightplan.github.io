@@ -1489,23 +1489,14 @@
         return item.id === questionRef.answer;
       });
 
-      if (employee) {
-        return employee.firstName + ' ' + employee.lastName;
-      } else {
-        return "";
-      }
+      return employee ? employee.firstName + ' ' + employee.lastName : "";
     }
 
     function ParseEquipment(questionRef, associations){
       var equipment = associations.equipments.find(function (item) {
         return item.id === questionRef.answer;
       });
-      
-      if (equipment) {
-        return equipment.name;
-      } else {
-        return "";
-      }
+      return equipment ? equipment.name : "";
     }
 
     function parseGeoCoordinate(coordinate) {

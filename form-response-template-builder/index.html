@@ -272,6 +272,12 @@
           `<div class="editable"><div data-id="add-response-date"><span class="non-editable" data-bind="text: responseDate">{{ responseDate }}</span></div></div>`
         ),
         new TreeItemViewModel(
+          'add-response-time',
+          'leaf',
+          'Form Response Time',
+          `<div class="editable"><div data-id="add-response-time"><span class="non-editable" data-bind="text: responseTime">{{ responseTime }}</span></div></div>`
+        ),
+        new TreeItemViewModel(
           'add-respondent',
           'leaf',
           'Respondent',
@@ -1405,8 +1411,10 @@
               viewModel.customerName = response.associations.customers[0].name;
               viewModel.workOrderNumber = response.associations.workOrders[0].number;
               viewModel.dispatchJob = { number: response.associations.dispatchJobs[0].number, description: response.associations.dispatchJobs[0].description };
-              viewModel.responseDate = response.date;
-
+              var responseDateAndTime = new Date(response.receivedAt)
+              viewModel.responseDate = responseDateAndTime.toISOString().split('T')[0];
+              viewModel.responseTime = responseDateAndTime.toLocaleTimeString();
+              
               var title = formDefinitionForRevision.title + ' - ' + viewModel.Job;
               if (response.date) {
                 title += " (" + response.date + ")";
@@ -1464,12 +1472,13 @@
     function ParseAnswer(questionRef, questionVM, formResponse) {
       if (questionVM.type === 'employee') {
         return ParseEmployee(questionRef, formResponse.associations);
+      } else if (questionVM.type === 'equipment') {
+        return ParseEquipment(questionRef, formResponse.associations);
       } else if (questionVM.type === 'choice') {
         return questionRef.answer[0];
       } else if (questionVM.type === 'acknowledgement'){
-       return new Date(questionRef.answer);
-      }
-      else {
+        return new Date(questionRef.answer);
+      } else {
         return questionRef.answer
       }
     }
@@ -1482,6 +1491,18 @@
 
       if (employee) {
         return employee.firstName + ' ' + employee.lastName;
+      } else {
+        return "";
+      }
+    }
+
+    function ParseEquipment(questionRef, associations){
+      var equipment = associations.equipments.find(function (item) {
+        return item.id === questionRef.answer;
+      });
+      
+      if (equipment) {
+        return equipment.name;
       } else {
         return "";
       }

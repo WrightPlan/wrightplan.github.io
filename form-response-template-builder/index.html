@@ -1408,9 +1408,9 @@
               formDefinitionForRevision = cleanJsonData(formDefinitionForRevision);
               viewModel.formTitle = formDefinitionForRevision.title;
               viewModel.respondent = response.associations.employees[0].firstName + ' ' + response.associations.employees[0].lastName;
-              viewModel.customerName = response.associations.customers[0].name;
-              viewModel.workOrderNumber = response.associations.workOrders[0].number;
-              viewModel.dispatchJob = { number: response.associations.dispatchJobs[0].number, description: response.associations.dispatchJobs[0].description };
+              viewModel.customerName = response.associations.customers.length > 0 ? response.associations.customers[0].name : '';
+              viewModel.workOrderNumber = response.associations.workOrders.length > 0 ? response.associations.workOrders[0].number : '';
+              viewModel.dispatchJob = { number: response.associations.dispatchJobs.length > 0 ? response.associations.dispatchJobs[0].number : '', description: response.associations.dispatchJobs.length > 0 ? response.associations.dispatchJobs[0].description : '' };
               var responseDateAndTime = new Date(response.receivedAt)
               viewModel.responseDate = responseDateAndTime.toISOString().split('T')[0];
               viewModel.responseTime = responseDateAndTime.toLocaleTimeString();

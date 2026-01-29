@@ -1475,7 +1475,7 @@
       } else if (questionVM.type === 'equipment') {
         return ParseEquipment(questionRef, formResponse.associations);
       } else if (questionVM.type === 'choice') {
-        return questionRef.answer[0];
+        return questionRef.answer.join(', ');
       } else if (questionVM.type === 'acknowledgement'){
         return new Date(questionRef.answer);
       } else {
